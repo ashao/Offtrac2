@@ -1,0 +1,14 @@
+syear 1900
+sinterval 0
+eyear 1910
+einterval 0
+use_hindcast 0
+restart_flag 0
+timestep month
+forcing_path /ltraid3/ashao/uw-apl/data/offtrac/input/normalyear/
+outputfile test
+wrint 1
+ntime_climatology 12
+ntime_hindcast 12
+age 1
+
