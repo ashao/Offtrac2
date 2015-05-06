@@ -47,9 +47,9 @@ void initialize_timekeeper( void ) {
 	// Calculate starting year fraction
 	// Note that 1 is added to the interval since the timestamp more rightfully refers to the end of the timestep
 	timekeeper.current_time = run_parameters.syear +
-			(run_parameters.sinterval+1)/timekeeper.num_intervals_year;
+			(double) (run_parameters.sinterval+1)/timekeeper.num_intervals_year;
 
-	timekeeper.current_interval = run_parameters.sinterval-1;
+	timekeeper.current_interval = mod(run_parameters.sinterval-1,timekeeper.num_intervals_year);
 	timekeeper.current_year = run_parameters.syear;
 	
 
@@ -60,7 +60,7 @@ void update_timekeeper( void ) {
 
 	timekeeper.current_interval++;
 	timekeeper.averaging_counter++;
-	timekeeper.current_time = timekeeper.current_year + (double) timekeeper.current_interval/timekeeper.num_intervals_year;
+	timekeeper.current_time = timekeeper.current_year + (double) (timekeeper.current_interval+1)/timekeeper.num_intervals_year;
 
 	if ( (timekeeper.current_interval == timekeeper.num_intervals_year) )	{
 		timekeeper.current_year++;

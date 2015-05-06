@@ -40,7 +40,7 @@ extern double ***mn_vhtm, ***vhtm;
 extern double ***mn_wd, ***wd;
 #endif 
 
-
+extern int oceanmask[NXMEM][NYMEM];
 extern struct parameters run_parameters;
 extern struct timekeeper_t timekeeper;
 
@@ -87,7 +87,8 @@ void step_fields( ) {
 	update_transport_fields( );
 
 	printf("Calculate tracer transport. \n");
-	tracer( ); /* perform transport time step */
+	printf("TR[0][15][100][100]: %f\n",tr[0][15][100][100]);
+	tracer( 0  ); /* perform transport time step */
 	merge_ml_tr();
 
 	/*-----------------------------------------
@@ -148,14 +149,28 @@ void step_fields( ) {
 	}
 
 
+	for (m=0;m<NTR;m++)
+		for(i=0;i<NXMEM;i++)
+			for(j=0;j<NYMEM;j++)
+				if (!oceanmask[i][j])
+					for(k=0;k<NZ;k++)
+						tr[m][k][i][j]=MISVAL;
+					
+
 	submit_for_averaging( mn_h, h );
 	submit_for_averaging( mn_uhtm, uhtm );
 	submit_for_averaging( mn_vhtm, vhtm );
 	submit_for_averaging( mn_wd, wd );
 
 #ifdef AGE
-	submit_for_averaging( mn_age, tr[mAGE]) ;
+//	submit_for_averaging( mn_age, tr[mAGE]) ;
 #endif
+
+//	apply_mask(mn_h,oceanmask);
+//	apply_mask(mn_uhtm,oceanmask);
+//	apply_mask(mn_vhtm,oceanmask);
+//	apply_mask(mn_wd,oceanmask);
+	
 
 	/*-----------------------------------------
 	 *
@@ -217,28 +232,30 @@ void merge_ml_tr( void ) {
 void update_transport_fields(  ) {
 
 	char file_suffix[100];
+	char path[1000];
 	int read_index;
 
 	copy_darray3d(hstart,hend,NZ,NXMEM,NYMEM);
 	copy_darray3d(h,hstart,NZ,NXMEM,NYMEM);
 
 	if (timekeeper.read_hind_flag) {
-
+		
 		sprintf(file_suffix,"hind.%d.%s",timekeeper.current_year,run_parameters.timestep);
 		printf("Hindcast Mass transports and isopycnal thickness: Year %d, Interval: %d\n",
 				timekeeper.current_year,timekeeper.current_interval);
 		read_index = timekeeper.current_interval;
-
+		strcpy(path,run_parameters.hindcast_path);
 	}
 	else {
 		sprintf(file_suffix,"clim.%s",run_parameters.timestep);
 		printf("Climatology Mass transports and isopycnal thickness: Climatology index: %d\n",
 				timekeeper.climatology_index);
 		read_index = timekeeper.climatology_index;
+		strcpy(path,run_parameters.normalyear_path);
 	}
 
-	read_uvw(read_index,file_suffix);
-	read_h(read_index,file_suffix,hend);;
+	read_uvw(read_index,file_suffix,path);
+	read_h(read_index,file_suffix,path,hend);;
 
 
 

@@ -37,7 +37,48 @@ void initialize( void )
 	extern ****tr;
 
 	// Setup the variable descriptions
-	strcpy(varname,"h");
+	
+	strcpy(varname,"depth");
+	strcpy(vars[map_variable_to_index(varname)].name,"Depth");
+	strcpy(vars[map_variable_to_index(varname)].longname,"Depth to bottom");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='1';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"m");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
+	
+	strcpy(varname,"geolat");
+	strcpy(vars[map_variable_to_index(varname)].name,"geolat");
+	strcpy(vars[map_variable_to_index(varname)].longname,"Latitude on tripolar grid");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='1';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"Degrees N");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
+	
+	strcpy(varname,"geolon");
+	strcpy(vars[map_variable_to_index(varname)].name,"geolon");
+	strcpy(vars[map_variable_to_index(varname)].longname,"Longitude on tripolar grid");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='1';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"Degrees E");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
+	
+	strcpy(varname,"wetmask");
+	strcpy(vars[map_variable_to_index(varname)].name,"wetmask");
+	strcpy(vars[map_variable_to_index(varname)].longname,"Wetmask");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='1';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"1 for ocean (0 for land)");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
+
+	strcpy(varname,"hlay");
 	strcpy(vars[map_variable_to_index(varname)].name,"mn_h");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Isopycnal thickness");
 	vars[map_variable_to_index(varname)].hor_grid='h';
@@ -47,7 +88,7 @@ void initialize( void )
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
-	strcpy(varname,"uh");
+	strcpy(varname,"uhtm");
 	strcpy(vars[map_variable_to_index(varname)].name,"mn_uh");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Zonal mass transport");
 	vars[map_variable_to_index(varname)].hor_grid='h';
@@ -57,7 +98,7 @@ void initialize( void )
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
-	strcpy(varname,"vh");
+	strcpy(varname,"vhtm");
 	strcpy(vars[map_variable_to_index(varname)].name,"mn_vh");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Meridional mass transport");
 	vars[map_variable_to_index(varname)].hor_grid='h';
@@ -146,11 +187,17 @@ void set_run_parameters( void )
 		// Set input and output
 		if (!strcmp(attribute,"forcing_path"))
 			strcpy(run_parameters.forcing_path,value);
+		if (!strcmp(attribute,"normalyear_path"))
+			strcpy(run_parameters.normalyear_path,value);
+		if (!strcmp(attribute,"hindcast_path"))
+			strcpy(run_parameters.hindcast_path,value);
 		if (!strcmp(attribute,"outputfile")) {
-			sprintf(run_parameters.outputfile,"%s.%d.%d.nc",value,eyear,einterval);
-			sprintf(run_parameters.restartfile,"restart.%s.%d.%d.nc",
-					run_parameters.outputfile, run_parameters.eyear, run_parameters.einterval);
+			sprintf(run_parameters.new_restartfile,"restart.%s.%d.%02d.nc",
+					value, run_parameters.eyear, run_parameters.einterval);
+			sprintf(run_parameters.outputfile,"%s.%d.%02d.nc",value,run_parameters.eyear,run_parameters.einterval);
 		}
+		if (!strcmp(attribute,"restartfile"))
+			strcpy(run_parameters.restartfile,value);
 		if (!strcmp(attribute,"wrint"))
 			run_parameters.wrint = atoi(value);
 
@@ -170,7 +217,7 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"wetmask"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
-		if (!strcmp(attribute,"h"))
+		if (!strcmp(attribute,"hlay"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"uhtm"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
@@ -181,7 +228,7 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"age"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"age_restart"))
-			rflags[map_variable_to_index(attribute)] = atoi(value);
+			rflags[map_variable_to_index("age")] = atoi(value);
 
 	}
 

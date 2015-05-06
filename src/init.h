@@ -37,7 +37,7 @@
 
 /* Specify properties of the passive tracers                          */
 
-#define NUM_ADV_ITER 100         /* number of iterations for advection */
+#define NUM_ADV_ITER 30         /* number of iterations for advection */
 
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
@@ -56,7 +56,7 @@
                                /*    (15NO3 + DO15N), SF6
 				/* CFC11_sat, CFC12_sat, SF6_sar ashao    */
 
-#define NOVARS 16              /*  Number of variables used in        */
+#define NOVARS 9              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */
@@ -234,7 +234,7 @@
 #endif                         /* PARALLEL_Y */
 
 #undef ISOTROPIC               
-
+#undef OUTPUT_DEFS
 
 /* misc other stuff for tracadv.c */
 #define BULKMIXEDLAYER
@@ -246,12 +246,12 @@
 #define KDML 0.0
 #define KD   0.0
 //#define KHTR 5.0e2           /* define the coef. of horiz. diffusion */
-//#define KHTR 1.0e3           /* define the coef. of horiz. diffusion */
+#define KHTR 1.0e3           /* define the coef. of horiz. diffusion */
 
 /* end of default values */
 
 /* alternate values for horizontal and vertical diffusion: */
-#define KHTR 1.0e4           /* define the coef. of horiz. diffusion */
+//#define KHTR 1.0e4           /* define the coef. of horiz. diffusion */
 //#define KHTR 0.0
 
 #ifdef DIFFUSE_TRACER

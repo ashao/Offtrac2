@@ -29,6 +29,11 @@
 #include "read.h"
 #include "tracer_utilities.h"
 #include "timekeeper.h"
+#ifdef AGE
+
+extern int mAGE;
+
+#endif
 /*-------------------------------------------------------------------*
  *                                                                   *
  *     define variables and subroutines
@@ -148,6 +153,7 @@ int main( int argc, char *argv[] )
 
 	initialize_timekeeper( );
 	update_transport_fields( ); // Primarily done to read in the initial layer thicknesses
+	printf("Read in fields\n");
 	initialize();
 
 
@@ -174,14 +180,14 @@ int main( int argc, char *argv[] )
 	alloc_fields();
 
 	/* initialize tracer pointers					*/
-
+/*
 	for (m = 0; m < NOVARS; m++)
 	{
 		if (flags[m])
 			for (k = 0; k < varsize[m]; k++)
 				var[m][k] = 0.0;
 	}
-
+*/
 
 
 	/*-------------------------------------------------------------------*
@@ -201,9 +207,11 @@ int main( int argc, char *argv[] )
 		 *
 		 *----------------------------------*/
 		update_timekeeper( );
-		printf("Iteration counter: %d\n",timekeeper.iteration_counter);
-		printf("End of iteration: Year: %d Interval: %d Timestamp: %f\n",timekeeper.current_year,timekeeper.current_interval,timekeeper.current_time);
-		step_fields( ); // modified ashao
+//		printf("Iteration counter: %d\n",timekeeper.iteration_counter);
+		printf("Iteration: %d Year: %d Interval: %d Ending timestamp: %f\n",
+			timekeeper.iteration_counter,timekeeper.current_year,
+			timekeeper.current_interval,timekeeper.current_time);
+		step_fields( ); 
 
 
 		/*-------------------------------------------------------------------*
@@ -218,8 +226,6 @@ int main( int argc, char *argv[] )
 		 *
 		 *----------------------------------*/
 
-		printf("calculate tracer averages\n");
-
 		if (timekeeper.averaging_counter == run_parameters.wrint)
 		{
 			/*-----------------------------------
@@ -228,6 +234,7 @@ int main( int argc, char *argv[] )
 			 *
 			 *----------------------------------*/
 			printf("Writing time interval %i variables out to netCDF\n\n", timekeeper.current_interval);
+			printf("Accumulated averaging time (days): %f\n",timekeeper.accumulated_time_since_writing/86400);
 			status = nc_open(run_parameters.outputfile, NC_WRITE, &cdfid);
 			if (status != NC_NOERR)
 			{
@@ -244,7 +251,7 @@ int main( int argc, char *argv[] )
 			for (m = 0; m < NOVARS; m++)
 				if (flags[m]==1)
 				{
-					printf("m = %d\n",m);
+//					printf("m = %d\n",m);
 					err = write_field(cdfid, fn, vars[m],
 							varinfo[varmap[m]], timekeeper.num_records, var[m]);
 					if (err == -1)
@@ -263,7 +270,7 @@ int main( int argc, char *argv[] )
 			set_darray3d_zero(mn_age, NZ, NXMEM, NYMEM);
 #endif
 
-			printf("netcdf record = %d\n", timekeeper.num_records + 1);
+//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
 
 		} /*  end if nmn==WRITEINT */
@@ -290,7 +297,15 @@ int main( int argc, char *argv[] )
 
 	//  Second, create restart file name and open file
 
-	printf("Writing NetCDF restart file '%s'.\n\n", run_parameters.restartfile);
+	printf("Writing NetCDF restart file '%s'.\n\n", run_parameters.new_restartfile);
+
+	// Force layer thicknesses to be output for the restart
+	var[map_variable_to_index("hlay")] = &hend[0][0][0];
+	rflags[map_variable_to_index("hlay")] = 1;
+
+#ifdef AGE
+	copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
+#endif
 
 	/* Copy the variable descriptions to a list of the actual restart variables. */
 	nvar = 0;
@@ -303,8 +318,9 @@ int main( int argc, char *argv[] )
 		}
 
 	// do NOT force float precision output with last argument
-	create_file(run_parameters.restartfile, NETCDF_FILE, var_out, nvar, &fn, &cdfid,
+	create_file(run_parameters.new_restartfile, NETCDF_FILE, var_out, nvar, &fn, &cdfid,
 			timeid, varinfo, 0);
+
 
 	for (m = 0; m < NOVARS; m++)
 		if (rflags[m])
@@ -344,7 +360,7 @@ void alloc_fields(void)
 
 		//HF if ( m>3 )    {
 		//HF: added mn_h
-		if (m >= 3)
+//		if (m >= 3)
 		{
 			switch (vars[m].z_grid)
 			{
@@ -378,10 +394,10 @@ void alloc_fields(void)
 			//      printf("Allocated memory for var[%d],%s.\n\n",m,vars[m].name);
 
 		}
-		else
-		{
+//		else
+//		{
 			varsize[m] = 0;
-		}
+//		}
 	}
 
 /*	var[map_variable_to_index("D")] = &D[0][0];
@@ -392,7 +408,7 @@ void alloc_fields(void)
 	var[map_variable_to_index("uhtm")] = &mn_uhtm[0][0][0];
 	var[map_variable_to_index("vhtm")] = &mn_vhtm[0][0][0];
 	var[map_variable_to_index("wd")] = &mn_wd[0][0][0];
-	var[map_variable_to_index("h")] = &mn_h[0][0][0];
+	var[map_variable_to_index("hlay")] = &mn_h[0][0][0];
 #ifdef AGE
 	var[map_variable_to_index("age")] = &mn_age[0][0][0];
 #endif

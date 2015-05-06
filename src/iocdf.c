@@ -171,7 +171,7 @@ size_t write_field(int cdfid, FILE *fileptr, struct vardesc vars,
 
         if (status != NC_NOERR) {
           strcpy(message,"put m "); strcat(message,vars.name);
-          handle_error(message,status);
+          //handle_error(message,status);
         }
 # endif
       }
@@ -261,7 +261,6 @@ void create_file(char filename[], int type, struct vardesc vars[], int novars,
     char message[144];
     size_t xhsize, yhsize, xqsize, yqsize;
 
-#define OUTPUT_DEFS
 #ifdef OUTPUT_DEFS
     int dummy, kdmlvid, kdvid, khtrvid, tauvid;
     float kdml = KDML; // need to copy from macro to variable

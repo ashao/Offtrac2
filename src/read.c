@@ -299,7 +299,7 @@ void read_D()
 #endif
 }
 
-void read_uvw(int imon, char *fieldtype)
+void read_uvw(int imon, char *fieldtype, char *readpath)
 {
 
 	int i,j,k;
@@ -324,10 +324,10 @@ void read_uvw(int imon, char *fieldtype)
 	//    Start with uhtm
 
 	sprintf(infile,"UH.%s.nc",fieldtype);
-	strcpy(inpath, run_parameters.forcing_path);
+	strcpy(inpath, readpath);
 	strcat(inpath, infile);
 
-	printf("Looking for file '%s'.\n",inpath);
+//	printf("Looking for file '%s'.\n",inpath);
 
 	err = open_input_file(inpath,&file,&cdfid,&timeid);
 	if (err != 0) {
@@ -387,10 +387,10 @@ void read_uvw(int imon, char *fieldtype)
 
 	sprintf(infile,"VH.%s.nc",fieldtype);
 
-	strcpy(inpath, run_parameters.forcing_path);
+	strcpy(inpath, readpath);
 	strcat(inpath, infile);
 
-	printf("Looking for file '%s'.\n",inpath);
+//	printf("Looking for file '%s'.\n",inpath);
 
 	err = open_input_file(inpath,&file,&cdfid,&timeid);
 	if (err != 0) {
@@ -440,10 +440,10 @@ void read_uvw(int imon, char *fieldtype)
 
 	sprintf(infile,"WD.%s.nc",fieldtype);
 
-	strcpy(inpath, run_parameters.forcing_path);
+	strcpy(inpath, readpath);
 	strcat(inpath, infile);
 
-	printf("Looking for file '%s'.\n",inpath);
+//	printf("Looking for file '%s'.\n",inpath);
 
 	err = open_input_file(inpath,&file,&cdfid,&timeid);
 	if (err != 0) {
@@ -504,7 +504,7 @@ void read_uvw(int imon, char *fieldtype)
 	close_file(&cdfid,&file);
 }
 
-void read_h(int imon, char *fieldtype, double ***hread)
+void read_h(int imon, char *fieldtype, char *readpath, double ***hread)
 {
 	
 	int i,j,k;
@@ -526,7 +526,7 @@ void read_h(int imon, char *fieldtype, double ***hread)
 //	printf("Reading hread from month: %d\n",imon);
 	sprintf(infile,"H.%s.nc",fieldtype);
 
-	strcpy(inpath, run_parameters.forcing_path);
+	strcpy(inpath, readpath);
 	strcat(inpath, infile);
 
 	//  printf("Looking for file '%s'.\n",inpath);
@@ -571,10 +571,9 @@ void read_h(int imon, char *fieldtype, double ***hread)
 			}
 		}
 	}
-	printf("Copied to hread\n");
 	//printf("Read in h=%g, hstart=%g, hread=%g\n",h[1][100][100],hstart[1][100][100],hread[1][100][100]);
 
-	free3d_f(tmp3d, NZ);
+//	free3d_f(tmp3d, NZ);
 
 
 	//	zonal re-entrance
@@ -604,10 +603,11 @@ void read_h(int imon, char *fieldtype, double ***hread)
 
 
 /* ashao: Read data routines (UH, VH, WD, T, S) for hindcast runs */
+/*
 void read_var3d( char *inpath, char *varname, int imon, double ***data)
 {
 
-	int i,j,k;
+	int i,j,k,ii;
 	int err, cdfid, timeid, varid;
 	char infile[25];
 	FILE *file;
@@ -615,7 +615,7 @@ void read_var3d( char *inpath, char *varname, int imon, double ***data)
 	int inxt,iprv;
 	size_t start[MAX_NC_VARS];
 	size_t count[MAX_NC_VARS];
-	float ***tmp3d;
+	double ***tmp3d;
 
 	start[0] = imon;
 	start[1] = 0;
@@ -635,19 +635,38 @@ void read_var3d( char *inpath, char *varname, int imon, double ***data)
 	//    for (i=0;i<4;i++)
 	//	printf("start[%d]: %d,count[%d]: %d\n",i,start[i],i,count[i]);
 
-	tmp3d  = alloc3d_f(NZ+1,NYTOT,NXTOT);
-	if ((status = nc_get_vara_float(cdfid,varid,start,count,tmp3d[0][0])))
+	tmp3d  = alloc3d(NZ,NYTOT,NXTOT);
+	if ((status = nc_get_vara_double(cdfid,varid,start,count,tmp3d[0][0])))
 		ERR(status);
 	for (k=0;k<count[1];k++)
 		for (i=0;i<NXTOT;i++)
 			for (j=0;j<NYTOT;j++)
 				data[k][i+2][j+2]= tmp3d[k][j][i];
 
-	wrap_reentrance_3d(data,count[1]);
 
-	free3d_f(tmp3d,NZ);
+	for (k=0;k<NZ;k++) {
+		for (j=0;j<=NYMEM-1;j++) {
+			data[k][nx+1][j] = data[k][2][j];
+			data[k][nx+2][j] = data[k][3][j];
+			data[k][0][j] =   data[k][nx-1][j];
+			data[k][1][j] =   data[k][nx][j];
+		}
+	}
+#ifdef REENTRANT_Y
+	//      meridional re-entrance
+	for (i=2;i<=nx;i++) {
+		ii = 363 - i;
+		for (k=0;k<NZ;k++) {
+			data[k][ii][ny+1] = data[k][i][ny];
+			data[k][ii][ny+2]   = data[k][i][ny-1];
+		}
+	}
+#endif
+	free3d(tmp3d,NZ);
+
+	close_file(&cdfid,&file);	
 }
-
+*/
 void read_var2d( char *inpath, char *varname, double **data)
 {
 
@@ -680,4 +699,81 @@ void read_var2d( char *inpath, char *varname, double **data)
 	wrap_reentrance_2d(data);
 
 	free2d_f(tmp2d,NZ);
+}
+
+void read_var3d(char *readpath, char *varname, int imon, double ***readarray)
+{
+	
+	int i,j,k;
+	int ii;
+	int err, cdfid, timeid;
+	char inpath[1000];
+	FILE *file;
+	int status;
+
+	int fileid;
+
+	size_t start[MAX_NC_VARS];
+	size_t count[MAX_NC_VARS];
+
+	double*** tmp3d;
+
+	tmp3d  = alloc3d(NZ,NYTOT,NXTOT);
+	
+	strcpy(inpath,readpath);
+	printf("Looking for file '%s'.\n",inpath);
+
+	err = open_input_file(inpath,&file,&cdfid,&timeid);
+	if (err != 0) {
+		strcat(inpath, ".cdf");
+		err = open_input_file(inpath,&file,&cdfid,&timeid);
+		if (err != 0) {
+			printf("Unable to find file %s.\n",inpath);
+			exit(-73);
+		}
+	}
+
+	if ((status = nc_inq_varid(cdfid, varname, &fileid)))
+		ERR(status);
+
+	bzero(start, MAX_NC_VARS * sizeof(long));
+
+	count[0] = 1;
+	count[1] = NZ;
+	count[2] = NYTOT;
+	count[3] = NXTOT;
+
+	start[0] = imon;
+	if ((status = nc_get_vara_double(cdfid,fileid,start,count,tmp3d[0][0])))
+		ERR(status);
+	for (k=0;k<NZ;k++) {
+		for (i=0;i<NXTOT;i++) {
+			for (j=0;j<NYTOT;j++) {
+				readarray[k][i+2][j+2]= tmp3d[k][j][i];
+			}
+		}
+	}
+
+	free3d(tmp3d, NZ);
+
+	//	zonal re-entrance
+	for (k=0;k<NZ;k++) {
+		for (j=0;j<=NYMEM-1;j++) {
+			readarray[k][nx+1][j] = readarray[k][2][j];
+			readarray[k][nx+2][j] = readarray[k][3][j];
+			readarray[k][0][j] =   readarray[k][nx-1][j];
+			readarray[k][1][j] =   readarray[k][nx][j];
+		}
+	}
+	//      meridional re-entrance
+	for (i=2;i<=nx;i++) {
+		ii = 363 - i;
+		for (k=0;k<NZ;k++) {
+			readarray[k][ii][ny+1] = readarray[k][i][ny];
+			readarray[k][ii][ny+2]   = readarray[k][i][ny-1];
+		}
+	}
+
+	close_file(&cdfid,&file);
+
 }

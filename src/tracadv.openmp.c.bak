@@ -18,12 +18,11 @@
 #include "metrics.h"
 #include "offtrac.h"
 #include "alloc.h"
-#include "timekeeper.h"
 #ifdef HTEST
 #include "ideal_age.h"
 #endif
+#include "timekeeper.h"
 
-extern struct timekeeper_t timekeeper;
 
 static double dmax1, dmax2, dmin1, dmin2;
 #define D_MAX(a,b) (dmax1=(a),dmax2=(b),((dmax1) > (dmax2)) ?\
@@ -31,15 +30,8 @@ static double dmax1, dmax2, dmin1, dmin2;
 #define D_MIN(a,b) (dmin1=(a),dmin2=(b),((dmin1) < (dmin2)) ?\
                    (dmin1) : (dmin2))
 
-double dt;
+extern double ***h, ***hstart, ***hend;	/* Layer thickness, begin of advec step in m.  */
 
-extern double ***h, ***hstart, ***hend;
-
-//extern double h[NZ][NXMEM][NYMEM];	/* Layer thickness, begin of advec step in m.  */
-
-//extern double hstart[NZ][NXMEM][NYMEM];	/* Layer thickness, begin of advec step in m.  */
-
-//extern double hend[NZ][NXMEM][NYMEM];	/* Layer thickness, end of advec step in m.  */
 #ifdef HTEST
 // extern double htest[NZ][NXMEM][NYMEM];	/* Layer thickness, used for debugging  */
 #endif
@@ -50,18 +42,13 @@ extern double           D[NXMEM][NYMEM]; /* Basin depth, in m.         */
 extern double ***uhtm; /* uhtm and the vhtm are the sum */
 extern double ***vhtm; /* of uh and vh between tracer   */
                     /* updates, both in m3 s-1.      */
+extern double ***wd; /* the diapycnal velocity that is */
+                                      /* calculated at the interfaces   */
 
 extern double umask[NXMEM][NYMEM];   /* _mask are 1 over ocean and 0  */
 extern double vmask[NXMEM][NYMEM];   /* over land on the u & v grids. */
 
-extern double ***ea;
-extern double ***eb;
-extern double eaml[NXMEM][NYMEM];
-//extern double wd[NZ+1][NXMEM][NYMEM]; /* the diapycnal velocity that is */
-                                      /* calculated at the interfaces   */
-extern double ***wd;
-extern char directory2[95];          /* The directory to use to save  */
-                                     /* output files.                 */
+int itts = 0;
 
 #if defined(PARALLEL_X) || defined(PARALLEL_Y)
 extern int pe_here;                  /* The current processor's label.*/
@@ -86,11 +73,13 @@ extern int ny;                       /* The number of y-points in the */
   extern int mAGE;
 #endif
 double hvolint;
-double trintegral[NTR];
+extern double trintegral[NTR];
 
 #ifdef DIFFUSE_TRACER
 static void diffuse_tracer();
 #endif
+
+extern struct timekeeper_t timekeeper;
 
 static void tracer_hordiff();
 void print_tr(int pstage);
@@ -99,7 +88,7 @@ void hvol_kintegral(int k, double ***hvol);
 void tracer_integral(int trnum, double ***hvol);
 void tracer_kintegral(int trnum, int k, double ***hvol);
 
-void tracer(int itts)
+void tracer( )
 {
 
 /*    This subroutine time steps the tracer concentration.            */
@@ -154,6 +143,8 @@ double hlst[NYMEM];
 //	double MLMIN = EPSILON;
 //	double BLMIN = 0.20; // ashao: in global configuration of HIM it's 0.1
 	double BLMIN = 0.10;
+	double dt;
+	dt = timekeeper.dt;
 
 #ifdef ENTRAIN
   double nts = dt/DT; /* number of timesteps (#day*86400/3600seconds) */
@@ -165,8 +156,6 @@ double hlst[NYMEM];
 # ifdef WRTTS
   double wrts;
 # endif
-
-  dt = timekeeper.dt;
 
   hvol = alloc3d(NZ,NXMEM,NYMEM);
     if(hvol == NULL) {
@@ -729,12 +718,13 @@ double hlst[NYMEM];
 	      for (j=Y1; j<=ny; j++) {
 		  if (hnew[k][i][j] < EPSILON) hnew[k][i][j] = EPSILON;
 		  hvol[k][i][j] = DXDYh(i,j)*hnew[k][i][j];
-
+/*
 		  if ( wd[k][i][j] > 0.0 && ( wdh[k][i][j] > wd[k][i][j] ))
 		      printf("case 1 wdh[k]\n");
 
 		  else if ( wd[k][i][j] < 0.0 && ( wdh[k][i][j] < wd[k][i][j] ))
 		      printf("case 2 wdh[k]\n");
+*/
 		  wd[k][i][j] -= wdh[k][i][j];	
 	      }
  
@@ -958,7 +948,7 @@ static void diffuse_tracer()
 
   C2dtKD = 2.0*KD*dt; C2dtKDML = 2.0*KDML*dt;
 
-	printf("DIFFUSING TRACER - diapycnal dt=%f\n",dt);
+	printf("DIFFUSING TRACER - diapycnal\n");
 
 //#pragma omp parallel for private(i,j,k,m,a,z,bet,gam)
   for (i=X1;i<=nx;i++) {
@@ -1076,8 +1066,10 @@ static void tracer_hordiff(void)
   static int zero_if_first_call = 0;
   int i, j, k, ii, m, domore_k, itt;
   double C0;  /* A work variable with units of m2. */
-
-  printf("DIFFUSING TRACER - isopycnal dt=%f\n",dt);
+  
+  double dt;
+  dt = timekeeper.dt;
+  printf("DIFFUSING TRACER - isopycnal\n");
 
   if (zero_if_first_call == 0) {
     for (j=Y1;j<=ny;j++) 
@@ -1251,30 +1243,4 @@ void hvol_kintegral(int k, double ***hvol){
   }
 
 }
-
-//BX tracer_integral is calculated in step.c
-/*
-void tracer_kintegral(int trnum, int k, double ***hvol){
-    
-  int i, j;
-  double sum;
-
-//  trintegral[trnum]=0.e0;
-  sum=0.e0;
-//#pragma omp parallel for  private(i,j) reduction(+:sum) schedule(dynamic)
-  for (i=2;i<=NXMEM-1;i++) {
-      for (j=2;j<=NYMEM-1;j++) {
-	  //BX if (h[k][i][j] > 1e-6) {
-	      //BX	      trintegral[trnum] += tr[trnum][k][i][j] * h[k][i][j] * dxdyh[i][j];
-          //   trintegral[trnum] += tr[trnum][k][i][j] * hvol[k][i][j];
-          sum += tr[trnum][k][i][j] * hvol[k][i][j];
-	     //BX }
-      }
-  }
-
- trintegral[trnum] = sum;
-
-}
-*/
-//BX-e
 

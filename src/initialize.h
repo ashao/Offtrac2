@@ -9,8 +9,11 @@ struct parameters {
 	int use_hindcast; // 0 for normalyear, 1 for hindcast
 	int restart_flag; // '1' for restart, '0' for cold start
 	char forcing_path[1000]; // Directory to forcing
+	char normalyear_path[1000]; // Directory to forcing
+	char hindcast_path[1000]; // Directory to forcing
 	char outputfile[100]; // model output name
-	char restartfile[100]; // restart file name
+	char restartfile[100]; // restart file name 
+	char new_restartfile[100]; // restart file name
 	char timestep[7]; // '5day' or 'month'
 	
 	int wrint; // Averaging interval

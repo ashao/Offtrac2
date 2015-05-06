@@ -38,3 +38,4 @@ int calc_hindindex(int inmon, int nmonths);
 void wrap_reentrance_2d( double **arr );
 void wrap_reentrance_3d( double ***arr, int nz );
 
+void apply_mask( double ***arr, int wetmask[NXMEM][NYMEM] );

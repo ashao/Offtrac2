@@ -148,14 +148,12 @@ void wrap_reentrance_2d( double **arr ) {
 		arr[nx + 1][j] = arr[2][j];
 		arr[nx + 2][j] = arr[3][j];
 	}
-#ifdef REENTRANT_Y
 	//      meridional re-entrance
 	for (i=0;i<=nx+2;i++) {
 		ii = 363 - i;
 		arr[ii][ny+1] = arr[i][ny];
 		arr[ii][ny+2] = arr[i][ny-1];
 	}
-#endif
 
 }
 
@@ -186,6 +184,17 @@ int mod(int a, int b)
     return r < 0 ? r + b : r;
 }
 
+void apply_mask( double ***tracer, int wetmask[NXMEM][NYMEM] ) {
+
+	int i,j,k;
+	for (i=0;i<NXMEM;i++)
+		for(j=0;j<NYMEM;j++)
+			if(!wetmask[i][j])
+				for (k=0;k<NZ;k++)
+					tracer[k][i][j] = MISVAL;
+
+}
+
 /*
 void wrap_reentrance_3d( double ***arr, int nz) {
 
@@ -212,4 +221,5 @@ void wrap_reentrance_3d( double ***arr, int nz) {
 	}
 }
 */
+
 // end ashao

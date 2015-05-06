@@ -51,32 +51,46 @@ void initialize_age( ) {
         vars[map_variable_to_index(varname)].hor_grid='h';
         vars[map_variable_to_index(varname)].z_grid='L';
         vars[map_variable_to_index(varname)].t_grid='s';
-        strcpy(vars[map_variable_to_index(varname)].units,"m");
+        strcpy(vars[map_variable_to_index(varname)].units,"Years");
         vars[map_variable_to_index(varname)].mem_size='d';
         vars[map_variable_to_index(varname)].mval=MISVAL;
 	printf("DONE\n");
 
-	printf("Age init example: ");
-	printf("%f\n",tr[mAGE][10][100][100]);
+//	printf("Age init example: ");
+//	printf("%f\n",tr[mAGE][10][100][100]);
 	if (run_parameters.restart_flag) {
-		printf("Initializing oxygen from restart %s\n",run_parameters.restartfile);
+		printf("Initializing age from restart %s\n",run_parameters.restartfile);
 		read_var3d( run_parameters.restartfile, "mn_age", 0, age_init );
+		// Filter for bad values
+		//
+/*
+		for (i=0;i<NXMEM;i++) 
+			for (j=0;j<NYMEM;j++)
+				for (k=0;k<NZ;k++)
+					if(age_init[k][i][j] > 2050. || age_init[k][i][j] < 0 ) {
+						age_init[k][i][j] = 0.0;
+					}
+		
+*/		
 	}
 	else {
 		set_darray3d_zero(age_init, NZ, NXMEM, NYMEM);
 		printf("Ideal age initialized to zero\n");
 	}
 
-	// Copy the initialized tracer value over to main trace array
-	printf("Age init example: %f\n",tr[mAGE][10][100][100]);
-	for (i=0;i<NXMEM;i++) {
-		for (j=0;j<NYMEM;j++) {
-				for (k=0;k<NZ;k++) {
-					tr[mAGE][k][i][j] = age_init[k][i][j];
-			}
-		}
-	}
+	wrap_reentrance_3d(age_init,NZ);
+	
 
+	// Copy the initialized tracer value over to main trace array
+	for (i=0;i<NXMEM;i++) 
+		for (j=0;j<NYMEM;j++)
+			for (k=0;k<NZ;k++) {
+				if (oceanmask[i][j]) tr[mAGE][k][i][j] = age_init[k][i][j];
+				else tr[mAGE][k][i][j] = 0.0;
+			}
+	
+	copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
+	printf("Age init example: %f\n",tr[mAGE][15][100][100]);
 	free3d(age_init,NZ);
 
 
@@ -101,9 +115,9 @@ void step_age( double dt ){
 			}
 
 
-	for(i=0;i<NXMEM;i++)
+/*	for(i=0;i<NXMEM;i++)
 		for(j=0;j<NYMEM;j++)
 			for(k=0;k<NZ;k++)
 				mn_age[k][i][j]+=tr[mAGE][k][i][j];
-
+*/
 }

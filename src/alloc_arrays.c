@@ -16,14 +16,9 @@ int alloc_arrays() {
 	extern double ***vhtm, ***mn_vhtm;
 	extern double ***wd, ***mn_wd;
 
-	double **areagr;
-	double **D;
-	double **umask, **vmask;
-
-#ifdef AGE
-	extern double ***mn_age;
-	extern double ***htest;
-#endif
+//	double **areagr;
+//	double **D;
+//	double **umask, **vmask;
 
 	if (! (h = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("h");
 	if (! (hstart = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("hstart");
