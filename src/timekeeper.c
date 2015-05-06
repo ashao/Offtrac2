@@ -29,12 +29,12 @@ void initialize_timekeeper( void ) {
 			(run_parameters.einterval-run_parameters.sinterval);
 	printf("Timekeeper.total_intervals: %d\n",timekeeper.total_intervals);
 
+	if (run_parameters.sinterval == 0) {
+		run_parameters.syear = run_parameters.syear-1;
+	}
 	// Check to see if we should begin by reading a hindcast year
 	if (run_parameters.use_hindcast) {
 
-		if (run_parameters.sinterval == 0) {
-			run_parameters.syear = run_parameters.syear-1;
-		}
 		timekeeper.read_hind_flag = run_parameters.syear >= BEGHIND && run_parameters.syear <= ENDHIND;
 		if (timekeeper.read_hind_flag)
 			timekeeper.current_interval = mod(run_parameters.sinterval - 1,timekeeper.num_intervals_year);

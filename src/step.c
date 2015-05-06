@@ -238,8 +238,11 @@ void update_transport_fields(  ) {
 	copy_darray3d(h,hstart,NZ,NXMEM,NYMEM);
 
 	if (timekeeper.read_hind_flag) {
-		
-		sprintf(file_suffix,"hind.%d.%s",timekeeper.current_year,run_parameters.timestep);
+		// BUG FIX BECAUSE 1964 is INCOMPLETE REMOVE WHEN HINDCAST RERUN!
+		if (timekeeper.current_year == 1964) 
+			sprintf(file_suffix,"hind.%d.%s",1965,run_parameters.timestep);
+		else 
+			sprintf(file_suffix,"hind.%d.%s",timekeeper.current_year,run_parameters.timestep);
 		printf("Hindcast Mass transports and isopycnal thickness: Year %d, Interval: %d\n",
 				timekeeper.current_year,timekeeper.current_interval);
 		read_index = timekeeper.current_interval;

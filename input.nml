@@ -1,14 +1,17 @@
-syear 1900
+syear 1948
 sinterval 0
-eyear 1910
+eyear 1949
 einterval 0
 use_hindcast 0
-restart_flag 0
-timestep month
-forcing_path /ltraid3/ashao/uw-apl/data/offtrac/input/normalyear/
-outputfile test
+restart_flag 1
+timestep 5day
+forcing_path /ltraid3/ashao/uw-apl/data/offtrac/input/
+normalyear_path /ltraid3/ashao/uw-apl/data/offtrac/input/normalyear/
+hindcast_path /ltraid3/ashao/uw-apl/data/offtrac/input/normalyear/
+restartfile restart.idealage.24132.nc
+outputfile idealage.5day.clim
 wrint 1
-ntime_climatology 12
-ntime_hindcast 12
+ntime_climatology 73
+ntime_hindcast 73
 age 1
-
+age_restart 1

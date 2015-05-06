@@ -8,7 +8,7 @@ OUTNAME=offtrac
 
 # gaggle with gcc
 CC = gcc
-CFLAGS = -mfpmath=sse -O2 -flto -march=native -funroll-loops -fopenmp  -g -pipe
+CFLAGS = -mfpmath=sse -flto -march=native -funroll-loops -fopenmp  -g -pipe -Ofast
 LDFLAGS = -I/cm/shared/apps/netcdf/gcc/64/4.3.0/include -L/cm/shared/apps/netcdf/gcc/64/4.3.0/lib
 # waddle with gcc
 #CC=gcc
@@ -44,7 +44,7 @@ LDFLAGS = -I/cm/shared/apps/netcdf/gcc/64/4.3.0/include -L/cm/shared/apps/netcdf
 #LDFLAGS = -lm -ftrap -lnetcdf -I/usr/local/include -L/usr/local/lib
 #LDFLAGS = -lm -ftrap -lnetcdf -I/usr/include -L/usr/lib
 #LDFLAGS = -lm -lnetcdf -I/usr/local/include -L/usr/local/lib
-SRCDIR = src_offtrac2
+SRCDIR = src
 
 #pendragon with icc
 #CC=icc
@@ -54,7 +54,7 @@ SRCDIR = src_offtrac2
 CDFFLAGS= -lnetcdf
 
 
-OFFSRC = $(SRCDIR)/offtrac2.c $(SRCDIR)/read.c \
+OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/initialize.c $(SRCDIR)/iocdf.c $(SRCDIR)/par_IO.c \
 	$(SRCDIR)/tracadv.openmp.c $(SRCDIR)/step.c \
         $(SRCDIR)/alloc_trac.c \
