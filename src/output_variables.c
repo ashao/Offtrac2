@@ -18,15 +18,15 @@ int map_variable_to_index( char *var_name ) {
 	int var_idx=-99;
 	// Time-invariant variables
 	if (!strcmp(var_name,"depth"))		var_idx = 0;
-	if (!strcmp(var_name,"geolat"))	var_idx = 1;
-	if (!strcmp(var_name,"geolon"))	var_idx = 2;
+	if (!strcmp(var_name,"geolat"))		var_idx = 1;
+	if (!strcmp(var_name,"geolon"))		var_idx = 2;
 	if (!strcmp(var_name,"wetmask"))	var_idx = 3;
 
 	// Time-varying varibles
 	if (!strcmp(var_name,"hlay"))		var_idx = 4;
-	if (!strcmp(var_name,"uhtm"))	var_idx = 5;
-	if (!strcmp(var_name,"vhtm"))	var_idx = 6;
-	if (!strcmp(var_name,"wd"))		var_idx = 7;
+	if (!strcmp(var_name,"uhtm"))		var_idx = 5;
+	if (!strcmp(var_name,"vhtm"))		var_idx = 6;
+	if (!strcmp(var_name,"wd"))			var_idx = 7;
 
 	// User-defined variables
 	if (!strcmp(var_name,"age"))		var_idx = 8;

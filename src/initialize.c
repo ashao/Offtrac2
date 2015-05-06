@@ -34,7 +34,7 @@ void initialize( void )
 
 	int i, j, k, m;
 	char varname[100];
-	extern ****tr;
+	extern double ****tr;
 
 	// Setup the variable descriptions
 	
@@ -153,7 +153,7 @@ void set_run_parameters( void )
 	ssize_t read;
 	size_t len;
 
-	extern flags[NOVARS],rflags[NOVARS];
+	extern int flags[NOVARS], rflags[NOVARS];
 
 	printf("reading parameters\n");
 	ptr_file = fopen(run_parameters.namelist_file,"r");

@@ -45,7 +45,7 @@ extern double ***h, ***hstart, ***hend;
 #endif
 
 extern double ****tr; /* Tracer concentration g m-3.*/
-extern double           D[NXMEM][NYMEM]; /* Basin depth, in m.         */
+extern double D[NXMEM][NYMEM]; /* Basin depth, in m.         */
 
 extern double ***uhtm; /* uhtm and the vhtm are the sum */
 extern double ***vhtm; /* of uh and vh between tracer   */

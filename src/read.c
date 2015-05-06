@@ -699,6 +699,8 @@ void read_var2d( char *inpath, char *varname, double **data)
 	wrap_reentrance_2d(data);
 
 	free2d_f(tmp2d,NZ);
+	close_file(&cdfid,&file);
+
 }
 
 void read_var3d(char *readpath, char *varname, int imon, double ***readarray)

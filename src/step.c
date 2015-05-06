@@ -29,7 +29,6 @@
  *---------------------------------------------------------------------*/
 
 extern double ****tr;
-extern double dt;
 extern double ***hstart, ***h, ***hend;
 
 #ifdef AGE
@@ -163,7 +162,7 @@ void step_fields( ) {
 	submit_for_averaging( mn_wd, wd );
 
 #ifdef AGE
-//	submit_for_averaging( mn_age, tr[mAGE]) ;
+	submit_for_averaging( mn_age, tr[mAGE]) ;
 #endif
 
 //	apply_mask(mn_h,oceanmask);
