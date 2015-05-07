@@ -24,6 +24,10 @@
 #ifdef AGE
 #include "ideal_age.h"
 #endif
+
+#ifdef CFCS
+#include "cfcs_sf6.h"
+#endif
 /*---------------------------------------------------------------------
  *     define variables and subroutines
  *---------------------------------------------------------------------*/
@@ -33,11 +37,11 @@ extern double ***hstart, ***h, ***hend;
 
 #ifdef AGE
 extern int mAGE;
+#endif
 extern double ***mn_h, ***h;
 extern double ***mn_uhtm, ***uhtm;
 extern double ***mn_vhtm, ***vhtm;
 extern double ***mn_wd, ***wd;
-#endif 
 
 extern int oceanmask[NXMEM][NYMEM];
 extern struct parameters run_parameters;
@@ -84,7 +88,6 @@ void step_fields( ) {
 	 *-----------------------------------------*/
 
 	update_transport_fields( );
-
 	printf("Calculate tracer transport. \n");
 	printf("TR[0][15][100][100]: %f\n",tr[0][15][100][100]);
 	tracer( 0  ); /* perform transport time step */
@@ -110,6 +113,14 @@ void step_fields( ) {
 	step_age(timekeeper.dt);
 #endif
 
+#ifdef CFCS
+	surface_cfc11();
+	divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
+	surface_cfc12();
+	divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
+	surface_sf6();
+	divide_darray3d(psf6,tr[mSF6],sf6_sol);
+#endif
 	merge_ml_tr();
 
 
@@ -163,6 +174,15 @@ void step_fields( ) {
 
 #ifdef AGE
 	submit_for_averaging( mn_age, tr[mAGE]) ;
+#endif
+
+#ifdef CFCS
+	submit_for_averaging( mn_cfc11, tr[mCFC11] );	
+	submit_for_averaging( mn_pcfc11, pcfc11 );
+	submit_for_averaging( mn_cfc12, tr[mCFC12] );	
+	submit_for_averaging( mn_pcfc12, pcfc12 );
+	submit_for_averaging( mn_sf6, tr[mSF6] );	
+	submit_for_averaging( mn_psf6, psf6 );
 #endif
 
 //	apply_mask(mn_h,oceanmask);
@@ -257,9 +277,11 @@ void update_transport_fields(  ) {
 	}
 
 	read_uvw(read_index,file_suffix,path);
-	read_h(read_index,file_suffix,path,hend);;
+	read_h(read_index,file_suffix,path,hend);
 
-
+#ifdef CFCS
+	read_temp_and_salt(read_index,file_suffix,path);
+#endif
 
 }
 

@@ -316,7 +316,7 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 	size_t count[MAX_NC_VARS];
 
 	float*** tmp3d;
-	printf("UVW %s index: %d\n",fieldtype,imon);
+//	printf("UVW %s index: %d\n",fieldtype,imon);
 
 	//
 	//   read in separate files for U, V, and W
@@ -573,7 +573,7 @@ void read_h(int imon, char *fieldtype, char *readpath, double ***hread)
 	}
 	//printf("Read in h=%g, hstart=%g, hread=%g\n",h[1][100][100],hstart[1][100][100],hread[1][100][100]);
 
-//	free3d_f(tmp3d, NZ);
+	free3d_f(tmp3d, NZ);
 
 
 	//	zonal re-entrance
@@ -723,7 +723,7 @@ void read_var3d(char *readpath, char *varname, int imon, double ***readarray)
 	tmp3d  = alloc3d(NZ,NYTOT,NXTOT);
 	
 	strcpy(inpath,readpath);
-	printf("Looking for file '%s'.\n",inpath);
+//	printf("Looking for file '%s'.\n",inpath);
 
 	err = open_input_file(inpath,&file,&cdfid,&timeid);
 	if (err != 0) {

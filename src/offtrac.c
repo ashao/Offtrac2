@@ -29,11 +29,17 @@
 #include "read.h"
 #include "tracer_utilities.h"
 #include "timekeeper.h"
+
+#ifdef CFCS
+#include "cfcs_sf6.h"
+#endif
+
 #ifdef AGE
 
 extern int mAGE;
 
 #endif
+
 /*-------------------------------------------------------------------*
  *                                                                   *
  *     define variables and subroutines
@@ -59,9 +65,11 @@ const double misval = -1.e+6;
 double depth[NZ][NXMEM][NYMEM];
 
 double ***h, ***hstart, ***hend;
+double ***htest;
 double ***uhtm;
 double ***vhtm;
 double ***wd;
+double ***Temptm, ***Salttm;
 
 double ***mn_h;
 double ***mn_uhtm;
@@ -411,6 +419,14 @@ void alloc_fields(void)
 	var[map_variable_to_index("hlay")] = &mn_h[0][0][0];
 #ifdef AGE
 	var[map_variable_to_index("age")] = &mn_age[0][0][0];
+#endif
+#ifdef CFCS
+	var[map_variable_to_index("cfc11")] = &mn_cfc11[0][0][0];
+	var[map_variable_to_index("pcfc11")] = &mn_pcfc11[0][0][0];
+	var[map_variable_to_index("cfc12")] = &mn_cfc12[0][0][0];
+	var[map_variable_to_index("pcfc12")] = &mn_pcfc12[0][0][0];
+	var[map_variable_to_index("sf6")] = &mn_sf6[0][0][0];
+	var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
 #endif
 	//var[18] = &mn_rml[0][0][0];
 

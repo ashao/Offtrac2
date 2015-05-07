@@ -29,7 +29,19 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"wd"))			var_idx = 7;
 
 	// User-defined variables
+#ifdef AGE	
 	if (!strcmp(var_name,"age"))		var_idx = 8;
+#endif 
+
+#ifdef CFCS
+	if (!strcmp(var_name,"cfc11"))	var_idx = 8;
+	if (!strcmp(var_name,"pcfc11"))	var_idx = 9;
+	if (!strcmp(var_name,"cfc12"))	var_idx = 10;
+	if (!strcmp(var_name,"pcfc12"))	var_idx = 11;
+	if (!strcmp(var_name,"sf6"))	var_idx = 12;
+	if (!strcmp(var_name,"psf6"))	var_idx = 13;
+#endif 
+
 
 
 	if (var_idx < 0)	{

@@ -6,13 +6,14 @@
  */
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include "init.h"
 #include "tracer_utilities.h"
 #include "alloc.h"
 #include "read.h"
 extern int oceanmask[NXMEM][NYMEM];
 extern double D[NXMEM][NYMEM];
-double ***Temptm,***Salttm;
+extern double ***Temptm,***Salttm;
 
 void allocate_ts( ) {
 
@@ -21,24 +22,18 @@ void allocate_ts( ) {
 
 }
 
-void read_temp_and_salt( int imon, char *fieldtype) {
-	extern char directory[75];
-	char filename[20];
+void read_temp_and_salt( int imon, char *fieldtype, char* path) {
+	char filename[50];
 	char saltpath[300];
 	char temppath[300];
 
-//	if ( imon % NMONTHS == 0 )
-//		imon = 0;
-
-	strcpy(saltpath,directory);
-	sprintf(filename,"salt.%s.nc",fieldtype);
-	strcat(saltpath,filename);
-	strcpy(temppath,directory);
-	sprintf(filename,"temp.%s.nc",fieldtype);
+	strcpy(temppath,path);
+	sprintf(filename,"TS.%s.nc",fieldtype);
 	strcat(temppath,filename);
-	printf("Reading temperature and salinity from month %d\n",imon);
+
+	printf("Reading temperature and salinity from interval %d\n",imon);
 	read_var3d( temppath, "temp", imon, Temptm);
-	read_var3d( saltpath, "salt", imon, Salttm);
+	read_var3d( temppath, "salt", imon, Salttm);
 
 }
 
@@ -83,7 +78,7 @@ void z_depth(double h[NZ][NXMEM][NYMEM], double depth[NZ][NXMEM][NYMEM]) {
 double calc_inventory( int tridx ) {
 
 	extern double areagr[NXMEM][NYMEM];
-	extern double hend[NZ][NXMEM][NYMEM];
+	extern double ***hend;
 	extern double ****tr;
 
 	double inventory;
@@ -106,3 +101,58 @@ double calc_inventory( int tridx ) {
 	printf("Inventory: %e\n",inventory);	
 	return inventory;
 }
+
+double linear_interpolation(const double xin[], const double yin[], double xi, int numin) {
+
+        int i,j,flipidx;
+        int intpidx1,intpidx2;
+        int decreasing;
+        double deltax,dist;
+        double x[numin],y[numin];
+        double y0,y1,x0,x1,yi;
+
+        // first check to see if xin increases or decreases
+        
+        if (xin[numin-1]>xin[0]) decreasing = 0;
+        if (xin[numin-1]<xin[0]) decreasing = 1; 
+        // flip the input vectors if it is decreasing
+                if (decreasing) {
+                for (i=0;i<numin;i++) {
+                        flipidx = numin-1-i;
+                        x[i] = xin[flipidx];
+                        y[i] = yin[flipidx];
+                }
+        }
+        if (decreasing==0) {
+                for (i=0;i<numin;i++) {
+                        x[i] = xin[i];
+                        y[i] = yin[i];
+                }
+        }
+
+	deltax = fabs(xi-x[0]);
+        intpidx1 = 0;
+        intpidx2 = 1;
+        for (i=0;i<numin;i++) {
+
+                dist = fabs(xi-x[i]); // Calculate how far away the current x value is from the desired number
+                if (dist<deltax) {
+                        deltax = dist;
+                        intpidx1 = i; // We now know at least one bound of the interpolation interval
+                        if ( xi<x[i] ){
+                                intpidx2 = i - 1;
+                        }
+                        else{
+                                intpidx2 = i + 1;
+                        }
+                }
+        }
+        y0 = y[ intpidx1 ];
+        y1 = y[ intpidx2 ];
+        x0 = x[ intpidx1 ];
+        x1 = x[ intpidx2 ];
+        yi = y0 + (y1-y0)*(xi-x0)/(x1-x0);
+//        if (x0>1900) printf("x0,x1: %f,%f\ny0,y1: %f,%f\nxi,yi: %f/%f\n",x0,x1,y0,y1,xi,yi);
+        return(yi);
+}
+

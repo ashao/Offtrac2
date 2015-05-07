@@ -101,6 +101,25 @@ void free3d_f(float*** arr3d, int NZED)
 /////////////////////////////////////////////////////////////////////
 // T W O - D I M E N S I O N A L   A R R A Y S
 /////////////////////////////////////////////////////////////////////
+double** alloc2d(int NY, int NX)
+{
+  int iy;
+
+  double **arr2d = (double **) malloc(NY * sizeof(double *));
+  if (arr2d == NULL)
+    return NULL;
+
+  /* allocate the memory for the array */
+  arr2d[0] = (double *) malloc(NY * NX * sizeof(double));
+  if (arr2d[0] == NULL)
+    return NULL;
+
+  /* assign pointers to rows */
+  for (iy = 1; iy < NY; iy++)
+    arr2d[iy] = arr2d[0] + iy * NX;
+
+  return arr2d;
+}
 
 float** alloc2d_f(int NY, int NX)
 {

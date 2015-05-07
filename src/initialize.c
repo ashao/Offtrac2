@@ -125,6 +125,16 @@ void initialize( void )
 
 #endif
 
+#ifdef CFCS
+	allocate_cfc11( );
+	initialize_cfc11();
+	allocate_cfc12( );
+	initialize_cfc12();
+	allocate_sf6( );
+	initialize_sf6();
+	read_tracer_boundary( );
+	
+#endif
 	/* zonal, meridional re-entrance    */
 	for (m=0;m<NTR;m++) {
 		for (k=0;k<NZ;k++) {
@@ -225,10 +235,33 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"wd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
+#ifdef AGE
 		if (!strcmp(attribute,"age"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"age_restart"))
 			rflags[map_variable_to_index("age")] = atoi(value);
+#endif
+
+#ifdef CFCS
+		if (!strcmp(attribute,"cfc11"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"cfc11_restart"))
+			rflags[map_variable_to_index("cfc11")] = atoi(value);
+		if (!strcmp(attribute,"pcfc11"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"cfc12"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"cfc12_restart"))
+			rflags[map_variable_to_index("cfc12")] = atoi(value);
+		if (!strcmp(attribute,"pcfc12"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"sf6"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"sf6_restart"))
+			rflags[map_variable_to_index("cfc11")] = atoi(value);
+		if (!strcmp(attribute,"psf6"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+#endif
 
 	}
 

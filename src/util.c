@@ -157,6 +157,16 @@ void wrap_reentrance_2d( double **arr ) {
 
 }
 
+void divide_darray3d(double ***arr, double ***num, double ***den) {
+	int i, j, k;
+
+	for (k=0;k<NZ;k++)
+		for (i=0;i<NXMEM;i++)
+			for(j=0;j<NYMEM;j++)
+				arr[k][i][j] = num[k][i][j]/den[k][i][j];
+
+
+}
 
 void wrap_reentrance_3d( double ***arr, int nz ){
 	int i,j,k, ii;
