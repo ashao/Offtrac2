@@ -21,6 +21,10 @@
 #include "ideal_age.h"
 #endif
 
+#ifdef CONSERVATION_CHECK
+#include "conservation_check.h"
+#endif
+
 extern struct vardesc vars[NOVARS];
 extern struct parameters run_parameters;
 // end ashao
@@ -134,6 +138,16 @@ void initialize( void )
 	initialize_sf6();
 	read_tracer_boundary( );
 	
+#endif
+
+#ifdef CONSERVATION_CHECK
+	allocate_test();
+	initialize_test();
+#endif
+
+#ifdef TTD
+	allocate_ttd();
+	initialize_ttd();
 #endif
 	/* zonal, meridional re-entrance    */
 	for (m=0;m<NTR;m++) {
@@ -262,7 +276,24 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"psf6"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 #endif
+#ifdef CONSERVATION_CHECK
+		if (!strcmp(attribute,"test"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"test_inventory"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"htest"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+#endif
+#ifdef TTD
+		if (!strcmp(attribute,"ttd"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"ttd_restart"))
+			rflags[map_variable_to_index("ttd")] = atoi(value);
+		if (!strcmp(attribute,"num_ttd_intervals"))
+			run_parameters.num_ttd_intervals = atoi(value);
+		 
 
+#endif
 	}
 
 

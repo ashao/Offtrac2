@@ -28,6 +28,17 @@
 #ifdef CFCS
 #include "cfcs_sf6.h"
 #endif
+
+#ifdef CONSERVATION_CHECK
+#include "conservation_check.h"
+extern int mTEST;
+extern  double ***mn_test;
+extern double test_inventory;
+#endif
+
+#ifdef TTD
+#include "ttd_bp.h"
+#endif
 /*---------------------------------------------------------------------
  *     define variables and subroutines
  *---------------------------------------------------------------------*/
@@ -89,7 +100,6 @@ void step_fields( ) {
 
 	update_transport_fields( );
 	printf("Calculate tracer transport. \n");
-	printf("TR[0][15][100][100]: %f\n",tr[0][15][100][100]);
 	tracer( 0  ); /* perform transport time step */
 	merge_ml_tr();
 
@@ -120,6 +130,16 @@ void step_fields( ) {
 	divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
 	surface_sf6();
 	divide_darray3d(psf6,tr[mSF6],sf6_sol);
+#endif
+
+#ifdef CONSERVATION_CHECK
+	step_test();
+	submit_for_averaging(mn_test,tr[mTEST]);
+	printf("Test tracer inventory: %e\n", test_inventory);
+#endif
+
+#ifdef TTD
+	step_ttd();
 #endif
 	merge_ml_tr();
 
@@ -183,6 +203,10 @@ void step_fields( ) {
 	submit_for_averaging( mn_pcfc12, pcfc12 );
 	submit_for_averaging( mn_sf6, tr[mSF6] );	
 	submit_for_averaging( mn_psf6, psf6 );
+#endif
+
+#ifdef TTD
+	submit_for_averaging( mn_ttd, tr[mTTD] );
 #endif
 
 //	apply_mask(mn_h,oceanmask);

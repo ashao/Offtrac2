@@ -19,9 +19,6 @@
 #include "offtrac.h"
 #include "alloc.h"
 #include "timekeeper.h"
-#ifdef HTEST
-#include "ideal_age.h"
-#endif
 
 extern struct timekeeper_t timekeeper;
 
@@ -33,7 +30,7 @@ static double dmax1, dmax2, dmin1, dmin2;
 
 double dt;
 
-extern double ***h, ***hstart, ***hend;
+extern double ***h, ***hstart, ***hend, ***htest;
 
 //extern double h[NZ][NXMEM][NYMEM];	/* Layer thickness, begin of advec step in m.  */
 
@@ -867,7 +864,7 @@ double hlst[NYMEM];
 		h[k][i][j] = fract1*hstart[k][i][j] + fract2*hend[k][i][j];
 //BX 		h[k][i][j] = hend[k][i][j];
 # endif
-#ifdef HTEST
+#ifdef CONSERVATION_CHECK
 	  	htest[k][i][j] = hnew[k][i][j]-hend[k][i][j]; 
 //		printf("htest(%d,%d,%d)=%g,hend=%g\n",
 //		       k,i,j,htes

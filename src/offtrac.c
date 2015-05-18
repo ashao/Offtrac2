@@ -363,6 +363,13 @@ void alloc_fields(void)
 #ifdef AGE
 	extern double ***mn_age;
 #endif
+#ifdef CONSERVATION_CHECK
+	extern double ***mn_test;
+	extern double test_inventory;
+#endif
+#ifdef TTD
+	extern double ***mn_ttd;
+#endif
 	for (m = 0; m < NOVARS; m++)
 	{
 
@@ -427,6 +434,14 @@ void alloc_fields(void)
 	var[map_variable_to_index("pcfc12")] = &mn_pcfc12[0][0][0];
 	var[map_variable_to_index("sf6")] = &mn_sf6[0][0][0];
 	var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
+#endif
+#ifdef CONSERVATION_CHECK
+        var[map_variable_to_index("test")] = &mn_test[0][0][0];
+        var[map_variable_to_index("test_inventory")] = &test_inventory;
+        var[map_variable_to_index("htest")] = &htest[0][0][0];
+#endif
+#ifdef TTD
+	var[map_variable_to_index("ttd")] = &mn_ttd[0][0][0];
 #endif
 	//var[18] = &mn_rml[0][0][0];
 

@@ -75,11 +75,10 @@ void z_depth(double h[NZ][NXMEM][NYMEM], double depth[NZ][NXMEM][NYMEM]) {
 
 }
 
-double calc_inventory( int tridx ) {
+double calc_inventory( double ***array ) {
 
 	extern double areagr[NXMEM][NYMEM];
 	extern double ***hend;
-	extern double ****tr;
 
 	double inventory;
 	int i, j, k;
@@ -91,14 +90,11 @@ double calc_inventory( int tridx ) {
 			if(D[i][j]>MINIMUM_DEPTH)
 				for(k=0;k<NZ;k++) {
 
-					inventory += hend[k][i][j]*areagr[i][j]*tr[tridx][k][i][j];
+					inventory += hend[k][i][j]*areagr[i][j]*array[k][i][j];
 
 				}
 
 		}
-	printf("Volume: %f\n",hend[k][i][j]*areagr[i][j]);
-	printf("Age[0][100][100]:%f \n",tr[tridx][0][100][100]);
-	printf("Inventory: %e\n",inventory);	
 	return inventory;
 }
 

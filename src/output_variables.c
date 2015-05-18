@@ -42,14 +42,23 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"psf6"))	var_idx = 13;
 #endif 
 
+#ifdef CONSERVATION_CHECK
+	if (!strcmp(var_name,"test"))		var_idx = 8;
+	if (!strcmp(var_name,"test_inventory"))	var_idx = 9;
+	if (!strcmp(var_name,"htest"))		var_idx = 10;
+#endif
 
+#ifdef TTD
+	if (!strcmp(var_name,"ttd"))		var_idx = 8;
+
+#endif
 
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);
 		exit( -2 );
 	}
 	else	{
-
+		printf("%s index = %d\n",var_name,var_idx);
 		return var_idx;
 
 	}

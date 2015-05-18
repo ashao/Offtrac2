@@ -32,9 +32,6 @@
                                /*  Otherwise, use '#undef REENTRANT'. */
 #define REENTRANT_Y            /* meridionally reentrant              */
 
-#define HTEST			/*  use htest[] rather than h[]       */
-				/*  for output of mn_h[]              */
-
 /* Specify properties of the passive tracers                          */
 
 #define NUM_ADV_ITER 30         /* number of iterations for advection */
@@ -43,13 +40,15 @@
                                /* layers for all BGC variables       */
 
 #undef  AGE                    /*  Define ideal age tracer in years.  */
-#define CFCS
+#undef CFCS
+#undef	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
+#define TTD
 
 #define TRNCINIT	       /* read in initial tracers values from */
 			       /* netCDF files -- otherwise initialize*/
 			       /* analytically 			      */
 
-#define NTR 3                 /*  The number of tracers to carry.    */
+#define NTR 1                 /*  The number of tracers to carry.    */
                                /*  Must add up to total of AGE,       */
                                /*    OXYGEN, O18, (CFC11 + CFC12),    */
                                /*    (DOP + PHOSPHATE), (DIC + ALK)   */
