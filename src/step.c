@@ -135,7 +135,6 @@ void step_fields( ) {
 #ifdef CONSERVATION_CHECK
 	step_test();
 	submit_for_averaging(mn_test,tr[mTEST]);
-	printf("Test tracer inventory: %e\n", test_inventory);
 #endif
 
 #ifdef TTD
@@ -259,7 +258,7 @@ void merge_ml_tr( void ) {
 
 				tracsum = 0; // Reset the tracer amount
 				for(k=0;k<NML;k++) {
-					tracsum+=tr[l][k][i][j]/NML;
+					tracsum+=tr[l][k][i][j];
 				}
 
 				// Set the mixed layer to the average of all the mixed layer 'layers'

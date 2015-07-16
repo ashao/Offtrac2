@@ -19,7 +19,9 @@
 #include "iocdf.h"
 #include "offtrac.h"
 #include "par_IO.h"
+#include "timekeeper.h"
 
+extern struct timekeeper_t timekeeper;
 
 #ifdef NETCDF_OUTPUT
 extern double latq[NYMEM];          /* The latitude of q points.     */
@@ -323,7 +325,11 @@ void create_file(char filename[], int type, struct vardesc vars[], int novars,
     }
 # endif
 
-    status = nc_create(filename, NC_CLOBBER, cdfid);
+# ifdef NETCDF4
+    status = nc_create(filename, NC_NETCDF4|NC_NOCLOBBER, cdfid);
+# else
+    status = nc_create(filename, NC_NOCLOBBER, cdfid);
+# endif
      if (status != NC_NOERR) {
       strcpy(message,"Opening "); strcat(message,filename);
       handle_error(message,status);
@@ -495,7 +501,7 @@ void create_file(char filename[], int type, struct vardesc vars[], int novars,
 
       *timeid = -1;
       for (k=0;k<novars;k++) if (vars[k].t_grid != '1') {
-        status = nc_def_dim(*cdfid, "Time", NC_UNLIMITED, &dayid);
+        status = nc_def_dim(*cdfid, "Time", timekeeper.write_intervals, &dayid);
         if (status != NC_NOERR) handle_error("Dim Time",status);
         status = nc_def_var (*cdfid, "Time", NC_DOUBLE, 1, &dayid, &dayvid);
         if (status != NC_NOERR) handle_error("Var Time",status);
@@ -618,12 +624,22 @@ void create_file(char filename[], int type, struct vardesc vars[], int novars,
 	    mem_sz = NC_FLOAT;
 	else if (vars[k].mem_size == 'd') mem_sz = NC_DOUBLE;
         else mem_sz = NC_FLOAT;
+
         status = nc_def_var(*cdfid, vars[k].name, mem_sz, nodims, 
                             dims, &varinfo[k].id);
         if (status != NC_NOERR) {
           strcpy(message,"Var "); strcat(message,vars[k].name);
           handle_error(message,status);
         }
+
+#ifdef NETCDF4
+	size_t chunksize[4] = {12, 1, 21, 36};
+	if (nodims == 4) status = nc_def_var_chunking(*cdfid,varinfo[k].id, NC_CHUNKED, chunksize );
+        if (status != NC_NOERR) {
+          strcpy(message,"Var chunking"); strcat(message,vars[k].name);
+          handle_error(message,status);
+        }
+#endif
 
         status = nc_put_att_text(*cdfid, varinfo[k].id, "long_name", 
                                  strlen(vars[k].longname)+1, vars[k].longname);

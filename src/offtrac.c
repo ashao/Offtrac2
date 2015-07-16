@@ -154,6 +154,7 @@ int main( int argc, char *argv[] )
 
 	read_grid();
 	set_metrics();
+	printf("areagr[100][100] = %f\n",areagr[100][100]);
 	printf("Done setting metrics.\n");
 	printf("Reading bathymetry, D.\n");
 	read_D();
@@ -219,7 +220,10 @@ int main( int argc, char *argv[] )
 		printf("Iteration: %d Year: %d Interval: %d Ending timestamp: %f\n",
 			timekeeper.iteration_counter,timekeeper.current_year,
 			timekeeper.current_interval,timekeeper.current_time);
+  		printf("UHTM: %f VHTM: %f WD: %e\n",uhtm[2][100][100],vhtm[2][100][100],wd[2][102][102]);
+  		printf("Start: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
 		step_fields( ); 
+  		printf("End: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
 
 
 		/*-------------------------------------------------------------------*

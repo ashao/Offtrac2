@@ -165,6 +165,7 @@ double hlst[NYMEM];
 
   dt = timekeeper.dt;
 
+//  printf("Beginning tracer transport dt=%f\n",dt);
   hvol = alloc3d(NZ,NXMEM,NYMEM);
     if(hvol == NULL) {
 	fprintf(stderr,"not enough memory for hvol!\n");
@@ -307,7 +308,6 @@ double hlst[NYMEM];
 /* ============================================================ */
 /*			first advect zonally			*/
 /* ============================================================ */
-#ifndef ADV1D
 	  for (j=Y1;j<=ny;j++) {
 
 /*   Calculate the i-direction profiles (slopes) of each tracer that  */
@@ -406,12 +406,10 @@ double hlst[NYMEM];
 	    }
           //  #pragma omp barrier
 	  } /* j loop */
-#endif
 
 /* ============================================================ */
 /*			now advect meridionally			*/
 /* ============================================================ */
-#ifndef ADV1D
 	  for (i=X1;i<=nx;i++) {
 /*   Calculate the j-direction profiles (slopes) of each tracer that  */
 /* is being advected.                                                 */
@@ -510,7 +508,6 @@ double hlst[NYMEM];
 	    }
        //     #pragma omp barrier
 	  } /* i loop */
-#endif
 
 	}			 /* end of big loop over k		*/
 
@@ -732,6 +729,7 @@ double hlst[NYMEM];
 
 		  else if ( wd[k][i][j] < 0.0 && ( wdh[k][i][j] < wd[k][i][j] ))
 		      printf("case 2 wdh[k]\n");
+
 		  wd[k][i][j] -= wdh[k][i][j];	
 	      }
  

@@ -41,8 +41,8 @@
 
 #undef  AGE                    /*  Define ideal age tracer in years.  */
 #undef CFCS
-#undef	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
-#define TTD
+#define	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
+#undef TTD
 
 #define TRNCINIT	       /* read in initial tracers values from */
 			       /* netCDF files -- otherwise initialize*/
@@ -164,6 +164,7 @@
                                /*  C binary.                          */
 #endif
 
+#define NETCDF4
 #ifdef PARALLEL_X
 #define NXPROC 2               /*    NXPROC is the minimum number of  */
                                /*  processors in the x-direction.     */

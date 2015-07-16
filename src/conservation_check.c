@@ -86,7 +86,7 @@ void step_test( double dt ){
 
 	int i,j,k;
 	extern struct timekeeper_t timekeeper;
-	if (timekeeper.iteration_counter < timekeeper.num_intervals_year){
+	if (timekeeper.iteration_counter < 2){
 		printf("Injecting tracer into mixed layer\n");
 		for(i=0;i<NXMEM;i++)
 			for(j=0;j<NYMEM;j++)
@@ -95,5 +95,6 @@ void step_test( double dt ){
 	}
 			
 	test_inventory=calc_inventory(tr[mTEST]);
+	printf("Test tracer inventory: %e\n", calc_inventory(tr[mTEST]));
 
 }

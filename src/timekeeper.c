@@ -6,8 +6,8 @@
 extern struct timekeeper_t timekeeper;
 extern struct parameters run_parameters;
 const int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
-const double seconds_in_year = 365 * 24 * 60 * 60;
-const double seconds_in_day = 24 * 60 * 60;
+const double seconds_in_year = (double) 365 * 24 * 60 * 60;
+const double seconds_in_day = (double) 24 * 60 * 60;
 
 void initialize_timekeeper( void ) {
 
@@ -29,6 +29,7 @@ void initialize_timekeeper( void ) {
 			(run_parameters.einterval-run_parameters.sinterval);
 	printf("Timekeeper.total_intervals: %d\n",timekeeper.total_intervals);
 
+	timekeeper.write_intervals = ceil(timekeeper.total_intervals/run_parameters.wrint);
 	if (run_parameters.sinterval == 0) {
 		run_parameters.syear = run_parameters.syear-1;
 	}
@@ -76,7 +77,7 @@ void update_timekeeper( void ) {
 	timekeeper.climatology_index = timekeeper.climatology_index % run_parameters.ntime_climatology;
 
 
-	if (timekeeper.num_intervals_year==73) { timekeeper.dt = (double) 5 * seconds_in_day; }
+	if (timekeeper.num_intervals_year==73) { timekeeper.dt = 5.0 * seconds_in_day; }
 	else if (timekeeper.num_intervals_year==12) { timekeeper.dt = (double) days_in_month[timekeeper.current_interval] * seconds_in_day; }
 	else {
 		printf("Invalid number of time intervals in year, choose either 5-day or monthly\n");
