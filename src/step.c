@@ -125,11 +125,18 @@ void step_fields( ) {
 
 #ifdef CFCS
 	surface_cfc11();
-	divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
 	surface_cfc12();
-	divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
 	surface_sf6();
+# ifdef NOCONC
+
+	copy_darray3d(pcfc11,tr[mCFC11],NZ,NXMEM,NYMEM);
+	copy_darray3d(pcfc12,tr[mCFC12],NZ,NXMEM,NYMEM);
+	copy_darray3d(psf6,tr[mSF6],NZ,NXMEM,NYMEM);
+#else
+	divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
+	divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
 	divide_darray3d(psf6,tr[mSF6],sf6_sol);
+# endif
 #endif
 
 #ifdef CONSERVATION_CHECK
