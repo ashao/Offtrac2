@@ -17,8 +17,6 @@
 
 extern double areagr[NXMEM][NYMEM];
 
-extern double dt;
-
 extern double ***uhtm,***vhtm;
 extern double ***wd;
 extern double D[NXMEM][NYMEM];
@@ -316,9 +314,10 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 	size_t count[MAX_NC_VARS];
 
 	float*** tmp3d;
-//	printf("UVW %s index: %d\n",fieldtype,imon);
 
-	//
+	// allocate NZ+1 so that it can be used for WDCLIM as well
+	tmp3d  = alloc3d_f(NZ+1,NYTOT,NXTOT);
+
 	//   read in separate files for U, V, and W
 	//
 	//    Start with uhtm
@@ -342,8 +341,6 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 
 	if ((status = nc_inq_varid(cdfid, "uh", &uhfileid)))
 		ERR(status);
-	//    if ((status = nc_inq_varid(cdfid, "UHCLIM", &uhfileid)))
-	//if ((status = nc_inq_varid(cdfid, "UH", &uhfileid)))
 	//   ERR(status);
 
 	bzero(start, MAX_NC_VARS * sizeof(long));
@@ -356,37 +353,19 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 
 	//    printf("read_clim UH month=  %i\n",imon);
 
-	// allocate NZ+1 so that it can be used for WDCLIM as well
-	tmp3d  = alloc3d_f(NZ+1,NYTOT,NXTOT);
 
 	start[0] = imon;
 	if ((status = nc_get_vara_float(cdfid,uhfileid,start,count,tmp3d[0][0])))
 		ERR(status);
-	//printf("read_clim UH month=  %i done\n",imon);
-	//    start[0] = iprv;
-	//    if ((status = nc_get_vara_float(cdfid,uhclimid,start,count,tmp3dp[0][0])))
-	//       ERR(status);
-	//printf("read_clim UH month=  %i done\n",iprv);
-	//    start[0] = inxt;
-	//    if ((status = nc_get_vara_float(cdfid,uhfileid,start,count,tmp3dn[0][0])))
-	//       ERR(status);
-	//printf("read_clim UH month=  %i done\n",inxt);
 
 	for (k=0;k<NZ;k++)
 		for (i=0;i<NXTOT;i++)
 			for (j=0;j<NYTOT;j++)
 				uhtm[k][i+2][j+2]= tmp3d[k][j][i];
-	//uhtm[k][i+2][j+2]= fact1 * tmp3d[k][j][i] +
-	//    fact0 * tmp3dp[k][j][i] + fact2 * tmp3dn[k][j][i];
 
 	close_file(&cdfid,&file);
-	//printf("READ uhtm=%g;%g,%g,%g\n",uhtm[0][190][26],tmp3d[0][24][188],
-	//	   tmp3dp[0][24][188],tmp3dn[0][24][188]);
-
-	//    Next vhtm
 
 	sprintf(infile,"VH.%s.nc",fieldtype);
-
 	strcpy(inpath, readpath);
 	strcat(inpath, infile);
 
@@ -404,9 +383,6 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 
 	if ((status = nc_inq_varid(cdfid, "vh", &vhfileid)))
 		ERR(status);
-	//    if ((status = nc_inq_varid(cdfid, "VHCLIM", &vhfileid)))
-	//if ((status = nc_inq_varid(cdfid, "VH", &vhclimid)))
-	//   ERR(status);
 
 	bzero(start, MAX_NC_VARS * sizeof(long));
 
@@ -415,24 +391,14 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 	count[2] = NYTOT;
 	count[3] = NXTOT;
 
-	// printf("read_clim VH month=  %i\n",imon);
-
 	start[0] = imon;
 	if ((status = nc_get_vara_float(cdfid,vhfileid,start,count,tmp3d[0][0])))
 		ERR(status);
-	//    start[0] = iprv;
-	//    if ((status = nc_get_vara_float(cdfid,vhfileid,start,count,tmp3dp[0][0])))
-	//       ERR(status);
-	//    start[0] = inxt;
-	//    if ((status = nc_get_vara_float(cdfid,vhfileid,start,count,tmp3dn[0][0])))
-	//         ERR(status);
 
 	for (k=0;k<NZ;k++)
 		for (i=0;i<NXTOT;i++)
 			for (j=0;j<NYTOT;j++)
 				vhtm[k][i+2][j+2]= tmp3d[k][j][i];
-	//vhtm[k][i+2][j+2]= fact1 * tmp3d[k][j][i] +
-	//    fact0 * tmp3dp[k][j][i] + fact2 * tmp3dn[k][j][i];
 
 	close_file(&cdfid,&file);
 
@@ -458,10 +424,6 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 	if ((status = nc_inq_varid(cdfid, "wd", &wdfileid)))
 		ERR(status);
 
-	//    if ((status = nc_inq_varid(cdfid, "WDCLIM", &wdclimid)))
-	//if ((status = nc_inq_varid(cdfid, "WD", &wdclimid)))
-	//   ERR(status);
-
 	bzero(start, MAX_NC_VARS * sizeof(long));
 
 	count[0] = 1;
@@ -469,34 +431,17 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 	count[2] = NYTOT;
 	count[3] = NXTOT;
 
-	//    printf("read_clim WD month=  %i\n",imon);
-
 	count[1] = NZ+1;
 	start[0] = imon;
 	if ((status = nc_get_vara_float(cdfid,wdfileid,start,count,tmp3d[0][0])))
 		ERR(status);
-	//    start[0] = iprv;
-	//    if ((status = nc_get_vara_float(cdfid,wdfileid,start,count,tmp3dp[0][0])))
-	//       ERR(status);
-	//    start[0] = inxt;
-	//    if ((status = nc_get_vara_float(cdfid,wdclimid,start,count,tmp3dn[0][0])))
-	//       ERR(status);
 
 	for (k=0;k<NZ+1;k++)
 		for (i=0;i<NXTOT;i++)
-			for (j=0;j<NYTOT;j++)
-				wd[k][i+2][j+2]= timekeeper.dt * tmp3d[k][j][i];
-	//wd[k][i+2][j+2]= dt * (fact1 * tmp3d[k][j][i] +
-	//    fact0 * tmp3dp[k][j][i] + fact2 * tmp3dn[k][j][i]);
-
-	//BX-a
-	// take out PME which is read in onto wd[0][i][j]
-	//for (i=0;i<NXTOT;i++)
-	//	for (j=0;j<NYTOT;j++)
-	//	    wd[k][i+2][j+2]= 0;
-	//    printf("ATTENTION: EmP is set to 0. for this run.\n");
-	//BX-e
-
+			for (j=0;j<NYTOT;j++) {
+				wd[k][i+2][j+2]= tmp3d[k][j][i]*timekeeper.dt;
+		//		wd[k][i+2][j+2]= tmp3d[k][j][i];
+				}
 
 	free3d_f(tmp3d, NZ+1);
 
@@ -520,10 +465,7 @@ void read_h(int imon, char *fieldtype, char *readpath, double ***hread)
 	size_t count[MAX_NC_VARS];
 
 	float*** tmp3d;
-//	extern double ***hread;
-
 	tmp3d  = alloc3d_f(NZ,NYTOT,NXTOT);
-//	printf("Reading hread from month: %d\n",imon);
 	sprintf(infile,"H.%s.nc",fieldtype);
 
 	strcpy(inpath, readpath);
@@ -561,7 +503,7 @@ void read_h(int imon, char *fieldtype, char *readpath, double ***hread)
 	count[3] = NXTOT;
 
 	start[0] = imon;
-	// allocate NZ so that it can be used for WDCLIM as well
+
 	if ((status = nc_get_vara_float(cdfid,hfileid,start,count,tmp3d[0][0])))
 		ERR(status);
 	for (k=0;k<NZ;k++) {

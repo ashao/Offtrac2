@@ -154,6 +154,7 @@ int main( int argc, char *argv[] )
 
 	read_grid();
 	set_metrics();
+	printf("areagr[100][100] = %f\n",areagr[100][100]);
 	printf("Done setting metrics.\n");
 	printf("Reading bathymetry, D.\n");
 	read_D();
@@ -219,7 +220,10 @@ int main( int argc, char *argv[] )
 		printf("Iteration: %d Year: %d Interval: %d Ending timestamp: %f\n",
 			timekeeper.iteration_counter,timekeeper.current_year,
 			timekeeper.current_interval,timekeeper.current_time);
+  		printf("UHTM: %f VHTM: %f WD: %e\n",uhtm[2][100][100],vhtm[2][100][100],wd[2][102][102]);
+  		printf("Start: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
 		step_fields( ); 
+  		printf("End: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
 
 
 		/*-------------------------------------------------------------------*
@@ -363,6 +367,13 @@ void alloc_fields(void)
 #ifdef AGE
 	extern double ***mn_age;
 #endif
+#ifdef CONSERVATION_CHECK
+	extern double ***mn_test;
+	extern double test_inventory;
+#endif
+#ifdef TTD
+	extern double ***mn_ttd;
+#endif
 	for (m = 0; m < NOVARS; m++)
 	{
 
@@ -427,6 +438,14 @@ void alloc_fields(void)
 	var[map_variable_to_index("pcfc12")] = &mn_pcfc12[0][0][0];
 	var[map_variable_to_index("sf6")] = &mn_sf6[0][0][0];
 	var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
+#endif
+#ifdef CONSERVATION_CHECK
+        var[map_variable_to_index("test")] = &mn_test[0][0][0];
+        var[map_variable_to_index("test_inventory")] = &test_inventory;
+        var[map_variable_to_index("htest")] = &htest[0][0][0];
+#endif
+#ifdef TTD
+	var[map_variable_to_index("ttd")] = &mn_ttd[0][0][0];
 #endif
 	//var[18] = &mn_rml[0][0][0];
 

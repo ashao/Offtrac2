@@ -6,6 +6,7 @@ struct timekeeper_t {
 	int hindcast_index; 	// Index to read from hindcast
 
 	int total_intervals; 	// How many intervals to integrate over
+	int write_intervals; 	// How many intervals to write
 	int num_intervals_year; // Number of intervals in a year (12, monthly, 73 for 5-day)
 
 	int read_hind_flag;	// 1 if the current month should read from hindcast or 0 if from climatology

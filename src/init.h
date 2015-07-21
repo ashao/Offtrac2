@@ -32,9 +32,6 @@
                                /*  Otherwise, use '#undef REENTRANT'. */
 #define REENTRANT_Y            /* meridionally reentrant              */
 
-#define HTEST			/*  use htest[] rather than h[]       */
-				/*  for output of mn_h[]              */
-
 /* Specify properties of the passive tracers                          */
 
 #define NUM_ADV_ITER 30         /* number of iterations for advection */
@@ -44,6 +41,9 @@
 
 #undef  AGE                    /*  Define ideal age tracer in years.  */
 #define CFCS
+#define NOCONC
+#undef	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
+#undef TTD
 
 #define TRNCINIT	       /* read in initial tracers values from */
 			       /* netCDF files -- otherwise initialize*/
@@ -165,6 +165,7 @@
                                /*  C binary.                          */
 #endif
 
+#define NETCDF4
 #ifdef PARALLEL_X
 #define NXPROC 2               /*    NXPROC is the minimum number of  */
                                /*  processors in the x-direction.     */

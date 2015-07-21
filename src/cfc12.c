@@ -173,12 +173,24 @@ void surface_cfc12( ) {
         printf("\tTime: %f\n",timekeeper.current_time);
         printf("\tAtmospheric Concentration: %f\n",cfc12_atmconc[100][100]);
         printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
-        printf("\tSaturation: %f\n\n",cfc12_sat[100][100]);
-	
-	for (k=0;k<NML;k++)
-		for (i=0;i<NXMEM;i++)
+        printf("\tSolubility: %f\tSaturation: %f\n\n",cfc12_sol[0][100][100],cfc12_sat[100][100]);
+
+
+
+
+#ifdef NOCONC
+        for (k=0;k<NML;k++)
+                for (i=0;i<NXMEM;i++)
 			for (j=0;j<NYMEM;j++)
-					tr[mCFC12][k][i][j]=cfc12_sat[i][j];
+                        tr[mCFC12][k][i][j] = cfc12_atmconc[i][j];
+
+#else
+        for (k=0;k<NML;k++)
+                for (i=0;i<NXMEM;i++)
+                        for (j=0;j<NYMEM;j++)
+                                tr[mCFC12][k][i][j]=cfc12_sat[i][j];
+
+#endif
 
 }
 

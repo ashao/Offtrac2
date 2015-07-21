@@ -28,6 +28,17 @@
 #ifdef CFCS
 #include "cfcs_sf6.h"
 #endif
+
+#ifdef CONSERVATION_CHECK
+#include "conservation_check.h"
+extern int mTEST;
+extern  double ***mn_test;
+extern double test_inventory;
+#endif
+
+#ifdef TTD
+#include "ttd_bp.h"
+#endif
 /*---------------------------------------------------------------------
  *     define variables and subroutines
  *---------------------------------------------------------------------*/
@@ -89,7 +100,6 @@ void step_fields( ) {
 
 	update_transport_fields( );
 	printf("Calculate tracer transport. \n");
-	printf("TR[0][15][100][100]: %f\n",tr[0][15][100][100]);
 	tracer( 0  ); /* perform transport time step */
 	merge_ml_tr();
 
@@ -115,11 +125,27 @@ void step_fields( ) {
 
 #ifdef CFCS
 	surface_cfc11();
-	divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
 	surface_cfc12();
-	divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
 	surface_sf6();
+# ifdef NOCONC
+
+	copy_darray3d(pcfc11,tr[mCFC11],NZ,NXMEM,NYMEM);
+	copy_darray3d(pcfc12,tr[mCFC12],NZ,NXMEM,NYMEM);
+	copy_darray3d(psf6,tr[mSF6],NZ,NXMEM,NYMEM);
+#else
+	divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
+	divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
 	divide_darray3d(psf6,tr[mSF6],sf6_sol);
+# endif
+#endif
+
+#ifdef CONSERVATION_CHECK
+	step_test();
+	submit_for_averaging(mn_test,tr[mTEST]);
+#endif
+
+#ifdef TTD
+	step_ttd();
 #endif
 	merge_ml_tr();
 
@@ -185,6 +211,10 @@ void step_fields( ) {
 	submit_for_averaging( mn_psf6, psf6 );
 #endif
 
+#ifdef TTD
+	submit_for_averaging( mn_ttd, tr[mTTD] );
+#endif
+
 //	apply_mask(mn_h,oceanmask);
 //	apply_mask(mn_uhtm,oceanmask);
 //	apply_mask(mn_vhtm,oceanmask);
@@ -235,7 +265,7 @@ void merge_ml_tr( void ) {
 
 				tracsum = 0; // Reset the tracer amount
 				for(k=0;k<NML;k++) {
-					tracsum+=tr[l][k][i][j]/NML;
+					tracsum+=tr[l][k][i][j];
 				}
 
 				// Set the mixed layer to the average of all the mixed layer 'layers'

@@ -1,3 +1,5 @@
+#include "init.h"
+
 void initialize( void );
 
 struct parameters { 
@@ -19,6 +21,10 @@ struct parameters {
 	int wrint; // Averaging interval
 	int ntime_climatology; // Number of time stamps in climatology forcing
 	int ntime_hindcast; // Number of timesteps in hindcast fields
+
+#ifdef TTD
+	int num_ttd_intervals;
+#endif
 
 };
 

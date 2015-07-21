@@ -19,9 +19,6 @@
 #include "offtrac.h"
 #include "alloc.h"
 #include "timekeeper.h"
-#ifdef HTEST
-#include "ideal_age.h"
-#endif
 
 extern struct timekeeper_t timekeeper;
 
@@ -33,7 +30,7 @@ static double dmax1, dmax2, dmin1, dmin2;
 
 double dt;
 
-extern double ***h, ***hstart, ***hend;
+extern double ***h, ***hstart, ***hend, ***htest;
 
 //extern double h[NZ][NXMEM][NYMEM];	/* Layer thickness, begin of advec step in m.  */
 
@@ -168,6 +165,7 @@ double hlst[NYMEM];
 
   dt = timekeeper.dt;
 
+//  printf("Beginning tracer transport dt=%f\n",dt);
   hvol = alloc3d(NZ,NXMEM,NYMEM);
     if(hvol == NULL) {
 	fprintf(stderr,"not enough memory for hvol!\n");
@@ -310,7 +308,6 @@ double hlst[NYMEM];
 /* ============================================================ */
 /*			first advect zonally			*/
 /* ============================================================ */
-#ifndef ADV1D
 	  for (j=Y1;j<=ny;j++) {
 
 /*   Calculate the i-direction profiles (slopes) of each tracer that  */
@@ -409,12 +406,10 @@ double hlst[NYMEM];
 	    }
           //  #pragma omp barrier
 	  } /* j loop */
-#endif
 
 /* ============================================================ */
 /*			now advect meridionally			*/
 /* ============================================================ */
-#ifndef ADV1D
 	  for (i=X1;i<=nx;i++) {
 /*   Calculate the j-direction profiles (slopes) of each tracer that  */
 /* is being advected.                                                 */
@@ -513,7 +508,6 @@ double hlst[NYMEM];
 	    }
        //     #pragma omp barrier
 	  } /* i loop */
-#endif
 
 	}			 /* end of big loop over k		*/
 
@@ -735,6 +729,7 @@ double hlst[NYMEM];
 
 		  else if ( wd[k][i][j] < 0.0 && ( wdh[k][i][j] < wd[k][i][j] ))
 		      printf("case 2 wdh[k]\n");
+
 		  wd[k][i][j] -= wdh[k][i][j];	
 	      }
  
@@ -867,7 +862,7 @@ double hlst[NYMEM];
 		h[k][i][j] = fract1*hstart[k][i][j] + fract2*hend[k][i][j];
 //BX 		h[k][i][j] = hend[k][i][j];
 # endif
-#ifdef HTEST
+#ifdef CONSERVATION_CHECK
 	  	htest[k][i][j] = hnew[k][i][j]-hend[k][i][j]; 
 //		printf("htest(%d,%d,%d)=%g,hend=%g\n",
 //		       k,i,j,htes
