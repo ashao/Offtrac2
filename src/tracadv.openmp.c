@@ -19,6 +19,7 @@
 #include "offtrac.h"
 #include "alloc.h"
 #include "timekeeper.h"
+#include "initialize.h"
 
 extern struct timekeeper_t timekeeper;
 
@@ -80,7 +81,7 @@ extern int ny;                       /* The number of y-points in the */
 
 // for debugging
 double hvolint;
-double trintegral[run_parameters.numtracers];
+//double trintegral[run_parameters.numtracers];
 
 #ifdef DIFFUSE_TRACER
 static void diffuse_tracer();
@@ -149,7 +150,7 @@ void tracer(int itts)
 	//	double BLMIN = 0.20; // ashao: in global configuration of HIM it's 0.1
 	double BLMIN = 0.10;
 
-#ifdef Erun_parameters.numtracersAIN
+#ifdef ENTRAIN
 	double nts = dt/DT; /* number of timesteps (#day*86400/3600seconds) */
 #endif
 	int i, j, k, m, ii, pstage;
@@ -263,7 +264,7 @@ void tracer(int itts)
 		/*   if we read in the ea, eb and eaml variables                */
 		/*   Otherwise we read in wd directly                           */
 
-#ifdef Erun_parameters.numtracersAIN
+#ifdef ENTRAIN
 
 #pragma omp for  private(i,j)
 		for (i=X0;i<=nx+1;i++)

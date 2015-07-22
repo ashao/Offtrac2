@@ -14,7 +14,7 @@
 #include <errno.h>
 #include "init.h"
 #include "io.h"
-
+#include "initialize.h"
 
 int alloc_trac()
 {

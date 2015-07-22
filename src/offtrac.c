@@ -30,7 +30,9 @@
 #include "tracer_utilities.h"
 #include "timekeeper.h"
 #include "cfcs_sf6.h"
-
+#include "ttd_bp.h"
+#include "conservation_check.h"
+#include "ideal_age.h"
 /*-------------------------------------------------------------------*
  *                                                                   *
  *     define variables and subroutines
@@ -126,7 +128,7 @@ int main( int argc, char *argv[] )
 
 	strcpy(run_parameters.namelist_file,argv[1]);
 	printf("Namelist file: %s\n",run_parameters.namelist_file);
-	set_run_parameters(  );
+	set_run_parameters( );
 
 	//BX  allocate tracer fields
 	err = alloc_arrays();
@@ -357,12 +359,7 @@ void alloc_fields(void)
 	extern double junk[(NZ + 1) * (NXMEM) * (NYMEM)];
 	extern long varsize[NOVARS];
 	extern int flags[NOVARS];
-	extern double ***mn_age;
 
-	if (run_parameters.conservation_check) {
-		extern double ***mn_test;
-		extern double test_inventory;
-	}
 
 	for (m = 0; m < NOVARS; m++)
 	{

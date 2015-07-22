@@ -3,6 +3,7 @@
 #include "init.h"
 #include "initialize.h"
 #include "timekeeper.h"
+#include "math.h"
 extern struct timekeeper_t timekeeper;
 extern struct parameters run_parameters;
 const int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
@@ -51,8 +52,7 @@ void initialize_timekeeper( void ) {
 			(double) (run_parameters.sinterval+1)/timekeeper.num_intervals_year;
 
 	timekeeper.current_interval = mod(run_parameters.sinterval-1,timekeeper.num_intervals_year);
-	timekeeper.current_year = run_parameters.syear;
-	
+	timekeeper.current_year = run_parameters.syear;	
 
 		
 }

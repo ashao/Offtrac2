@@ -180,10 +180,15 @@ void set_run_parameters( void )
 		printf("Error: Cannot open %s\n",run_parameters.namelist_file);
 		exit(1);
 	}
+	else {
+		printf("Opened namelist file: %s\n",run_parameters.namelist_file);
+	
+	}
 
 	while( (read = getline(&line_read,&len,ptr_file)) != -1 ) {
 
 		// Set intervals of time integration
+		printf("Read line: %s\n",line_read);
 		sscanf(line_read,"%s %s",attribute,value);
 		printf("Setting %s to %s\n",attribute,value);
 		if (!strcmp(attribute,"syear"))

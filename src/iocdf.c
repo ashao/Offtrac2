@@ -988,7 +988,7 @@ void read_field(int cdfid, FILE *fileptr, char varname[],
   } else
 #endif
   {
-/*  Here a field is read from a binary file.                          */
+/*  Here a field is read from a binary file.                          
     int k, flt;
     size_t err = 1;
     
@@ -1014,5 +1014,6 @@ void read_field(int cdfid, FILE *fileptr, char varname[],
       strcat(message,varname);
       handle_error(message,-1);
     }
+*/
   }
 }
