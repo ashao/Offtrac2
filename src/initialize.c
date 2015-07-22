@@ -17,9 +17,7 @@
 #include "output_variables.h"
 #include "io.h"
 
-#ifdef AGE
 #include "ideal_age.h"
-#endif
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
@@ -122,12 +120,11 @@ void initialize( void )
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
-#ifdef AGE
 
-	allocate_age( );
-	initialize_age( );
-
-#endif
+	if (run_parameters.do_age) {
+		allocate_age( );
+		initialize_age( );
+	}
 
 #ifdef CFCS
 	allocate_cfc11( );
@@ -249,12 +246,13 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"wd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
-#ifdef AGE
+
+		if (!strcmp(attribute,"do_age"))
+			run_parameters.do_age = atoi(value);
 		if (!strcmp(attribute,"age"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"age_restart"))
 			rflags[map_variable_to_index("age")] = atoi(value);
-#endif
 
 #ifdef CFCS
 		if (!strcmp(attribute,"cfc11"))

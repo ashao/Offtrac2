@@ -79,9 +79,7 @@ extern int ny;                       /* The number of y-points in the */
 #endif
 
 // for debugging
-#ifdef AGE
-  extern int mAGE;
-#endif
+
 double hvolint;
 double trintegral[NTR];
 

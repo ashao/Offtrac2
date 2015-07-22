@@ -30,14 +30,9 @@
 #include "tracer_utilities.h"
 #include "timekeeper.h"
 
+#include "ideal_age.h"
 #ifdef CFCS
 #include "cfcs_sf6.h"
-#endif
-
-#ifdef AGE
-
-extern int mAGE;
-
 #endif
 
 /*-------------------------------------------------------------------*
@@ -98,11 +93,6 @@ int rflags[NOVARS];
 
 struct parameters run_parameters;
 struct timekeeper_t timekeeper;
-#ifdef AGE
-
-extern double ***mn_age;
-
-#endif
 /*-------------------------------------------------------------------*
  *
  *     begin main executable
@@ -278,9 +268,8 @@ int main( int argc, char *argv[] )
 			set_darray3d_zero(mn_vhtm, NZ, NXMEM, NYMEM);
 			set_darray3d_zero(mn_wd, NZ+1, NXMEM, NYMEM);
 			set_darray3d_zero(mn_h, NZ, NXMEM, NYMEM);
-#ifdef AGE
-			set_darray3d_zero(mn_age, NZ, NXMEM, NYMEM);
-#endif
+
+			if (run_parameters.do_age)	set_darray3d_zero(mn_age, NZ, NXMEM, NYMEM);
 
 //			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
@@ -315,9 +304,7 @@ int main( int argc, char *argv[] )
 	var[map_variable_to_index("hlay")] = &hend[0][0][0];
 	rflags[map_variable_to_index("hlay")] = 1;
 
-#ifdef AGE
-	copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
-#endif
+	if (run_parameters.do_age) copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
 
 	/* Copy the variable descriptions to a list of the actual restart variables. */
 	nvar = 0;
@@ -364,9 +351,7 @@ void alloc_fields(void)
 	extern double junk[(NZ + 1) * (NXMEM) * (NYMEM)];
 	extern long varsize[NOVARS];
 	extern int flags[NOVARS];
-#ifdef AGE
-	extern double ***mn_age;
-#endif
+
 #ifdef CONSERVATION_CHECK
 	extern double ***mn_test;
 	extern double test_inventory;
@@ -428,9 +413,9 @@ void alloc_fields(void)
 	var[map_variable_to_index("vhtm")] = &mn_vhtm[0][0][0];
 	var[map_variable_to_index("wd")] = &mn_wd[0][0][0];
 	var[map_variable_to_index("hlay")] = &mn_h[0][0][0];
-#ifdef AGE
-	var[map_variable_to_index("age")] = &mn_age[0][0][0];
-#endif
+
+	if (run_parameters.do_age)	var[map_variable_to_index("age")] = &mn_age[0][0][0];
+
 #ifdef CFCS
 	var[map_variable_to_index("cfc11")] = &mn_cfc11[0][0][0];
 	var[map_variable_to_index("pcfc11")] = &mn_pcfc11[0][0][0];

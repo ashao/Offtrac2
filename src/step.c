@@ -21,9 +21,7 @@
 #include "timekeeper.h"
 #include "initialize.h"
 
-#ifdef AGE
 #include "ideal_age.h"
-#endif
 
 #ifdef CFCS
 #include "cfcs_sf6.h"
@@ -46,9 +44,6 @@ extern double test_inventory;
 extern double ****tr;
 extern double ***hstart, ***h, ***hend;
 
-#ifdef AGE
-extern int mAGE;
-#endif
 extern double ***mn_h, ***h;
 extern double ***mn_uhtm, ***uhtm;
 extern double ***mn_vhtm, ***vhtm;
@@ -119,9 +114,7 @@ void step_fields( ) {
 	 *-----------------------------------------*/
 
 
-#ifdef AGE
-	step_age(timekeeper.dt);
-#endif
+	if (run_parameters.do_age)	step_age(timekeeper.dt);
 
 #ifdef CFCS
 	surface_cfc11();
@@ -198,9 +191,7 @@ void step_fields( ) {
 	submit_for_averaging( mn_vhtm, vhtm );
 	submit_for_averaging( mn_wd, wd );
 
-#ifdef AGE
-	submit_for_averaging( mn_age, tr[mAGE]) ;
-#endif
+	if (run_parameters.do_age)	submit_for_averaging( mn_age, tr[mAGE]) ;
 
 #ifdef CFCS
 	submit_for_averaging( mn_cfc11, tr[mCFC11] );	
