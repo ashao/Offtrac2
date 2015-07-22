@@ -131,7 +131,7 @@ int main( int argc, char *argv[] )
 
 	//BX  allocate tracer fields
 	err = alloc_arrays();
-	err = alloc_trac();
+	err = alloc_trac(run_parameters.tracer_counter);
 
 
 	/*-----------------------------------

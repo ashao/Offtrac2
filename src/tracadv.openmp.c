@@ -19,6 +19,7 @@
 #include "offtrac.h"
 #include "alloc.h"
 #include "timekeeper.h"
+#include "initialize.h"
 
 extern struct timekeeper_t timekeeper;
 
@@ -81,7 +82,8 @@ extern int ny;                       /* The number of y-points in the */
 // for debugging
 
 double hvolint;
-double trintegral[NTR];
+extern struct parameters run_parameters;
+
 
 #ifdef DIFFUSE_TRACER
 static void diffuse_tracer();

@@ -1,1 +1,1 @@
-int alloc_trac();
+int alloc_trac(ntr);

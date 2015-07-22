@@ -47,8 +47,7 @@ void initialize_sf6 ( ) {
 	char varname[200];
 	extern struct parameters run_parameters;	
 	extern struct vardesc vars[NOVARS];	
-	
-	mSF6 = run_parameters.tracer_counter++;
+
 	printf("mSF6: %d\n",mSF6);
 
         printf("Setting SF6 variable description...");

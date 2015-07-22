@@ -127,6 +127,9 @@ void initialize( void )
 	}
 
 	if (run_parameters.do_cfcs) {
+		mCFC11 = run_parameters.tracer_counter++;
+		mCFC12 = run_parameters.tracer_counter++;
+		mSF6 = run_parameters.tracer_counter++;
 		allocate_cfc11( );
 		initialize_cfc11();
 		allocate_cfc12( );
@@ -142,11 +145,12 @@ void initialize( void )
 #endif
 
 	if (run_parameters.do_ttd) {
+		mTTD = run_parameters.tracer_counter++;
 		allocate_ttd();
 		initialize_ttd();
 	}
 	/* zonal, meridional re-entrance    */
-	for (m=0;m<NTR;m++) {
+	for (m=0;m<run_parameters.tracer_counter;m++) {
 		for (k=0;k<NZ;k++) {
 			for (j=0;j<=NYMEM-1;j++) {
 				tr[m][k][0][j] = tr[m][k][nx-1][j];
@@ -246,15 +250,21 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"wd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 
-		if (!strcmp(attribute,"do_age"))
+		if (!strcmp(attribute,"do_age")){
+			mAGE = run_parameters.tracer_counter++;
 			run_parameters.do_age = atoi(value);
+		}
 		if (!strcmp(attribute,"age"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"age_restart"))
 			rflags[map_variable_to_index("age")] = atoi(value);
 
-		if (!strcmp(attribute,"do_cfcs"))
+		if (!strcmp(attribute,"do_cfcs")) {
+			mCFC11 = run_parameters.tracer_counter++;
+			mCFC12 = run_parameters.tracer_counter++;
+			mSF6 = run_parameters.tracer_counter++;
 			run_parameters.do_cfcs = atoi(value);
+		}
 		if (!strcmp(attribute,"cfc11"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"cfc11_restart"))
@@ -283,8 +293,10 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 #endif
 
-		if (!strcmp(attribute,"do_ttd"))
+		if (!strcmp(attribute,"do_ttd")) {
+			mTTD = run_parameters.tracer_counter++;
 			run_parameters.do_ttd = atoi(value);
+		}
 		if (!strcmp(attribute,"ttd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ttd_restart"))

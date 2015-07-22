@@ -45,8 +45,7 @@ void initialize_cfc12 ( ) {
 	int i, j, k;
 	extern struct parameters run_parameters;
 	char varname[200];	
-	extern struct vardesc vars[NOVARS];	
-	mCFC12 = run_parameters.tracer_counter++;
+	extern struct vardesc vars[NOVARS];
 	printf("mCFC12: %d\n",mCFC12);
 
         printf("Setting CFC-12 variable description...");

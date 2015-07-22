@@ -154,7 +154,7 @@ void step_fields( ) {
 	 *-----------------------------------------*/
 
 	/* zonal, meridional re-entrance    */
-	for (m = 0; m < NTR; m++) {
+	for (m = 0; m < run_parameters.tracer_counter; m++) {
 		for (k = 0; k < NZ; k++) {
 			for (j = 0; j <= NYMEM - 1; j++) {
 				tr[m][k][0][j] = tr[m][k][nx - 1][j];
@@ -173,7 +173,7 @@ void step_fields( ) {
 	}
 
 
-	for (m=0;m<NTR;m++)
+	for (m=0;m<run_parameters.tracer_counter;m++)
 		for(i=0;i<NXMEM;i++)
 			for(j=0;j<NYMEM;j++)
 				if (!oceanmask[i][j])
@@ -243,7 +243,7 @@ void merge_ml_tr( void ) {
 	int i, j, k, l;
 	double tracsum;
 
-	for(l=0;l<NTR;l++)
+	for(l=0;l<run_parameters.tracer_counter;l++)
 		for(i=0;i<NXMEM;i++)
 			for(j=0;j<NYMEM;j++) {
 

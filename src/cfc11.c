@@ -63,7 +63,7 @@ void read_tracer_boundary ( ) {
 	char varname[20];
 	const int numatm = NUMATMVALS;
 	extern struct parameters run_parameters;
- 
+
 	int tempidx;
 	sprintf(infile,"cfc_sf6_bc.nc");
 	strcpy(inpath, run_parameters.forcing_path);
@@ -78,7 +78,7 @@ void read_tracer_boundary ( ) {
 	printf("mCFC11: %d, mCFC12: %d, mSF6: %d\n",mCFC11,mCFC12,mSF6);
 
 	for (i=0;i<NUMTRANSIENT;i++) // Put the year into all the	
-	    	status = nc_get_vara_double(cdfid, varid, start, end,atmconc[i].time);
+		status = nc_get_vara_double(cdfid, varid, start, end,atmconc[i].time);
 
 	strcpy(varname,"CFC11NH");
 	status = nc_inq_varid(cdfid, varname, &varid);
@@ -101,7 +101,7 @@ void read_tracer_boundary ( ) {
 	strcpy(varname,"SF6SH");
 	status = nc_inq_varid(cdfid, varname, &varid);
 	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[SF6IDX].sval);
-	
+
 	printf("status=%d\n",status);
 	close_file(&cdfid,&file);
 }
@@ -114,28 +114,27 @@ void initialize_cfc11 ( ) {
 	extern struct vardesc vars[NOVARS];
 
 
-	mCFC11 = run_parameters.tracer_counter++;
-        printf("Setting CFC-11 variable description...");
-        strcpy(varname,"cfc11");
-        strcpy(vars[map_variable_to_index(varname)].name,"mn_cfc11");
-        strcpy(vars[map_variable_to_index(varname)].longname,"CFC-11 volumetric concentration");
-        vars[map_variable_to_index(varname)].hor_grid='h';
-        vars[map_variable_to_index(varname)].z_grid='L';
-        vars[map_variable_to_index(varname)].t_grid='s';
-        strcpy(vars[map_variable_to_index(varname)].units,"pmol/L");
-        vars[map_variable_to_index(varname)].mem_size='d';
-        vars[map_variable_to_index(varname)].mval=MISVAL;
+	printf("Setting CFC-11 variable description...");
+	strcpy(varname,"cfc11");
+	strcpy(vars[map_variable_to_index(varname)].name,"mn_cfc11");
+	strcpy(vars[map_variable_to_index(varname)].longname,"CFC-11 volumetric concentration");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='L';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"pmol/L");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
 
-        strcpy(varname,"pcfc11");
-        strcpy(vars[map_variable_to_index(varname)].name,"mn_pcfc11");
-        strcpy(vars[map_variable_to_index(varname)].longname,"Partial pressure of CFC-11");
-        vars[map_variable_to_index(varname)].hor_grid='h';
-        vars[map_variable_to_index(varname)].z_grid='L';
-        vars[map_variable_to_index(varname)].t_grid='s';
-        strcpy(vars[map_variable_to_index(varname)].units,"parts-per-trillion");
-        vars[map_variable_to_index(varname)].mem_size='d';
-        vars[map_variable_to_index(varname)].mval=MISVAL;
-        printf("DONE\n");
+	strcpy(varname,"pcfc11");
+	strcpy(vars[map_variable_to_index(varname)].name,"mn_pcfc11");
+	strcpy(vars[map_variable_to_index(varname)].longname,"Partial pressure of CFC-11");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='L';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"parts-per-trillion");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
+	printf("DONE\n");
 
 
 	if (run_parameters.restart_flag) {
@@ -160,24 +159,24 @@ void cfc11_saturation(  ) {
 	double TempK;
 	extern double ***Temptm, ***Salttm;
 	for (k=0;k<NZ;k++)
-	for (i=0;i<NXMEM;i++)
-		for (j=0;j<NYMEM;j++)	{
+		for (i=0;i<NXMEM;i++)
+			for (j=0;j<NYMEM;j++)	{
 
-			if(oceanmask[i][j])
-			{
-				TempK = Temptm[k][i][j]+273.15;
-				work = solcoeffs[0] + solcoeffs[1]*(100/TempK) +
-					solcoeffs[2]*log( TempK/100 ) + solcoeffs[3]*pow(TempK/100,2) +
-					Salttm[k][i][j]*(solcoeffs[4]+solcoeffs[5]*(TempK/100)+solcoeffs[6]*pow(TempK/100,2));
-				cfc11_sol[k][i][j] = exp(work);
-				if (k<NML) cfc11_sat[i][j] = cfc11_sol[k][i][j]*cfc11_atmconc[i][j];
-			}
-			else {
-				cfc11_sol[k][i][j] = 0.0;
-				cfc11_sat[i][j] = 0.0;
-			}
+				if(oceanmask[i][j])
+				{
+					TempK = Temptm[k][i][j]+273.15;
+					work = solcoeffs[0] + solcoeffs[1]*(100/TempK) +
+							solcoeffs[2]*log( TempK/100 ) + solcoeffs[3]*pow(TempK/100,2) +
+							Salttm[k][i][j]*(solcoeffs[4]+solcoeffs[5]*(TempK/100)+solcoeffs[6]*pow(TempK/100,2));
+					cfc11_sol[k][i][j] = exp(work);
+					if (k<NML) cfc11_sat[i][j] = cfc11_sol[k][i][j]*cfc11_atmconc[i][j];
+				}
+				else {
+					cfc11_sol[k][i][j] = 0.0;
+					cfc11_sat[i][j] = 0.0;
+				}
 
-		}
+			}
 
 }
 
@@ -192,8 +191,8 @@ void cfc11_find_atmconc(  ) {
 	double currtime;
 
 	currtime = timekeeper.current_time;
-	
-// Interpolate in time to find the atmospheric concentration
+
+	// Interpolate in time to find the atmospheric concentration
 	for (i=0;i<NUMATMVALS;i++) {
 		time[i] = atmconc[mCFC11].time[i];
 		atmval[i] = atmconc[mCFC11].nval[i];
@@ -231,7 +230,7 @@ void surface_cfc11( ) {
 	//
 	cfc11_find_atmconc( );
 	cfc11_saturation(  );
-	
+
 	printf("CFC-11 Sample Point\n");
 	printf("\tTime: %f\n",timekeeper.current_time);
 	printf("\tAtmospheric Concentration: %f\n",cfc11_atmconc[100][100]);
