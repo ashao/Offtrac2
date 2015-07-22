@@ -283,6 +283,8 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 #endif
 
+		if (!strcmp(attribute,"do_ttd"))
+			run_parameters.do_ttd = atoi(value);
 		if (!strcmp(attribute,"ttd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ttd_restart"))
