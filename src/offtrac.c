@@ -29,16 +29,7 @@
 #include "read.h"
 #include "tracer_utilities.h"
 #include "timekeeper.h"
-
-#ifdef CFCS
 #include "cfcs_sf6.h"
-#endif
-
-#ifdef AGE
-
-extern int mAGE;
-
-#endif
 
 /*-------------------------------------------------------------------*
  *                                                                   *
@@ -98,11 +89,7 @@ int rflags[NOVARS];
 
 struct parameters run_parameters;
 struct timekeeper_t timekeeper;
-#ifdef AGE
 
-extern double ***mn_age;
-
-#endif
 /*-------------------------------------------------------------------*
  *
  *     begin main executable
@@ -123,7 +110,7 @@ int main( int argc, char *argv[] )
 	struct vardesc var_out[NOVARS];
 	struct varcdfinfo varinfo[NOVARS];
 	int nvar = 0, cdfid, timeid[2];
-	
+
 
 	double *timeptr;
 
@@ -189,14 +176,14 @@ int main( int argc, char *argv[] )
 	alloc_fields();
 
 	/* initialize tracer pointers					*/
-/*
+	/*
 	for (m = 0; m < NOVARS; m++)
 	{
 		if (flags[m])
 			for (k = 0; k < varsize[m]; k++)
 				var[m][k] = 0.0;
 	}
-*/
+	 */
 
 
 	/*-------------------------------------------------------------------*
@@ -216,14 +203,14 @@ int main( int argc, char *argv[] )
 		 *
 		 *----------------------------------*/
 		update_timekeeper( );
-//		printf("Iteration counter: %d\n",timekeeper.iteration_counter);
+		//		printf("Iteration counter: %d\n",timekeeper.iteration_counter);
 		printf("Iteration: %d Year: %d Interval: %d Ending timestamp: %f\n",
-			timekeeper.iteration_counter,timekeeper.current_year,
-			timekeeper.current_interval,timekeeper.current_time);
-  		printf("UHTM: %f VHTM: %f WD: %e\n",uhtm[2][100][100],vhtm[2][100][100],wd[2][102][102]);
-  		printf("Start: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
+				timekeeper.iteration_counter,timekeeper.current_year,
+				timekeeper.current_interval,timekeeper.current_time);
+		printf("UHTM: %f VHTM: %f WD: %e\n",uhtm[2][100][100],vhtm[2][100][100],wd[2][102][102]);
+		printf("Start: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
 		step_fields( ); 
-  		printf("End: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
+		printf("End: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
 
 
 		/*-------------------------------------------------------------------*
@@ -263,7 +250,7 @@ int main( int argc, char *argv[] )
 			for (m = 0; m < NOVARS; m++)
 				if (flags[m]==1)
 				{
-//					printf("m = %d\n",m);
+					//					printf("m = %d\n",m);
 					err = write_field(cdfid, fn, vars[m],
 							varinfo[varmap[m]], timekeeper.num_records, var[m]);
 					if (err == -1)
@@ -278,11 +265,21 @@ int main( int argc, char *argv[] )
 			set_darray3d_zero(mn_vhtm, NZ, NXMEM, NYMEM);
 			set_darray3d_zero(mn_wd, NZ+1, NXMEM, NYMEM);
 			set_darray3d_zero(mn_h, NZ, NXMEM, NYMEM);
-#ifdef AGE
-			set_darray3d_zero(mn_age, NZ, NXMEM, NYMEM);
-#endif
 
-//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
+			if (run_parameters.do_age) set_darray3d_zero(mn_age, NZ, NXMEM, NYMEM);
+			if (run_parameters.do_cfcs) {
+				set_darray3d_zero(mn_cfc11, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_cfc12, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_sf6, NZ, NXMEM, NYMEM);
+
+				set_darray3d_zero(mn_pcfc11, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_pcfc12, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_psf6, NZ, NXMEM, NYMEM);
+			}
+			if (run_parameters.do_ttd) set_darray3d_zero(mn_ttd, NZ, NXMEM, NYMEM);
+
+
+			//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
 
 		} /*  end if nmn==WRITEINT */
@@ -314,10 +311,6 @@ int main( int argc, char *argv[] )
 	// Force layer thicknesses to be output for the restart
 	var[map_variable_to_index("hlay")] = &hend[0][0][0];
 	rflags[map_variable_to_index("hlay")] = 1;
-
-#ifdef AGE
-	copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
-#endif
 
 	/* Copy the variable descriptions to a list of the actual restart variables. */
 	nvar = 0;
@@ -364,22 +357,19 @@ void alloc_fields(void)
 	extern double junk[(NZ + 1) * (NXMEM) * (NYMEM)];
 	extern long varsize[NOVARS];
 	extern int flags[NOVARS];
-#ifdef AGE
 	extern double ***mn_age;
-#endif
-#ifdef CONSERVATION_CHECK
-	extern double ***mn_test;
-	extern double test_inventory;
-#endif
-#ifdef TTD
-	extern double ***mn_ttd;
-#endif
+
+	if (run_parameters.conservation_check) {
+		extern double ***mn_test;
+		extern double test_inventory;
+	}
+
 	for (m = 0; m < NOVARS; m++)
 	{
 
 		//HF if ( m>3 )    {
 		//HF: added mn_h
-//		if (m >= 3)
+		//		if (m >= 3)
 		{
 			switch (vars[m].z_grid)
 			{
@@ -413,40 +403,40 @@ void alloc_fields(void)
 			//      printf("Allocated memory for var[%d],%s.\n\n",m,vars[m].name);
 
 		}
-//		else
-//		{
-			varsize[m] = 0;
-//		}
+		//		else
+		//		{
+		varsize[m] = 0;
+		//		}
 	}
 
-/*	var[map_variable_to_index("D")] = &D[0][0];
+	/*	var[map_variable_to_index("D")] = &D[0][0];
 	var[map_variable_to_index("geolat")] = &geolat[0][0];
 	var[map_variable_to_index("geolon")] = &geolon[0][0];
 	var[map_variable_to_index("wetmask")] = &geolon[0][0];
-*/
+	 */
 	var[map_variable_to_index("uhtm")] = &mn_uhtm[0][0][0];
 	var[map_variable_to_index("vhtm")] = &mn_vhtm[0][0][0];
 	var[map_variable_to_index("wd")] = &mn_wd[0][0][0];
 	var[map_variable_to_index("hlay")] = &mn_h[0][0][0];
-#ifdef AGE
-	var[map_variable_to_index("age")] = &mn_age[0][0][0];
-#endif
-#ifdef CFCS
-	var[map_variable_to_index("cfc11")] = &mn_cfc11[0][0][0];
-	var[map_variable_to_index("pcfc11")] = &mn_pcfc11[0][0][0];
-	var[map_variable_to_index("cfc12")] = &mn_cfc12[0][0][0];
-	var[map_variable_to_index("pcfc12")] = &mn_pcfc12[0][0][0];
-	var[map_variable_to_index("sf6")] = &mn_sf6[0][0][0];
-	var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
-#endif
-#ifdef CONSERVATION_CHECK
-        var[map_variable_to_index("test")] = &mn_test[0][0][0];
-        var[map_variable_to_index("test_inventory")] = &test_inventory;
-        var[map_variable_to_index("htest")] = &htest[0][0][0];
-#endif
-#ifdef TTD
-	var[map_variable_to_index("ttd")] = &mn_ttd[0][0][0];
-#endif
+
+	if (run_parameters.do_age)	var[map_variable_to_index("age")] = &mn_age[0][0][0];
+
+	if (run_parameters.do_cfcs)
+	{
+		var[map_variable_to_index("cfc11")] = &mn_cfc11[0][0][0];
+		var[map_variable_to_index("pcfc11")] = &mn_pcfc11[0][0][0];
+		var[map_variable_to_index("cfc12")] = &mn_cfc12[0][0][0];
+		var[map_variable_to_index("pcfc12")] = &mn_pcfc12[0][0][0];
+		var[map_variable_to_index("sf6")] = &mn_sf6[0][0][0];
+		var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
+	}
+	if (run_parameters.conservation_check) {
+		var[map_variable_to_index("test")] = &mn_test[0][0][0];
+		var[map_variable_to_index("test_inventory")] = &test_inventory;
+		var[map_variable_to_index("htest")] = &htest[0][0][0];
+	}
+	if (run_parameters.do_ttd)	var[map_variable_to_index("ttd")] = &mn_ttd[0][0][0];
+
 	//var[18] = &mn_rml[0][0][0];
 
 	// end ashao

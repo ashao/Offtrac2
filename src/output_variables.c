@@ -29,29 +29,22 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"wd"))			var_idx = 7;
 
 	// User-defined variables
-#ifdef AGE	
-	if (!strcmp(var_name,"age"))		var_idx = 8;
-#endif 
+	if (run_parameters.conservation_check) {
+		if (!strcmp(var_name,"test"))		var_idx = 8;
+		if (!strcmp(var_name,"test_inventory"))	var_idx = 9;
+		if (!strcmp(var_name,"htest"))		var_idx = 10;
+	}
 
-#ifdef CFCS
-	if (!strcmp(var_name,"cfc11"))	var_idx = 8;
-	if (!strcmp(var_name,"pcfc11"))	var_idx = 9;
-	if (!strcmp(var_name,"cfc12"))	var_idx = 10;
-	if (!strcmp(var_name,"pcfc12"))	var_idx = 11;
-	if (!strcmp(var_name,"sf6"))	var_idx = 12;
-	if (!strcmp(var_name,"psf6"))	var_idx = 13;
-#endif 
+	if (!strcmp(var_name,"age"))	var_idx = 11;
 
-#ifdef CONSERVATION_CHECK
-	if (!strcmp(var_name,"test"))		var_idx = 8;
-	if (!strcmp(var_name,"test_inventory"))	var_idx = 9;
-	if (!strcmp(var_name,"htest"))		var_idx = 10;
-#endif
+	if (!strcmp(var_name,"cfc11"))	var_idx = 12;
+	if (!strcmp(var_name,"pcfc11"))	var_idx = 13;
+	if (!strcmp(var_name,"cfc12"))	var_idx = 14;
+	if (!strcmp(var_name,"pcfc12"))	var_idx = 15;
+	if (!strcmp(var_name,"sf6"))	var_idx = 16;
+	if (!strcmp(var_name,"psf6"))	var_idx = 17;
+	if (!strcmp(var_name,"ttd"))	var_idx = 18;
 
-#ifdef TTD
-	if (!strcmp(var_name,"ttd"))		var_idx = 8;
-
-#endif
 
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);

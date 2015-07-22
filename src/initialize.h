@@ -9,6 +9,8 @@ struct parameters {
 	int syear, sinterval; // Model start time
 	int eyear, einterval; // Model end time
 	int use_hindcast; // 0 for normalyear, 1 for hindcast
+	int numtracers; // Number of tracers to carry
+	int tracer_counter = 0; // Use the tracer_counter to assign individual tracer indices
 	int restart_flag; // '1' for restart, '0' for cold start
 	char forcing_path[1000]; // Directory to forcing
 	char normalyear_path[1000]; // Directory to forcing
@@ -22,9 +24,14 @@ struct parameters {
 	int ntime_climatology; // Number of time stamps in climatology forcing
 	int ntime_hindcast; // Number of timesteps in hindcast fields
 
-#ifdef TTD
+	int do_cfcs;
+	int do_age;
+	int do_ttd;
+	int conservation_check;
+
 	int num_ttd_intervals;
-#endif
+
+
 
 };
 

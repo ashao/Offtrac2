@@ -17,13 +17,8 @@
 #include "output_variables.h"
 #include "io.h"
 
-#ifdef AGE
 #include "ideal_age.h"
-#endif
-
-#ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
-#endif
 
 extern struct vardesc vars[NOVARS];
 extern struct parameters run_parameters;
@@ -41,7 +36,7 @@ void initialize( void )
 	extern double ****tr;
 
 	// Setup the variable descriptions
-	
+
 	strcpy(varname,"depth");
 	strcpy(vars[map_variable_to_index(varname)].name,"Depth");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Depth to bottom");
@@ -51,7 +46,7 @@ void initialize( void )
 	strcpy(vars[map_variable_to_index(varname)].units,"m");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
-	
+
 	strcpy(varname,"geolat");
 	strcpy(vars[map_variable_to_index(varname)].name,"geolat");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Latitude on tripolar grid");
@@ -61,7 +56,7 @@ void initialize( void )
 	strcpy(vars[map_variable_to_index(varname)].units,"Degrees N");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
-	
+
 	strcpy(varname,"geolon");
 	strcpy(vars[map_variable_to_index(varname)].name,"geolon");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Longitude on tripolar grid");
@@ -71,7 +66,7 @@ void initialize( void )
 	strcpy(vars[map_variable_to_index(varname)].units,"Degrees E");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
-	
+
 	strcpy(varname,"wetmask");
 	strcpy(vars[map_variable_to_index(varname)].name,"wetmask");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Wetmask");
@@ -122,35 +117,35 @@ void initialize( void )
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
-#ifdef AGE
+	if (run_parameters.do_age) {
 
-	allocate_age( );
-	initialize_age( );
+		allocate_age( );
+		initialize_age( );
+	}
 
-#endif
 
-#ifdef CFCS
-	allocate_cfc11( );
-	initialize_cfc11();
-	allocate_cfc12( );
-	initialize_cfc12();
-	allocate_sf6( );
-	initialize_sf6();
-	read_tracer_boundary( );
-	
-#endif
+	if (run_parameters.do_cfcs) {
+		allocate_cfc11( );
+		initialize_cfc11();
+		allocate_cfc12( );
+		initialize_cfc12();
+		allocate_sf6( );
+		initialize_sf6();
+		read_tracer_boundary( );
+	}
 
-#ifdef CONSERVATION_CHECK
-	allocate_test();
-	initialize_test();
-#endif
 
-#ifdef TTD
-	allocate_ttd();
-	initialize_ttd();
-#endif
+	if (run_parameters.conservation_check) {
+		allocate_test();
+		initialize_test();
+	}
+
+	if (run_parameters.do_ttd) {
+		allocate_ttd();
+		initialize_ttd();
+	}
 	/* zonal, meridional re-entrance    */
-	for (m=0;m<NTR;m++) {
+	for (m=0;m<run_parameters.numtracers;m++) {
 		for (k=0;k<NZ;k++) {
 			for (j=0;j<=NYMEM-1;j++) {
 				tr[m][k][0][j] = tr[m][k][nx-1][j];
@@ -199,6 +194,10 @@ void set_run_parameters( void )
 			run_parameters.eyear = atoi(value);
 		if (!strcmp(attribute,"einterval"))
 			run_parameters.einterval = atoi(value);
+
+		// Define the total number of tracers to carry in the main array
+		if (!strcmp(attribute,"numtracers"))
+			run_parameters.numtracers = atoi(value);
 
 		// Define the type of run
 		if (!strcmp(attribute,"use_hindcast"))
@@ -249,14 +248,18 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"wd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
-#ifdef AGE
+
+		// Tracer-specific variables
+
+		if (!strcmp(attribute,"do_age"))
+			run_parameters.do_age = atoi(value);
 		if (!strcmp(attribute,"age"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"age_restart"))
 			rflags[map_variable_to_index("age")] = atoi(value);
-#endif
 
-#ifdef CFCS
+		if (!strcmp(attribute,"do_cfcs"))
+			run_parameters.do_cfcs = atoi(value);
 		if (!strcmp(attribute,"cfc11"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"cfc11_restart"))
@@ -275,25 +278,27 @@ void set_run_parameters( void )
 			rflags[map_variable_to_index("cfc11")] = atoi(value);
 		if (!strcmp(attribute,"psf6"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
-#endif
-#ifdef CONSERVATION_CHECK
+
+		if (!strcmp(attribute,"conservation_check"))
+			run_parameters.conservation_check = atoi(value);
 		if (!strcmp(attribute,"test"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"test_inventory"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"htest"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
-#endif
-#ifdef TTD
+
+		if (!strcmp(attribute,"do_ttd"))
+			run_parameters.do_ttd = atoi(value);
 		if (!strcmp(attribute,"ttd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ttd_restart"))
 			rflags[map_variable_to_index("ttd")] = atoi(value);
 		if (!strcmp(attribute,"num_ttd_intervals"))
 			run_parameters.num_ttd_intervals = atoi(value);
-		 
 
-#endif
+
+
 	}
 
 

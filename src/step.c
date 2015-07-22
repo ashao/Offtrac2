@@ -21,24 +21,11 @@
 #include "timekeeper.h"
 #include "initialize.h"
 
-#ifdef AGE
 #include "ideal_age.h"
-#endif
-
-#ifdef CFCS
 #include "cfcs_sf6.h"
-#endif
-
-#ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
-extern int mTEST;
-extern  double ***mn_test;
-extern double test_inventory;
-#endif
-
-#ifdef TTD
 #include "ttd_bp.h"
-#endif
+
 /*---------------------------------------------------------------------
  *     define variables and subroutines
  *---------------------------------------------------------------------*/
@@ -46,9 +33,6 @@ extern double test_inventory;
 extern double ****tr;
 extern double ***hstart, ***h, ***hend;
 
-#ifdef AGE
-extern int mAGE;
-#endif
 extern double ***mn_h, ***h;
 extern double ***mn_uhtm, ***uhtm;
 extern double ***mn_vhtm, ***vhtm;
@@ -119,34 +103,33 @@ void step_fields( ) {
 	 *-----------------------------------------*/
 
 
-#ifdef AGE
-	step_age(timekeeper.dt);
-#endif
 
-#ifdef CFCS
-	surface_cfc11();
-	surface_cfc12();
-	surface_sf6();
+	if (run_parameters.do_age)	step_age(timekeeper.dt);
+
+	if (run_parameters.do_cfcs) {
+		surface_cfc11();
+		surface_cfc12();
+		surface_sf6();
 # ifdef NOCONC
 
-	copy_darray3d(pcfc11,tr[mCFC11],NZ,NXMEM,NYMEM);
-	copy_darray3d(pcfc12,tr[mCFC12],NZ,NXMEM,NYMEM);
-	copy_darray3d(psf6,tr[mSF6],NZ,NXMEM,NYMEM);
+		copy_darray3d(pcfc11,tr[mCFC11],NZ,NXMEM,NYMEM);
+		copy_darray3d(pcfc12,tr[mCFC12],NZ,NXMEM,NYMEM);
+		copy_darray3d(psf6,tr[mSF6],NZ,NXMEM,NYMEM);
 #else
-	divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
-	divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
-	divide_darray3d(psf6,tr[mSF6],sf6_sol);
+		divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
+		divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
+		divide_darray3d(psf6,tr[mSF6],sf6_sol);
 # endif
-#endif
+	}
 
-#ifdef CONSERVATION_CHECK
-	step_test();
-	submit_for_averaging(mn_test,tr[mTEST]);
-#endif
+	if (run_parameters.conservation_check) {
+		step_test();
+		submit_for_averaging(mn_test,tr[mTEST]);
+	}
 
-#ifdef TTD
-	step_ttd();
-#endif
+
+	if (run_parameters.do_ttd)	step_ttd();
+
 	merge_ml_tr();
 
 
@@ -166,7 +149,7 @@ void step_fields( ) {
 	 *-----------------------------------------*/
 
 	/* zonal, meridional re-entrance    */
-	for (m = 0; m < NTR; m++) {
+	for (m = 0; m < run_parameters.numtracers; m++) {
 		for (k = 0; k < NZ; k++) {
 			for (j = 0; j <= NYMEM - 1; j++) {
 				tr[m][k][0][j] = tr[m][k][nx - 1][j];
@@ -185,41 +168,38 @@ void step_fields( ) {
 	}
 
 
-	for (m=0;m<NTR;m++)
+	for (m=0;m<run_parameters.numtracers;m++)
 		for(i=0;i<NXMEM;i++)
 			for(j=0;j<NYMEM;j++)
 				if (!oceanmask[i][j])
 					for(k=0;k<NZ;k++)
 						tr[m][k][i][j]=MISVAL;
-					
+
 
 	submit_for_averaging( mn_h, h );
 	submit_for_averaging( mn_uhtm, uhtm );
 	submit_for_averaging( mn_vhtm, vhtm );
 	submit_for_averaging( mn_wd, wd );
 
-#ifdef AGE
-	submit_for_averaging( mn_age, tr[mAGE]) ;
-#endif
+	if (run_parameters.do_age) submit_for_averaging( mn_age, tr[mAGE]) ;
 
-#ifdef CFCS
-	submit_for_averaging( mn_cfc11, tr[mCFC11] );	
-	submit_for_averaging( mn_pcfc11, pcfc11 );
-	submit_for_averaging( mn_cfc12, tr[mCFC12] );	
-	submit_for_averaging( mn_pcfc12, pcfc12 );
-	submit_for_averaging( mn_sf6, tr[mSF6] );	
-	submit_for_averaging( mn_psf6, psf6 );
-#endif
+	if (run_parameters.do_cfcs) {
+		submit_for_averaging( mn_cfc11, tr[mCFC11] );
+		submit_for_averaging( mn_pcfc11, pcfc11 );
+		submit_for_averaging( mn_cfc12, tr[mCFC12] );
+		submit_for_averaging( mn_pcfc12, pcfc12 );
+		submit_for_averaging( mn_sf6, tr[mSF6] );
+		submit_for_averaging( mn_psf6, psf6 );
+	}
 
-#ifdef TTD
-	submit_for_averaging( mn_ttd, tr[mTTD] );
-#endif
+	if (run_parameters.do_ttd)	submit_for_averaging( mn_ttd, tr[mTTD] );
 
-//	apply_mask(mn_h,oceanmask);
-//	apply_mask(mn_uhtm,oceanmask);
-//	apply_mask(mn_vhtm,oceanmask);
-//	apply_mask(mn_wd,oceanmask);
-	
+
+	//	apply_mask(mn_h,oceanmask);
+	//	apply_mask(mn_uhtm,oceanmask);
+	//	apply_mask(mn_vhtm,oceanmask);
+	//	apply_mask(mn_wd,oceanmask);
+
 
 	/*-----------------------------------------
 	 *
@@ -259,7 +239,7 @@ void merge_ml_tr( void ) {
 	int i, j, k, l;
 	double tracsum;
 
-	for(l=0;l<NTR;l++)
+	for(l=0;l<run_parameters.numtracers;l++)
 		for(i=0;i<NXMEM;i++)
 			for(j=0;j<NYMEM;j++) {
 
@@ -309,9 +289,7 @@ void update_transport_fields(  ) {
 	read_uvw(read_index,file_suffix,path);
 	read_h(read_index,file_suffix,path,hend);
 
-#ifdef CFCS
 	read_temp_and_salt(read_index,file_suffix,path);
-#endif
 
 }
 

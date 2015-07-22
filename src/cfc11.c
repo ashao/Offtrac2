@@ -113,6 +113,7 @@ void initialize_cfc11 ( ) {
 	extern struct parameters run_parameters;
 	extern struct vardesc vars[NOVARS];
 
+	mCFC11 = run_parameters.tracer_counter++;
 
         printf("Setting CFC-11 variable description...");
         strcpy(varname,"cfc11");

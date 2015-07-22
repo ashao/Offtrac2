@@ -39,47 +39,16 @@
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
 
-#undef  AGE                    /*  Define ideal age tracer in years.  */
-#define CFCS
+// #define CFCS
 #define NOCONC
-#undef	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
-#undef TTD
 
-#define TRNCINIT	       /* read in initial tracers values from */
-			       /* netCDF files -- otherwise initialize*/
-			       /* analytically 			      */
-
-#define NTR 3                 /*  The number of tracers to carry.    */
-                               /*  Must add up to total of AGE,       */
-                               /*    OXYGEN, O18, (CFC11 + CFC12),    */
-                               /*    (DOP + PHOSPHATE), (DIC + ALK)   */
-                               /*    (NO3 + DON)                      */
-                               /*    (15NO3 + DO15N), SF6
-				/* CFC11_sat, CFC12_sat, SF6_sar ashao    */
-
-#define NOVARS 14              /*  Number of variables used in        */
+#define NOVARS 19              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */
 
-#define BEGYEAR 1947			/* ashao: Set the start year, for
- 	 	 	 	 	 	 	 	 tracers with atmospheric histories */
-
-#undef HINDCAST			/* Expect to read in hindcasat fields */
 #define BEGHIND 1948        /* The first year of hindcast fields */
-#define ENDHIND 2007 		/* Last year of hindcast fields */
-
-#define SEPFILES              /* For use with separate input files for    */
-                              /* U,V,W,H                                */
-                              /* Files are assumed to be shifted by one */
-                              /* month, i.e. uvw leads h                */
-
-#define NMONTHS 12           /* Number of months in forcing field    */
-                             /* before repetition. E.g., for 10 year  */
-                             /* forcing file use 120, 564 for 47yrs */
-
-#define WRINT 1                /*  Number of months between writes AND */
-                               /*   the mean interval for each write   */
+#define ENDHIND 2009 		/* Last year of hindcast fields */
 
 #define NTSTEP 1                /*  Number of time steps between       */ 
                                /*  reading of forcing fields          */
@@ -92,27 +61,11 @@
 #undef WRTTS                  /* Write output after each sub time step */
                               /* for debugging - 04AUG08 BX           */
 
-#ifdef VARIAB_FORC
-
-# define TS_VARIAB             /* Specify if T and S are read from 
-				  variable time-series. If undefined
-				  read one year climatology.         */
-# define ICE_VARIAB             /* If undefined read one year          */
-                               /* climatology--not implemented yet    */
-#endif
-
 /* Specify if wd is read in, otherwise we read in ea, eb, eaml        */
 #undef ENTRAIN                 /* Define how we get diapycnal Velocity*/
                                /* If ENTRAIN is defined, must read in */
                                /* ea, eb, and eaml. Otherwise we must */
                                /* read in wd.                         */
-
-#ifndef VARIAB_FORC
-# define SMOOTH_REST            /* save h to restart file and use it to */
-                              /* interpolate at beginning of restart to */
-                              /* avoid shock by imperfect wrap arounds  */
-#endif
-
 /*  Specify the numerical domain.                                     */
 
 #define XMETRIC_J              /*    Define XMETRIC_J if the x-direc- */
@@ -176,20 +129,6 @@
                                /*  The minimum total number of        */
                                /*  processors is NXPROC*NYPROC.       */
 #endif
-#define MAXPROC 64             /*    MAXPROC is the maximum number of */
-                               /*  processors that might be used      */
-                               /*  without recompiling.  MAXPROC must */
-                               /*  exceed NXPROC*NYPROC or NXPROC or  */
-                               /*  NYPROC, or be undefined.           */
-
-#undef  CHECKPARALLEL          /*    If CHECKPARALLEL is defined, it  */
-                               /*  causes the model to run simultan-  */
-                               /*  eously on one and several process- */
-                               /*  ors.  The subroutine check_field   */
-                               /*  can then be called to compare the  */
-                               /*  fields in the serial and parallel  */
-                               /*  simulations, reporting any diff-   */
-                               /*  erences.                           */
 
 #define SAVEINT    5.0         /*    The number of days between saves.*/
                                /* I believe currently NOT used: Suzanne */
@@ -264,14 +203,3 @@
 #endif
 
 #define NML 2
-
-#define MDT 4800
-//HF
-#ifndef RESTART
-# undef SMOOTH_REST
-#endif
-
-// OXYGEN MACROS
-#define NZWOA 33
-#define MEAN_5DAY
-#define NUM5DAY 73
