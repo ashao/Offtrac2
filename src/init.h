@@ -40,11 +40,14 @@
                                /* layers for all BGC variables       */
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // #define CFCS
 #define NOCONC
 
 #define NOVARS 19              /*  Number of variables used in        */
 =======
+=======
+>>>>>>> parent of 8942fe1... Commit before removing more options from init.h
 #undef  AGE                    /*  Define ideal age tracer in years.  */
 #undef CFCS
 #define	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */

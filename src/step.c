@@ -105,6 +105,7 @@ void step_fields( ) {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (run_parameters.do_age)	step_age(timekeeper.dt);
 
 	if (run_parameters.do_cfcs) {
@@ -128,6 +129,8 @@ void step_fields( ) {
 		submit_for_averaging(mn_test,tr[mTEST]);
 	}
 =======
+=======
+>>>>>>> parent of 8942fe1... Commit before removing more options from init.h
 #ifdef CFCS
 	surface_cfc11();
 	divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
