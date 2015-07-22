@@ -276,7 +276,7 @@ int main( int argc, char *argv[] )
 				set_darray3d_zero(mn_sf6, NZ, NXMEM, NYMEM);
 				set_darray3d_zero(mn_psf6, NZ, NXMEM, NYMEM);
 			}
-
+			if (run_parameters.do_ttd)	set_darray3d_zero(mn_ttd, NZ, NXMEM, NYMEM);
 //			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
 
@@ -362,9 +362,7 @@ void alloc_fields(void)
 	extern double ***mn_test;
 	extern double test_inventory;
 #endif
-#ifdef TTD
-	extern double ***mn_ttd;
-#endif
+
 	for (m = 0; m < NOVARS; m++)
 	{
 

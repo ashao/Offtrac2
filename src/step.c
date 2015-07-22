@@ -31,9 +31,7 @@ extern  double ***mn_test;
 extern double test_inventory;
 #endif
 
-#ifdef TTD
 #include "ttd_bp.h"
-#endif
 /*---------------------------------------------------------------------
  *     define variables and subroutines
  *---------------------------------------------------------------------*/
@@ -134,9 +132,9 @@ void step_fields( ) {
 	submit_for_averaging(mn_test,tr[mTEST]);
 #endif
 
-#ifdef TTD
-	step_ttd();
-#endif
+
+	if (run_parameters.do_ttd)	step_ttd();
+
 	merge_ml_tr();
 
 
@@ -199,9 +197,7 @@ void step_fields( ) {
 		submit_for_averaging( mn_psf6, psf6 );
 	}
 
-#ifdef TTD
-	submit_for_averaging( mn_ttd, tr[mTTD] );
-#endif
+	if (run_parameters.do_ttd)	submit_for_averaging( mn_ttd, tr[mTTD] );
 
 	//	apply_mask(mn_h,oceanmask);
 	//	apply_mask(mn_uhtm,oceanmask);

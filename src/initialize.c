@@ -141,10 +141,10 @@ void initialize( void )
 	initialize_test();
 #endif
 
-#ifdef TTD
-	allocate_ttd();
-	initialize_ttd();
-#endif
+	if (run_parameters.do_ttd) {
+		allocate_ttd();
+		initialize_ttd();
+	}
 	/* zonal, meridional re-entrance    */
 	for (m=0;m<NTR;m++) {
 		for (k=0;k<NZ;k++) {
@@ -282,7 +282,7 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"htest"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 #endif
-#ifdef TTD
+
 		if (!strcmp(attribute,"ttd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ttd_restart"))
@@ -290,8 +290,6 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"num_ttd_intervals"))
 			run_parameters.num_ttd_intervals = atoi(value);
 		 
-
-#endif
 	}
 
 

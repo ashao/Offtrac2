@@ -39,7 +39,6 @@
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
 
-#undef CFCS
 #define NOCONC
 #undef	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
 #undef TTD
@@ -48,7 +47,7 @@
 			       /* netCDF files -- otherwise initialize*/
 			       /* analytically 			      */
 
-#define NTR 4                 /*  The number of tracers to carry.    */
+#define NTR 5                 /*  The number of tracers to carry.    */
                                /*  Must add up to total of AGE,       */
                                /*    OXYGEN, O18, (CFC11 + CFC12),    */
                                /*    (DOP + PHOSPHATE), (DIC + ALK)   */

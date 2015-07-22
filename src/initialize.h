@@ -25,10 +25,9 @@ struct parameters {
 
 	int do_age;
 	int do_cfcs;
+	int do_ttd;
 
-#ifdef TTD
 	int num_ttd_intervals;
-#endif
 
 };
 
