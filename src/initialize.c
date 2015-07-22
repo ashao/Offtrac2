@@ -126,16 +126,15 @@ void initialize( void )
 		initialize_age( );
 	}
 
-#ifdef CFCS
-	allocate_cfc11( );
-	initialize_cfc11();
-	allocate_cfc12( );
-	initialize_cfc12();
-	allocate_sf6( );
-	initialize_sf6();
-	read_tracer_boundary( );
-	
-#endif
+	if (run_parameters.do_cfcs) {
+		allocate_cfc11( );
+		initialize_cfc11();
+		allocate_cfc12( );
+		initialize_cfc12();
+		allocate_sf6( );
+		initialize_sf6();
+		read_tracer_boundary( );
+	}
 
 #ifdef CONSERVATION_CHECK
 	allocate_test();

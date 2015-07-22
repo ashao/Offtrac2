@@ -31,9 +31,7 @@
 #include "timekeeper.h"
 
 #include "ideal_age.h"
-#ifdef CFCS
 #include "cfcs_sf6.h"
-#endif
 
 /*-------------------------------------------------------------------*
  *                                                                   *
@@ -270,6 +268,14 @@ int main( int argc, char *argv[] )
 			set_darray3d_zero(mn_h, NZ, NXMEM, NYMEM);
 
 			if (run_parameters.do_age)	set_darray3d_zero(mn_age, NZ, NXMEM, NYMEM);
+			if (run_parameters.do_cfcs) {
+				set_darray3d_zero(mn_cfc11, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_pcfc11, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_cfc12, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_pcfc12, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_sf6, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_psf6, NZ, NXMEM, NYMEM);
+			}
 
 //			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
@@ -416,14 +422,14 @@ void alloc_fields(void)
 
 	if (run_parameters.do_age)	var[map_variable_to_index("age")] = &mn_age[0][0][0];
 
-#ifdef CFCS
-	var[map_variable_to_index("cfc11")] = &mn_cfc11[0][0][0];
-	var[map_variable_to_index("pcfc11")] = &mn_pcfc11[0][0][0];
-	var[map_variable_to_index("cfc12")] = &mn_cfc12[0][0][0];
-	var[map_variable_to_index("pcfc12")] = &mn_pcfc12[0][0][0];
-	var[map_variable_to_index("sf6")] = &mn_sf6[0][0][0];
-	var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
-#endif
+	if (run_parameters.do_cfcs) {
+		var[map_variable_to_index("cfc11")] = &mn_cfc11[0][0][0];
+		var[map_variable_to_index("pcfc11")] = &mn_pcfc11[0][0][0];
+		var[map_variable_to_index("cfc12")] = &mn_cfc12[0][0][0];
+		var[map_variable_to_index("pcfc12")] = &mn_pcfc12[0][0][0];
+		var[map_variable_to_index("sf6")] = &mn_sf6[0][0][0];
+		var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
+	}
 #ifdef CONSERVATION_CHECK
         var[map_variable_to_index("test")] = &mn_test[0][0][0];
         var[map_variable_to_index("test_inventory")] = &test_inventory;

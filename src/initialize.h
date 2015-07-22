@@ -24,6 +24,7 @@ struct parameters {
 	int ntime_hindcast; // Number of timesteps in hindcast fields
 
 	int do_age;
+	int do_cfcs;
 
 #ifdef TTD
 	int num_ttd_intervals;
