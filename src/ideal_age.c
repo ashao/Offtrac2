@@ -30,7 +30,7 @@ void allocate_age (  ) {
 	int i, j, k;
 
 	// Set index in tracer array
-	mAGE = run_parameters.tracer_counter++;
+	mAGE = 0;
 
 	// Allocate working and output arrays
 	mn_age = alloc3d(NZ,NXMEM,NYMEM);

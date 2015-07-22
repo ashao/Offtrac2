@@ -29,7 +29,7 @@ void allocate_test (  ) {
 	int i, j, k;
 
 	// Set index in tracer array
-	mTEST = run_parameters.tracer_counter++;
+	mTEST = 0;
 
 	// Allocate working and output arrays
 	mn_test = alloc3d(NZ,NXMEM,NYMEM);	

@@ -31,7 +31,7 @@ void allocate_ttd (  ) {
 	int i, j, k;
 
 	// Set index in tracer array
-	mTTD = run_parameters.tracer_counter++;
+	mTTD = 0;
 
 	// Allocate working and output arrays
 	mn_ttd = alloc3d(NZ,NXMEM,NYMEM);

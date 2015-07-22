@@ -14,7 +14,7 @@
 #include <errno.h>
 #include "init.h"
 #include "io.h"
-#include "initialize.h"
+
 
 int alloc_trac()
 {
@@ -23,13 +23,13 @@ int alloc_trac()
   extern double ****tr;
 
   /* allocation of tr (four levels, all with checks) */
-  tr = (double****) malloc(run_parameters.numtracers * sizeof(double ***));
+  tr = (double****) malloc(NTR * sizeof(double ***));
   if (tr == NULL) {
       fprintf(stderr, "out of memory in level 1 allocation!\n");
       return(1);
   }
   
-  for (iv = 0; iv < run_parameters.numtracers; iv++) {
+  for (iv = 0; iv < NTR; iv++) {
       tr[iv] = (double ***) malloc(NZ * sizeof(double **));
       if (tr[iv] == NULL) {
 	  fprintf(stderr, "out of memory in level 2 allocation!\n");

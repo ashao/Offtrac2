@@ -46,7 +46,7 @@ void initialize_cfc12 ( ) {
 	extern struct parameters run_parameters;
 	char varname[200];	
 	extern struct vardesc vars[NOVARS];	
-	mCFC12 = run_parameters.tracer_counter++;
+	mCFC12 = mCFC11+1;
 	printf("mCFC12: %d\n",mCFC12);
 
         printf("Setting CFC-12 variable description...");
@@ -174,11 +174,23 @@ void surface_cfc12( ) {
         printf("\tAtmospheric Concentration: %f\n",cfc12_atmconc[100][100]);
         printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
         printf("\tSolubility: %f\tSaturation: %f\n\n",cfc12_sol[0][100][100],cfc12_sat[100][100]);
-	
-	for (k=0;k<NML;k++)
-		for (i=0;i<NXMEM;i++)
+
+
+
+
+#ifdef NOCONC
+        for (k=0;k<NML;k++)
+                for (i=0;i<NXMEM;i++)
 			for (j=0;j<NYMEM;j++)
-					tr[mCFC12][k][i][j]=cfc12_sat[i][j];
+                        tr[mCFC12][k][i][j] = cfc12_atmconc[i][j];
+
+#else
+        for (k=0;k<NML;k++)
+                for (i=0;i<NXMEM;i++)
+                        for (j=0;j<NYMEM;j++)
+                                tr[mCFC12][k][i][j]=cfc12_sat[i][j];
+
+#endif
 
 }
 

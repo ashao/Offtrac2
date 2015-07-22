@@ -775,6 +775,140 @@ void handle_error (char message[], int status) {
   quit(status);
 }
 
+
+int name_output_file(char name[], double day, int noexdig,
+                     char filepath[], char directory[])
+{
+/*   This subroutine opens a file with a name that is unique and      */
+/* reflects the size and time of the output.  The first two arguments */
+/* are the base names that will be used for double and float output   */
+/* files.  The time of the output is day.  If noexdig is nonzero,     */
+/* noexdig extra digits are added to the time stamp.                  */
+/*   This subroutine returns a pointer to the opened file and sets    */
+/* the value addressed by floatoutput to 1 for a float file and 0 for */
+/* a double file.                                                     */
+
+  char filename[50];        /* The full name of the save file.        */
+  char format[43];          /* The format for the file name.          */
+  int j, numfig;
+  size_t namesize;
+#if defined(SAVE_DOUBLE) || defined(NETCDF_OUTPUT)
+  const int outsize = 8;
+#else
+  const int outsize = sizeof(float);
+#endif
+
+  if (day > 1e-6) {
+    numfig = (int) (floor(log10(1e10*day)) + 1e-3) -
+             (int) (floor(log10(1e10*(double)SAVEINT)) + 1e-3) + noexdig;
+    numfig = (numfig > 8) ? 8 : ((numfig > 2) ? numfig : 2);
+  }
+  else numfig = 2;
+
+  if ((outsize != 4) && (outsize != 8)) {
+    for (j=0;j<((int) strlen(name));j++) {
+      if (islower(name[j])) name[j] = toupper(name[j]);
+      else if (isupper(name[j])) name[j] = tolower(name[j]);
+    }
+  }
+  namesize = strlen(name);
+
+/*   The name of the file indicates whether it contains 4-byte or     */
+/* 8-byte numbers, by the way the time of the file is written.  It    */
+/* also indicates the horizontal size of the fields.  For example, an */
+/* 8-byte save file at time 1 will be "save1.00e00.50.80" for 50 x 80 */
+/* fields, while the corresponding 4-byte file is "save1.00e0.50.80". */
+
+  sprintf(format,"%s%%%d.%de.%%03d.%%03d",name,numfig+5,numfig);
+  sprintf(filename,format,day,NXTOT,NYTOT);
+  if (filename[numfig+namesize+3]=='+') {
+    for (j=numfig+namesize+3;j<=48;j++) filename[j] = filename[j+1];
+    if ((outsize == 4) && (filename[numfig+namesize+3]=='0')) {
+      for (j=numfig+namesize+3;j<=47;j++) filename[j] = filename[j+1];
+    }
+  }
+  else if ((outsize == 4) && (filename[numfig+namesize+4]=='0')) {
+    for (j=numfig+namesize+4;j<=47;j++) filename[j] = filename[j+1];
+  }
+
+  strcpy(filepath, directory);
+  strcat(filepath, filename);
+
+#ifdef NETCDF_OUTPUT
+  return NETCDF_FILE;
+#else
+  if (outsize == 8) return 0;
+  else return FLOAT_FILE;
+#endif
+
+}
+
+void find_input_file(char name[], char name2[], char fltname[], double day,
+                     char directory[], FILE **file, int *cdfid,
+                     int *timeid)
+{
+  char infile[150], inpath[300], inname[100];
+  char format[30];
+  int i, j, err = 1, namesize, try, try_nm, strip_0, flt_try;
+
+/* Read the velocities and thicknesses in from the saved binary files.*/
+
+/* Any non-netcdf file that is opened while stripping the extra 0 out */
+/* of the exponent in the file name or while using fltname is assumed */
+/* to contain 4-byte binary numbers.  Otherwise 8-byte binary numbers */
+/* are in a non-netcdf file.  Any of the 3 name arguments may be      */
+/* empty, in which case it is skipped.                                */
+
+  for (try=0;try<=2;try++) {
+    for (try_nm=0;try_nm<5;try_nm++) {
+      if (try_nm==0) {strcpy(inname, name); strip_0 = 0; flt_try = 0;}
+      else if (try_nm==1) {strcpy(inname, name2); strip_0 = 0; flt_try = 0;}
+      else if (try_nm==2) {strcpy(inname, name); strip_0 = 1; flt_try = 0;}
+      else if (try_nm==3) {strcpy(inname, name2); strip_0 = 1; flt_try = 0;}
+      else {strcpy(inname, fltname); strip_0 = 0; flt_try = 1;}
+
+      namesize = strlen(inname); if (namesize == 0) continue;
+
+      for (i=8;i>=2;i--) {
+        sprintf(format,"%s%%%d.%de.%%03d.%%03d",inname,i+5,i);
+        sprintf(infile,format,day,NXTOT,NYTOT);
+        if (infile[i+namesize+3]=='+') {
+          for (j=i+namesize+3;j<=148;j++) infile[j] = infile[j+1];
+          if (strip_0 && (infile[i+namesize+3]=='0')) {
+            for (j=i+namesize+3;j<=47;j++) infile[j] = infile[j+1];
+          }
+        }
+        else if (strip_0 && (infile[i+namesize+4]=='0')) {
+          for (j=i+namesize+4;j<=147;j++) infile[j] = infile[j+1];
+        }
+        strcpy(inpath, directory); strcat(inpath, infile);
+        err = open_input_file(inpath,file,cdfid,timeid);
+        if (err == 0) {
+          if ((flt_try || strip_0) && (*cdfid == -8)) *cdfid = -4;
+          break;
+        }
+
+        strcat(inpath, ".cdf");
+        err = open_input_file(inpath,file,cdfid,timeid);
+        if (err == 0) break;
+      }
+
+      if (err == 0) break;
+    }
+
+    if (err == 0) break;
+    else day += day*1.0e-10*(1.0-6.0*(double)try+3.0*(double)(try*try));
+  }
+
+  if (err != 0) {
+    printf("Unable to find input file.\n");
+    printf("Last tried '%s'.\n",inpath);
+    exit(-1);
+  }
+  else printf("Opened file '%s'.\n",inpath);
+}
+
+
 int open_input_file(char filename[], FILE **fileptr, int *cdfid, int *timeid) {
 
   int status, return_val = 0, i, j = 0;
@@ -988,7 +1122,7 @@ void read_field(int cdfid, FILE *fileptr, char varname[],
   } else
 #endif
   {
-/*  Here a field is read from a binary file.                          
+/*  Here a field is read from a binary file.                          */
     int k, flt;
     size_t err = 1;
     
@@ -1014,6 +1148,31 @@ void read_field(int cdfid, FILE *fileptr, char varname[],
       strcat(message,varname);
       handle_error(message,-1);
     }
-*/
+  }
+}
+
+size_t read_time(int cdfid, FILE *fileptr, int timeid, size_t nrec, 
+                 double *day)
+{
+#ifdef NETCDF_OUTPUT
+  if (cdfid > -4) {
+    if (cdfid >= 0) {
+      int status;
+      char message[144];
+
+      status = nc_get_var1_double(cdfid, timeid, &nrec, day);
+      if (status != NC_NOERR) {
+        sprintf(message,"Reading time %d",timeid);
+        handle_error(message,status);
+      }
+    }
+    return 1;
+  }
+  else
+#endif
+  {
+    size_t err = 1;
+    if (pe_here==0) err *= fread((void *)day,8,1,fileptr);
+    return err;
   }
 }
