@@ -238,14 +238,6 @@ void surface_cfc11( ) {
 	printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
 	printf("\tSaturation concentration: %f\n\n",cfc11_sat[100][100]);
 
-
-#ifdef NOCONC
-	for (k=0;k<NML;k++)
-		for (i=0;i<NXMEM;i++)
-			for (j=0;j<NYMEM;j++)
-				tr[mCFC11][k][i][j] = cfc11_atmconc[i][j];
-
-#else
 	for (k=0;k<NML;k++)
 		for (i=0;i<NXMEM;i++)
 			for (j=0;j<NYMEM;j++)
@@ -254,6 +246,6 @@ void surface_cfc11( ) {
 	for (i=0;i<NXMEM;i++)
 		for (j=0;j<NYMEM;j++)
 			mn_cfc11sat[i][j]+=cfc11_sat[i][j];
-#endif 
+
 }
 

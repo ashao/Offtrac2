@@ -170,18 +170,10 @@ void surface_sf6( ) {
         printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
         printf("\tSaturation: %f\n\n",sf6_sat[100][100]);
 
-#ifdef NOCONC
-        for (k=0;k<NML;k++)
-                for (i=0;i<NXMEM;i++)
-			for (j=0;j<NYMEM;j++)
-                        tr[mSF6][k][i][j] = sf6_atmconc[i][j];
-
-#else
 
 	for (k=0;k<NML;k++)
 		for (i=0;i<NXMEM;i++)
 			for (j=0;j<NYMEM;j++)
 					tr[mSF6][k][i][j]=sf6_sat[i][j];
-#endif
 }
 
