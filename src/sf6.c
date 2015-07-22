@@ -48,7 +48,7 @@ void initialize_sf6 ( ) {
 	extern struct parameters run_parameters;	
 	extern struct vardesc vars[NOVARS];	
 	
-	mSF6 = mCFC12+1;
+	mSF6 = run_parameters.tracer_counter++;
 	printf("mSF6: %d\n",mSF6);
 
         printf("Setting SF6 variable description...");
@@ -132,9 +132,9 @@ void sf6_find_atmconc(  ) {
 
 	// Interpolate in time to find the atmospheric concentration
 	hemisphere_concentrations[0] = linear_interpolation(
-				atmconc[mSF6].time, atmconc[mSF6].nval, currtime,NUMATMVALS);
+				atmconc[SF6IDX].time, atmconc[SF6IDX].nval, currtime,NUMATMVALS);
 	hemisphere_concentrations[1] = linear_interpolation(
-				atmconc[mSF6].time, atmconc[mSF6].sval, currtime,NUMATMVALS);
+				atmconc[SF6IDX].time, atmconc[SF6IDX].sval, currtime,NUMATMVALS);
 
 
 	for (i=0;i<NXMEM;i++)

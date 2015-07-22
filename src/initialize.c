@@ -253,6 +253,8 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"age_restart"))
 			rflags[map_variable_to_index("age")] = atoi(value);
 
+		if (!strcmp(attribute,"do_cfcs"))
+			run_parameters.do_cfcs = atoi(value);
 		if (!strcmp(attribute,"cfc11"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"cfc11_restart"))

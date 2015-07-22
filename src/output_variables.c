@@ -54,7 +54,7 @@ int map_variable_to_index( char *var_name ) {
 		exit( -2 );
 	}
 	else	{
-		printf("%s index = %d\n",var_name,var_idx);
+//		printf("%s index = %d\n",var_name,var_idx);
 		return var_idx;
 
 	}

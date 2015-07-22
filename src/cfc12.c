@@ -46,7 +46,7 @@ void initialize_cfc12 ( ) {
 	extern struct parameters run_parameters;
 	char varname[200];	
 	extern struct vardesc vars[NOVARS];	
-	mCFC12 = mCFC11+1;
+	mCFC12 = run_parameters.tracer_counter++;
 	printf("mCFC12: %d\n",mCFC12);
 
         printf("Setting CFC-12 variable description...");
@@ -134,9 +134,9 @@ void cfc12_find_atmconc(  ) {
 
 	// Interpolate in time to find the atmospheric concentration
 	hemisphere_concentrations[0] = linear_interpolation(
-		atmconc[mCFC12].time, atmconc[mCFC12].nval, currtime,NUMATMVALS);
+		atmconc[CFC12IDX].time, atmconc[CFC12IDX].nval, currtime,NUMATMVALS);
 	hemisphere_concentrations[1] = linear_interpolation(
-		atmconc[mCFC12].time, atmconc[mCFC12].sval, currtime,NUMATMVALS);
+		atmconc[CFC12IDX].time, atmconc[CFC12IDX].sval, currtime,NUMATMVALS);
 	
 for (i=0;i<NXMEM;i++)
 		for (j=0;j<NYMEM;j++) {

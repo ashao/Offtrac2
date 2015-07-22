@@ -39,4 +39,7 @@ typedef struct {
 #define NUMTRANSIENT 3
 extern tracer_boundary atmconc[NUMTRANSIENT];
 
+#define CFC11IDX 0
+#define CFC12IDX 1
+#define SF6IDX 2
 

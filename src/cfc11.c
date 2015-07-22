@@ -28,6 +28,7 @@ double **mn_cfc11sat;
 double ***pcfc11, ***mn_pcfc11;
 
 int mCFC11;
+
 double nval;
 double sval;
 extern double ****tr;
@@ -63,7 +64,7 @@ void read_tracer_boundary ( ) {
 	const int numatm = NUMATMVALS;
 	extern struct parameters run_parameters;
  
-
+	int tempidx;
 	sprintf(infile,"cfc_sf6_bc.nc");
 	strcpy(inpath, run_parameters.forcing_path);
 	strcat(inpath, infile);
@@ -81,25 +82,25 @@ void read_tracer_boundary ( ) {
 
 	strcpy(varname,"CFC11NH");
 	status = nc_inq_varid(cdfid, varname, &varid);
-	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[mCFC11].nval);
+	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[CFC11IDX].nval);
 
 	strcpy(varname,"CFC11SH");
 	status = nc_inq_varid(cdfid, varname, &varid);
-	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[mCFC11].sval);
+	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[CFC11IDX].sval);
 
 	strcpy(varname,"CFC12NH");
 	status = nc_inq_varid(cdfid, varname, &varid);
-	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[mCFC12].nval);
+	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[CFC12IDX].nval);
 	strcpy(varname,"CFC12SH");
 	status = nc_inq_varid(cdfid, varname, &varid);
-	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[mCFC12].sval);
+	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[CFC12IDX].sval);
 
 	strcpy(varname,"SF6NH");
 	status = nc_inq_varid(cdfid, varname, &varid);
-	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[mSF6].nval);
+	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[SF6IDX].nval);
 	strcpy(varname,"SF6SH");
 	status = nc_inq_varid(cdfid, varname, &varid);
-	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[mSF6].sval);
+	status = nc_get_vara_double(cdfid, varid, start, end, atmconc[SF6IDX].sval);
 	
 	printf("status=%d\n",status);
 	close_file(&cdfid,&file);
@@ -107,13 +108,13 @@ void read_tracer_boundary ( ) {
 
 void initialize_cfc11 ( ) {
 	int i, j, k;
-	int mCFC11 = 1;
 	char varname[200];
 	extern char restart_filename[200];
 	extern struct parameters run_parameters;
 	extern struct vardesc vars[NOVARS];
 
 
+	mCFC11 = run_parameters.tracer_counter++;
         printf("Setting CFC-11 variable description...");
         strcpy(varname,"cfc11");
         strcpy(vars[map_variable_to_index(varname)].name,"mn_cfc11");
@@ -199,9 +200,9 @@ void cfc11_find_atmconc(  ) {
 
 	}
 	hemisphere_concentrations[0] = linear_interpolation(
-			atmconc[mCFC11].time, atmconc[mCFC11].nval, currtime, NUMATMVALS);
+			atmconc[CFC11IDX].time, atmconc[CFC11IDX].nval, currtime, NUMATMVALS);
 	hemisphere_concentrations[1] = linear_interpolation(
-			atmconc[mCFC11].time, atmconc[mCFC11].sval, currtime, NUMATMVALS);
+			atmconc[CFC11IDX].time, atmconc[CFC11IDX].sval, currtime, NUMATMVALS);
 
 	for (i=0;i<NXMEM;i++)
 		for (j=0;j<NYMEM;j++) {
