@@ -253,7 +253,6 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"age_restart"))
 			rflags[map_variable_to_index("age")] = atoi(value);
 
-#ifdef CFCS
 		if (!strcmp(attribute,"cfc11"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"cfc11_restart"))
@@ -272,7 +271,7 @@ void set_run_parameters( void )
 			rflags[map_variable_to_index("cfc11")] = atoi(value);
 		if (!strcmp(attribute,"psf6"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
-#endif
+
 #ifdef CONSERVATION_CHECK
 		if (!strcmp(attribute,"test"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
