@@ -39,10 +39,31 @@
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
 
+<<<<<<< HEAD
 // #define CFCS
 #define NOCONC
 
 #define NOVARS 19              /*  Number of variables used in        */
+=======
+#undef  AGE                    /*  Define ideal age tracer in years.  */
+#undef CFCS
+#define	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
+#undef TTD
+
+#define TRNCINIT	       /* read in initial tracers values from */
+			       /* netCDF files -- otherwise initialize*/
+			       /* analytically 			      */
+
+#define NTR 1                 /*  The number of tracers to carry.    */
+                               /*  Must add up to total of AGE,       */
+                               /*    OXYGEN, O18, (CFC11 + CFC12),    */
+                               /*    (DOP + PHOSPHATE), (DIC + ALK)   */
+                               /*    (NO3 + DON)                      */
+                               /*    (15NO3 + DO15N), SF6
+				/* CFC11_sat, CFC12_sat, SF6_sar ashao    */
+
+#define NOVARS 14              /*  Number of variables used in        */
+>>>>>>> parent of 8942fe1... Commit before removing more options from init.h
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */
