@@ -48,8 +48,7 @@ void initialize_sf6 ( ) {
 	extern struct parameters run_parameters;	
 	extern struct vardesc vars[NOVARS];	
 
-	printf("mSF6: %d\n",mSF6);
-
+	printf("SF6 index in main tracer array: %d\n",mSF6);
         printf("Setting SF6 variable description...");
         strcpy(varname,"sf6");
         strcpy(vars[map_variable_to_index(varname)].name,"mn_sf6");

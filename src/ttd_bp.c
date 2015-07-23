@@ -31,7 +31,6 @@ void allocate_ttd (  ) {
 	int i, j, k;
 
 	// Set index in tracer array
-	mTTD = 0;
 
 	// Allocate working and output arrays
 	mn_ttd = alloc3d(NZ,NXMEM,NYMEM);
@@ -45,6 +44,7 @@ void initialize_ttd( ) {
 //	extern double misval;
 	char varname[100];
 
+	printf("TTD index in main tracer array: %d\n",mTTD);
 	printf("Setting TTD variable description...");
 	strcpy(varname,"ttd");
         strcpy(vars[map_variable_to_index(varname)].name,"mn_ttd");

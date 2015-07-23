@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+
 #include "init.h"
 #include "initialize.h"
 #include "timekeeper.h"

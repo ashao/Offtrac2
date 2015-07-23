@@ -16,7 +16,7 @@
 #include "io.h"
 
 
-int alloc_trac(ntr)
+int alloc_trac(int ntr)
 {
 
   int ix, iz, iv;

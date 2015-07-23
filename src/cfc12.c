@@ -46,8 +46,8 @@ void initialize_cfc12 ( ) {
 	extern struct parameters run_parameters;
 	char varname[200];	
 	extern struct vardesc vars[NOVARS];
-	printf("mCFC12: %d\n",mCFC12);
 
+	printf("CFC-12 index in main tracer array: %d\n",mCFC12);
         printf("Setting CFC-12 variable description...");
         strcpy(varname,"cfc12");
         strcpy(vars[map_variable_to_index(varname)].name,"mn_cfc12");

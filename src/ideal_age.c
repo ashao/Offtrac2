@@ -41,6 +41,7 @@ void initialize_age( ) {
 //	extern double misval;
 	char varname[100];
 
+	printf("Ideal age index in main tracer array: %d\n",mAGE);
 	printf("Setting age variable description...");
 	strcpy(varname,"age");
         strcpy(vars[map_variable_to_index(varname)].name,"mn_age");

@@ -1,7 +1,9 @@
-OUTNAME=offtrac
-
+#OUTNAME = offtrac.cfcs
 #CC=gcc
 
+ifeq ($(strip $(OUTNAME)),)
+OUTNAME=offtrac
+endif
 
 #CC=gcc
 #CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe -static
@@ -58,14 +60,18 @@ OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/initialize.c $(SRCDIR)/iocdf.c $(SRCDIR)/par_IO.c \
 	$(SRCDIR)/tracadv.openmp.c $(SRCDIR)/step.c \
         $(SRCDIR)/alloc_trac.c \
-        $(SRCDIR)/alloc.c $(SRCDIR)/alloc_arrays.c \
+        $(SRCDIR)/alloc_util.c $(SRCDIR)/alloc_arrays.c \
 	$(SRCDIR)/masks.c $(SRCDIR)/set_metrics.c\
 	$(SRCDIR)/util.c \
         $(SRCDIR)/timekeeper.c \
         $(SRCDIR)/output_variables.c \
-        $(SRCDIR)/ideal_age.c 
+        $(SRCDIR)/tracer_utilities.c \
+	$(SRCDIR)/ideal_age.c \
+	$(SRCDIR)/cfc11.c $(SRCDIR)/cfc12.c $(SRCDIR)/sf6.c \
+	$(SRCDIR)/ttd_bp.c
 
 offtrac: $(OFFSRC) $(SRCDIR)/init.h
+	echo compiling $(OUTNAME)
 	$(CC)  $(OFFSRC) -o $(OUTNAME) $(CDFFLAGS) $(CFLAGS) $(LDFLAGS)
 	rm -f off offsf6
 

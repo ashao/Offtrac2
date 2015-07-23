@@ -109,9 +109,9 @@ void tracer(int itts)
 
   double ***hvol; /* The cell volume of an h-element   */
 
-  double slope[NXMEM+NYMEM][NTR]; /* The concentration slope per grid */
+  double slope[NXMEM+NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
                         /* point in units of concentration (nondim.). */
-  double fluxtr[NXMEM+NYMEM][NTR];/* The flux of tracer across a      */
+  double fluxtr[NXMEM+NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
                         /* boundary, in m3 * conc. (nondim.).         */
 
 
@@ -314,7 +314,7 @@ double hlst[NYMEM];
 /* is being advected.                                                 */
 //#pragma omp for  private(i,m,minslope)
 	    for (i=X0;i<=nx+1;i++) {
-	      for (m=0;m<NTR;m++) {
+	      for (m=0;m<run_parameters.tracer_counter;m++) {
 		minslope = 4.0*((fabs(tr[m][k][i+1][j]-tr[m][k][i][j]) < 
 				 fabs(tr[m][k][i][j]-tr[m][k][i-1][j])) ? 
 				(tr[m][k][i+1][j]-tr[m][k][i][j]) :
@@ -336,7 +336,7 @@ double hlst[NYMEM];
 	    for (i=X0;i<=nx;i++) {
 	      if (uhr[k][i][j] == 0.0) {
 		uhh[i] = 0.0;
-		for (m=0;m<NTR;m++) fluxtr[i][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[i][m] = 0.0;
 	      }
 	      else if (uhr[k][i][j] < 0.0) {
 
@@ -353,7 +353,7 @@ double hlst[NYMEM];
 		}
 		else uhh[i] = uhr[k][i][j];
 		ts2 = 0.5*(1.0 + uhh[i]/hvol[k][i+1][j]);
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[i][m] = uhh[i]*(tr[m][k][i+1][j] - slope[i+1][m]*ts2);
 		}
 	      }
@@ -373,7 +373,7 @@ double hlst[NYMEM];
 		else uhh[i] = uhr[k][i][j];
 		ts2 = 0.5*(1.0 - uhh[i]/hvol[k][i][j]);
 
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[i][m] = uhh[i]*(tr[m][k][i][j] + slope[i][m]*ts2);
 		}
 	      }
@@ -396,7 +396,7 @@ double hlst[NYMEM];
 		  hvol[k][i][j] -= (uhh[i] - uhh[i-1]);
 		  Ihnew = 1.0 / hvol[k][i][j];
 		  
-		  for (m=0;m<NTR;m++) {
+		  for (m=0;m<run_parameters.tracer_counter;m++) {
 		    tr[m][k][i][j] *= hlst1;
 		    tr[m][k][i][j] = (tr[m][k][i][j] - 
 				      (fluxtr[i][m]-fluxtr[i-1][m])) * Ihnew;
@@ -415,7 +415,7 @@ double hlst[NYMEM];
 /* is being advected.                                                 */
 //#pragma omp for  private(j,m,minslope)
 	    for (j=Y0;j<=ny+1;j++) {
-	      for (m=0;m<NTR;m++) {
+	      for (m=0;m<run_parameters.tracer_counter;m++) {
 		minslope = 4.0*((fabs(tr[m][k][i][j+1]-tr[m][k][i][j]) <
 				 fabs(tr[m][k][i][j]-tr[m][k][i][j-1])) ?
 				(tr[m][k][i][j+1]-tr[m][k][i][j]) : 
@@ -437,7 +437,7 @@ double hlst[NYMEM];
 	    for (j=Y0;j<=ny;j++) {
 	      if (vhr[k][i][j] == 0.0) { 
 		vhh[j] = 0.0;
-		for (m=0;m<NTR;m++) fluxtr[j][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[j][m] = 0.0;
 	      }
 	      else if (vhr[k][i][j] < 0.0) {
 
@@ -457,7 +457,7 @@ double hlst[NYMEM];
 		else vhh[j] = vhr[k][i][j];
 		ts2 = 0.5*(1.0 + vhh[j]/(hvol[k][i][j+1]));
 		
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j+1] - slope[j+1][m]*ts2);
 		}
 	      }
@@ -479,7 +479,7 @@ double hlst[NYMEM];
 		else vhh[j] = vhr[k][i][j];
 		ts2 = 0.5*(1.0 - vhh[j] / (hvol[k][i][j]));
 		
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j] + slope[j][m]*ts2);
 		}
 	      }
@@ -499,7 +499,7 @@ double hlst[NYMEM];
 		hvol[k][i][j] -= (vhh[j] - vhh[j-1]);
 		Ihnew = 1.0 / hvol[k][i][j];
 		vhr[k][i][j] -= vhh[j];
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  tr[m][k][i][j] *= hlst[j];
 		  tr[m][k][i][j] = (tr[m][k][i][j] - 
 				    fluxtr[j][m] + fluxtr[j-1][m]) * Ihnew;
@@ -678,7 +678,7 @@ double hlst[NYMEM];
 	      hnew0[i] = hnew[0][i][j];
 	      bet[i]=1.0/(hnew[0][i][j] + ebr[0][i][j] + wdh[0][i][j]);
 
-	      for (m=0;m<NTR;m++)
+	      for (m=0;m<run_parameters.tracer_counter;m++)
 		  tr[m][0][i][j] = bet[i]*(hnew0[i]*tr[m][0][i][j]);
 	  }
 
@@ -690,13 +690,13 @@ double hlst[NYMEM];
 			      (1.0-gam[k][i])*ear[k][i][j]);
 		  
 
-		  for (m=0;m<NTR;m++)
+		  for (m=0;m<run_parameters.tracer_counter;m++)
 		      tr[m][k][i][j] = bet[i] * (hnew[k][i][j]*tr[m][k][i][j] +
 						 ear[k][i][j]*(tr[m][k-1][i][j]) );
 	      }	      
 	  }
 
-	  for (m=0;m<NTR;m++)
+	  for (m=0;m<run_parameters.tracer_counter;m++)
 	      for (k=NZ-2;k>=0;k--) {
 		  for (i=X1;i<=nx;i++) {
 		      tr[m][k][i][j] += gam[k+1][i]*tr[m][k+1][i][j];
@@ -800,7 +800,7 @@ double hlst[NYMEM];
         hvol[k][0][j]    = hvol[k][nx-1][j];
         hvol[k][1][j]    = hvol[k][nx][j];
 
-        for (m=0;m<NTR;m++) {
+        for (m=0;m<run_parameters.tracer_counter;m++) {
           tr[m][k][nx+1][j] = tr[m][k][2][j];
           tr[m][k][nx+2][j] = tr[m][k][3][j];
           tr[m][k][0][j]    = tr[m][k][nx-1][j];
@@ -826,7 +826,7 @@ double hlst[NYMEM];
         hvol[k][ii][ny+1] = hvol[k][i][ny];
         hvol[k][ii][ny+2] = hvol[k][i][ny-1];
   
-        for (m=0;m<NTR;m++) {
+        for (m=0;m<run_parameters.tracer_counter;m++) {
           tr[m][k][ii][ny+1] = tr[m][k][i][ny];
           tr[m][k][ii][ny+2] = tr[m][k][i][ny-1];
         }
@@ -973,7 +973,7 @@ static void diffuse_tracer()
 #endif
       bet[j]=1.0/(h[0][i][j]-a[1][j]);
 
-      for (m=0;m<NTR;m++)
+      for (m=0;m<run_parameters.tracer_counter;m++)
         tr[m][0][i][j] = bet[j] * h[0][i][j] * tr[m][0][i][j];
     }
     }
@@ -993,7 +993,7 @@ static void diffuse_tracer()
         gam[k][j]=a[k][j]*bet[j];
         bet[j]=1.0/(h[k][i][j] - a[k+1][j] - a[k][j]*(1.0+gam[k][j]));
 
-        for (m=0;m<NTR;m++)
+        for (m=0;m<run_parameters.tracer_counter;m++)
           tr[m][k][i][j]=(h[k][i][j]*tr[m][k][i][j] - 
                           a[k][j]*tr[m][k-1][i][j])*bet[j];
       }
@@ -1005,7 +1005,7 @@ static void diffuse_tracer()
       gam[NZ-1][j]=a[NZ-1][j]*bet[j];
       bet[j]=1.0/(h[NZ-1][i][j] - a[NZ-1][j]*(1.0+gam[k][j]));
 
-      for (m=0;m<NTR;m++)
+      for (m=0;m<run_parameters.tracer_counter;m++)
         tr[m][NZ-1][i][j]=(h[NZ-1][i][j]*tr[m][NZ-1][i][j] - 
                            a[NZ-1][j]*tr[m][NZ-2][i][j])*bet[j];
       }
@@ -1014,7 +1014,7 @@ static void diffuse_tracer()
     for (k=(NZ-2);k>=0;k--) {
       for (j=Y1;j<=ny;j++) {
         if (D[i][j] > MINIMUM_DEPTH)
-        for (m=0;m<NTR;m++)
+        for (m=0;m<run_parameters.tracer_counter;m++)
           tr[m][k][i][j] -= gam[k+1][j]*tr[m][k+1][i][j];
       }
     }
@@ -1160,7 +1160,7 @@ for (k=0;k<NZ;k++) {
 	      Coef_y[ii][ny+2] = Coef_y[i][ny-1];
 	  }
 
-      for (m=0;m<NTR;m++) {
+      for (m=0;m<run_parameters.tracer_counter;m++) {
 
 	  for (i=X1;i<=nx;i++) 
 	      for (j=Y1;j<=ny;j++) 

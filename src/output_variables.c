@@ -37,6 +37,7 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"pcfc12"))	var_idx = 12;
 	if (!strcmp(var_name,"sf6"))	var_idx = 13;
 	if (!strcmp(var_name,"psf6"))	var_idx = 14;
+
 	if (!strcmp(var_name,"ttd"))	var_idx = 15;
 
 #ifdef CONSERVATION_CHECK

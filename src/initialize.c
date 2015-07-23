@@ -18,6 +18,8 @@
 #include "io.h"
 
 #include "ideal_age.h"
+#include "ttd_bp.h"
+#include "cfcs_sf6.h"
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
@@ -127,9 +129,6 @@ void initialize( void )
 	}
 
 	if (run_parameters.do_cfcs) {
-		mCFC11 = run_parameters.tracer_counter++;
-		mCFC12 = run_parameters.tracer_counter++;
-		mSF6 = run_parameters.tracer_counter++;
 		allocate_cfc11( );
 		initialize_cfc11();
 		allocate_cfc12( );
@@ -145,7 +144,6 @@ void initialize( void )
 #endif
 
 	if (run_parameters.do_ttd) {
-		mTTD = run_parameters.tracer_counter++;
 		allocate_ttd();
 		initialize_ttd();
 	}
@@ -251,7 +249,6 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 
 		if (!strcmp(attribute,"do_age")){
-			mAGE = run_parameters.tracer_counter++;
 			run_parameters.do_age = atoi(value);
 		}
 		if (!strcmp(attribute,"age"))
@@ -260,9 +257,6 @@ void set_run_parameters( void )
 			rflags[map_variable_to_index("age")] = atoi(value);
 
 		if (!strcmp(attribute,"do_cfcs")) {
-			mCFC11 = run_parameters.tracer_counter++;
-			mCFC12 = run_parameters.tracer_counter++;
-			mSF6 = run_parameters.tracer_counter++;
 			run_parameters.do_cfcs = atoi(value);
 		}
 		if (!strcmp(attribute,"cfc11"))
@@ -294,7 +288,6 @@ void set_run_parameters( void )
 #endif
 
 		if (!strcmp(attribute,"do_ttd")) {
-			mTTD = run_parameters.tracer_counter++;
 			run_parameters.do_ttd = atoi(value);
 		}
 		if (!strcmp(attribute,"ttd"))
@@ -306,5 +299,16 @@ void set_run_parameters( void )
 		 
 	}
 
-
+	
+	if (run_parameters.do_age) {
+		mAGE = run_parameters.tracer_counter++;
+	}
+	if (run_parameters.do_ttd) {
+		mTTD = run_parameters.tracer_counter++;
+	}
+	if (run_parameters.do_cfcs) { 
+		mCFC11 = run_parameters.tracer_counter++;
+		mCFC12 = run_parameters.tracer_counter++;
+		mSF6 = run_parameters.tracer_counter++;
+	}
 }

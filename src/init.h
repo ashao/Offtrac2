@@ -39,33 +39,22 @@
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
 
-#define NOCONC
+#define NOCONC			/* Use partial pressure instead of
+				 concentration for CFCS */
 #undef	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
-#undef TTD
 
 #define TRNCINIT	       /* read in initial tracers values from */
 			       /* netCDF files -- otherwise initialize*/
 			       /* analytically 			      */
-
-#define NTR 5                 /*  The number of tracers to carry.    */
-                               /*  Must add up to total of AGE,       */
-                               /*    OXYGEN, O18, (CFC11 + CFC12),    */
-                               /*    (DOP + PHOSPHATE), (DIC + ALK)   */
-                               /*    (NO3 + DON)                      */
-                               /*    (15NO3 + DO15N), SF6
-				/* CFC11_sat, CFC12_sat, SF6_sar ashao    */
 
 #define NOVARS 19              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */
 
-#define BEGYEAR 1947			/* ashao: Set the start year, for
- 	 	 	 	 	 	 	 	 tracers with atmospheric histories */
-
 #undef HINDCAST			/* Expect to read in hindcasat fields */
 #define BEGHIND 1948        /* The first year of hindcast fields */
-#define ENDHIND 2007 		/* Last year of hindcast fields */
+#define ENDHIND 2009 		/* Last year of hindcast fields */
 
 #define SEPFILES              /* For use with separate input files for    */
                               /* U,V,W,H                                */
@@ -269,7 +258,3 @@
 # undef SMOOTH_REST
 #endif
 
-// OXYGEN MACROS
-#define NZWOA 33
-#define MEAN_5DAY
-#define NUM5DAY 73
