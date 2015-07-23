@@ -111,7 +111,7 @@ int main( int argc, char *argv[] )
 	struct vardesc var_out[NOVARS];
 	struct varcdfinfo varinfo[NOVARS];
 	int nvar = 0, cdfid, timeid[2];
-	
+
 
 	double *timeptr;
 
@@ -177,14 +177,14 @@ int main( int argc, char *argv[] )
 	alloc_fields();
 
 	/* initialize tracer pointers					*/
-/*
+	/*
 	for (m = 0; m < NOVARS; m++)
 	{
 		if (flags[m])
 			for (k = 0; k < varsize[m]; k++)
 				var[m][k] = 0.0;
 	}
-*/
+	 */
 
 
 	/*-------------------------------------------------------------------*
@@ -204,14 +204,12 @@ int main( int argc, char *argv[] )
 		 *
 		 *----------------------------------*/
 		update_timekeeper( );
-//		printf("Iteration counter: %d\n",timekeeper.iteration_counter);
+		//		printf("Iteration counter: %d\n",timekeeper.iteration_counter);
 		printf("Iteration: %d Year: %d Interval: %d Ending timestamp: %f\n",
-			timekeeper.iteration_counter,timekeeper.current_year,
-			timekeeper.current_interval,timekeeper.current_time);
-  		printf("UHTM: %f VHTM: %f WD: %e\n",uhtm[2][100][100],vhtm[2][100][100],wd[2][102][102]);
-  		printf("Start: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
-		step_fields( ); 
-  		printf("End: tr[0][1][100][100]=%f\n",tr[0][1][100][100]);
+				timekeeper.iteration_counter,timekeeper.current_year,
+				timekeeper.current_interval,timekeeper.current_time);
+		printf("UHTM: %f VHTM: %f WD: %e\n",uhtm[2][100][100],vhtm[2][100][100],wd[2][102][102]);
+		step_fields( );
 
 
 		/*-------------------------------------------------------------------*
@@ -251,7 +249,7 @@ int main( int argc, char *argv[] )
 			for (m = 0; m < NOVARS; m++)
 				if (flags[m]==1)
 				{
-//					printf("m = %d\n",m);
+					//					printf("m = %d\n",m);
 					err = write_field(cdfid, fn, vars[m],
 							varinfo[varmap[m]], timekeeper.num_records, var[m]);
 					if (err == -1)
@@ -277,7 +275,7 @@ int main( int argc, char *argv[] )
 				set_darray3d_zero(mn_psf6, NZ, NXMEM, NYMEM);
 			}
 			if (run_parameters.do_ttd)	set_darray3d_zero(mn_ttd, NZ, NXMEM, NYMEM);
-//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
+			//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
 
 		} /*  end if nmn==WRITEINT */
@@ -368,7 +366,7 @@ void alloc_fields(void)
 
 		//HF if ( m>3 )    {
 		//HF: added mn_h
-//		if (m >= 3)
+		//		if (m >= 3)
 		{
 			switch (vars[m].z_grid)
 			{
@@ -402,17 +400,17 @@ void alloc_fields(void)
 			//      printf("Allocated memory for var[%d],%s.\n\n",m,vars[m].name);
 
 		}
-//		else
-//		{
-			varsize[m] = 0;
-//		}
+		//		else
+		//		{
+		varsize[m] = 0;
+		//		}
 	}
 
-/*	var[map_variable_to_index("D")] = &D[0][0];
+	/*	var[map_variable_to_index("D")] = &D[0][0];
 	var[map_variable_to_index("geolat")] = &geolat[0][0];
 	var[map_variable_to_index("geolon")] = &geolon[0][0];
 	var[map_variable_to_index("wetmask")] = &geolon[0][0];
-*/
+	 */
 	var[map_variable_to_index("uhtm")] = &mn_uhtm[0][0][0];
 	var[map_variable_to_index("vhtm")] = &mn_vhtm[0][0][0];
 	var[map_variable_to_index("wd")] = &mn_wd[0][0][0];
@@ -429,13 +427,11 @@ void alloc_fields(void)
 		var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
 	}
 #ifdef CONSERVATION_CHECK
-        var[map_variable_to_index("test")] = &mn_test[0][0][0];
-        var[map_variable_to_index("test_inventory")] = &test_inventory;
-        var[map_variable_to_index("htest")] = &htest[0][0][0];
+	var[map_variable_to_index("test")] = &mn_test[0][0][0];
+	var[map_variable_to_index("test_inventory")] = &test_inventory;
+	var[map_variable_to_index("htest")] = &htest[0][0][0];
 #endif
-#ifdef TTD
 	var[map_variable_to_index("ttd")] = &mn_ttd[0][0][0];
-#endif
 	//var[18] = &mn_rml[0][0][0];
 
 	// end ashao

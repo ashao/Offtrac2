@@ -39,20 +39,16 @@
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
 
-#define NOCONC			/* Use partial pressure instead of
+#undef NOCONC			/* Use partial pressure instead of
 				 concentration for CFCS */
-#undef	CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
+#undef CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
 
-#define TRNCINIT	       /* read in initial tracers values from */
-			       /* netCDF files -- otherwise initialize*/
-			       /* analytically 			      */
 
 #define NOVARS 19              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */
 
-#undef HINDCAST			/* Expect to read in hindcasat fields */
 #define BEGHIND 1948        /* The first year of hindcast fields */
 #define ENDHIND 2009 		/* Last year of hindcast fields */
 
@@ -60,13 +56,6 @@
                               /* U,V,W,H                                */
                               /* Files are assumed to be shifted by one */
                               /* month, i.e. uvw leads h                */
-
-#define NMONTHS 12           /* Number of months in forcing field    */
-                             /* before repetition. E.g., for 10 year  */
-                             /* forcing file use 120, 564 for 47yrs */
-
-#define WRINT 1                /*  Number of months between writes AND */
-                               /*   the mean interval for each write   */
 
 #define NTSTEP 1                /*  Number of time steps between       */ 
                                /*  reading of forcing fields          */
@@ -78,15 +67,6 @@
 
 #undef WRTTS                  /* Write output after each sub time step */
                               /* for debugging - 04AUG08 BX           */
-
-#ifdef VARIAB_FORC
-
-# define TS_VARIAB             /* Specify if T and S are read from 
-				  variable time-series. If undefined
-				  read one year climatology.         */
-# define ICE_VARIAB             /* If undefined read one year          */
-                               /* climatology--not implemented yet    */
-#endif
 
 /* Specify if wd is read in, otherwise we read in ea, eb, eaml        */
 #undef ENTRAIN                 /* Define how we get diapycnal Velocity*/
@@ -121,6 +101,7 @@
                                /*  and meridional directions of the   */
                                /*  physical domain.                   */
 #define NZ  49                 /*    The number of layers.            */
+#define NML 2					/* Number of layers in the mixed layer */
 
 #ifdef SERIAL_IO_CODE          /*    SERIAL_IO_CODE is specified on   */
                                /*  the compile line of postprocessing */
@@ -151,8 +132,9 @@
                                /*  in NetCDF format or in unformatted */
                                /*  C binary.                          */
 #endif
+#define NETCDF4					/*	Enable netCDF4 output which uses
+									chunking for better read performance */
 
-#define NETCDF4
 #ifdef PARALLEL_X
 #define NXPROC 2               /*    NXPROC is the minimum number of  */
                                /*  processors in the x-direction.     */
@@ -250,11 +232,6 @@
 #define KD   1.00e-5		/* was 1.00e-5		*/
 #endif
 
-#define NML 2
 
-#define MDT 4800
-//HF
-#ifndef RESTART
-# undef SMOOTH_REST
-#endif
+
 

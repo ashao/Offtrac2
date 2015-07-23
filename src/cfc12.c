@@ -48,34 +48,34 @@ void initialize_cfc12 ( ) {
 	extern struct vardesc vars[NOVARS];
 
 	printf("CFC-12 index in main tracer array: %d\n",mCFC12);
-        printf("Setting CFC-12 variable description...");
-        strcpy(varname,"cfc12");
-        strcpy(vars[map_variable_to_index(varname)].name,"mn_cfc12");
-        strcpy(vars[map_variable_to_index(varname)].longname,"CFC-12 volumetric concentration");
-        vars[map_variable_to_index(varname)].hor_grid='h';
-        vars[map_variable_to_index(varname)].z_grid='L';
-        vars[map_variable_to_index(varname)].t_grid='s';
-        strcpy(vars[map_variable_to_index(varname)].units,"pmol/L");
-        vars[map_variable_to_index(varname)].mem_size='d';
-        vars[map_variable_to_index(varname)].mval=MISVAL;
+	printf("Setting CFC-12 variable description...");
+	strcpy(varname,"cfc12");
+	strcpy(vars[map_variable_to_index(varname)].name,"mn_cfc12");
+	strcpy(vars[map_variable_to_index(varname)].longname,"CFC-12 volumetric concentration");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='L';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"pmol/L");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
 
-        strcpy(varname,"pcfc12");
-        strcpy(vars[map_variable_to_index(varname)].name,"mn_pcfc12");
-        strcpy(vars[map_variable_to_index(varname)].longname,"Partial pressure of CFC-12");
-        vars[map_variable_to_index(varname)].hor_grid='h';
-        vars[map_variable_to_index(varname)].z_grid='L';
-        vars[map_variable_to_index(varname)].t_grid='s';
-        strcpy(vars[map_variable_to_index(varname)].units,"parts-per-trillion");
-        vars[map_variable_to_index(varname)].mem_size='d';
-        vars[map_variable_to_index(varname)].mval=MISVAL;
-        printf("DONE\n");
+	strcpy(varname,"pcfc12");
+	strcpy(vars[map_variable_to_index(varname)].name,"mn_pcfc12");
+	strcpy(vars[map_variable_to_index(varname)].longname,"Partial pressure of CFC-12");
+	vars[map_variable_to_index(varname)].hor_grid='h';
+	vars[map_variable_to_index(varname)].z_grid='L';
+	vars[map_variable_to_index(varname)].t_grid='s';
+	strcpy(vars[map_variable_to_index(varname)].units,"parts-per-trillion");
+	vars[map_variable_to_index(varname)].mem_size='d';
+	vars[map_variable_to_index(varname)].mval=MISVAL;
+	printf("DONE\n");
 
 
 
-        if (run_parameters.restart_flag) {
-                printf("Initializing CFC-1@ from restart %s\n",run_parameters.restartfile);
-                read_var3d( run_parameters.restartfile, "mn_cfc12", 0, cfc12_init);
-        }
+	if (run_parameters.restart_flag) {
+		printf("Initializing CFC-1@ from restart %s\n",run_parameters.restartfile);
+		read_var3d( run_parameters.restartfile, "mn_cfc12", 0, cfc12_init);
+	}
 	else	set_darray3d_zero(cfc12_init,NZ,NXMEM,NYMEM);
 
 	for(i=0;i<NXMEM;i++)
@@ -101,17 +101,17 @@ void cfc12_saturation(  ) {
 				if(oceanmask[i][j]) {
 					TempK = Temptm[k][i][j]+273.15;
 					work = solcoeffs[0] + solcoeffs[1]*(100/TempK) +solcoeffs[2]*log( TempK/100 ) +
-						solcoeffs[3]*pow(TempK/100,2) + Salttm[k][i][j]*(solcoeffs[4]+
-						solcoeffs[5]*(TempK/100)+solcoeffs[6]*pow(TempK/100,2));
-						cfc12_sol[k][i][j] = exp(work);
-	
-						if (k<NML) cfc12_sat[i][j] = cfc12_sol[k][i][j]*cfc12_atmconc[i][j];
+							solcoeffs[3]*pow(TempK/100,2) + Salttm[k][i][j]*(solcoeffs[4]+
+									solcoeffs[5]*(TempK/100)+solcoeffs[6]*pow(TempK/100,2));
+					cfc12_sol[k][i][j] = exp(work);
+
+					if (k<NML) cfc12_sat[i][j] = cfc12_sol[k][i][j]*cfc12_atmconc[i][j];
 				}		
 				else {
 					cfc12_sol[k][i][j] = 0.0;
 					cfc12_sat[i][j] = 0.0;
 				}
-				
+
 			}
 
 
@@ -128,16 +128,16 @@ void cfc12_find_atmconc(  ) {
 	double currtime;
 	double hemisphere_concentrations[2];
 	extern struct timekeeper_t timekeeper;
-	
+
 	currtime = timekeeper.current_time;
 
 	// Interpolate in time to find the atmospheric concentration
 	hemisphere_concentrations[0] = linear_interpolation(
-		atmconc[CFC12IDX].time, atmconc[CFC12IDX].nval, currtime,NUMATMVALS);
+			atmconc[CFC12IDX].time, atmconc[CFC12IDX].nval, currtime,NUMATMVALS);
 	hemisphere_concentrations[1] = linear_interpolation(
-		atmconc[CFC12IDX].time, atmconc[CFC12IDX].sval, currtime,NUMATMVALS);
-	
-for (i=0;i<NXMEM;i++)
+			atmconc[CFC12IDX].time, atmconc[CFC12IDX].sval, currtime,NUMATMVALS);
+
+	for (i=0;i<NXMEM;i++)
 		for (j=0;j<NYMEM;j++) {
 
 			if (hlat[j] < equatorbound[0] && hlat[j] > equatorbound[1]) {
@@ -165,29 +165,24 @@ void surface_cfc12( ) {
 	cfc12_saturation(  );
 
 	printf("CFC12 atmospheric values %d\n",NUMATMVALS);
-	i=100;
-	printf("%f %f\n",atmconc[mCFC12].time[i],atmconc[mCFC12].nval[i]);
-
-        printf("CFC-12 Sample Point\n");
-        printf("\tTime: %f\n",timekeeper.current_time);
-        printf("\tAtmospheric Concentration: %f\n",cfc12_atmconc[100][100]);
-        printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
-        printf("\tSolubility: %f\tSaturation: %f\n\n",cfc12_sol[0][100][100],cfc12_sat[100][100]);
-
-
+	printf("CFC-12 Sample Point\n");
+	printf("\tTime: %f\n",timekeeper.current_time);
+	printf("\tAtmospheric Concentration: %f\n",cfc12_atmconc[100][100]);
+	printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
+	printf("\tSolubility: %f\tSaturation: %f\n\n",cfc12_sol[0][100][100],cfc12_sat[100][100]);
 
 
 #ifdef NOCONC
-        for (k=0;k<NML;k++)
-                for (i=0;i<NXMEM;i++)
+	for (k=0;k<NML;k++)
+		for (i=0;i<NXMEM;i++)
 			for (j=0;j<NYMEM;j++)
-                        tr[mCFC12][k][i][j] = cfc12_atmconc[i][j];
+				tr[mCFC12][k][i][j] = cfc12_atmconc[i][j];
 
 #else
-        for (k=0;k<NML;k++)
-                for (i=0;i<NXMEM;i++)
-                        for (j=0;j<NYMEM;j++)
-                                tr[mCFC12][k][i][j]=cfc12_sat[i][j];
+	for (k=0;k<NML;k++)
+		for (i=0;i<NXMEM;i++)
+			for (j=0;j<NYMEM;j++)
+				tr[mCFC12][k][i][j]=cfc12_sat[i][j];
 
 #endif
 
