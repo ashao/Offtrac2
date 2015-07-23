@@ -15,6 +15,9 @@
 #include "string.h"
 #include "initialize.h"
 #include "timekeeper.h"
+#include "util.h"
+#include "output_variables.h"
+
 double ***mn_sf6;
 double ***sf6_init;
 
@@ -120,7 +123,6 @@ void sf6_find_atmconc(  ) {
 
 	int i,j;
 	extern double hlat[NYMEM];
-	extern double **atmpres;
 	const double equatorbound[2] = {10,-10}; // Set the latitudes where to start interpolating atmospheric concentrations
 	double hemisphere_concentrations[2];
 	double currtime;

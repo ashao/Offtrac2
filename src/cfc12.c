@@ -15,6 +15,8 @@
 #include "io.h"
 #include "initialize.h"
 #include "timekeeper.h"
+#include "util.h"
+#include "output_variables.h"
 
 double ***mn_cfc12;
 double ***cfc12_init;
@@ -123,7 +125,6 @@ void cfc12_find_atmconc(  ) {
 
 	int i,j;
 	extern double hlat[NYMEM];
-	extern double **atmpres;
 	const double equatorbound[2] = {10,-10}; // Set the latitudes where to start interpolating atmospheric concentrations
 	double currtime;
 	double hemisphere_concentrations[2];

@@ -8,6 +8,13 @@
 #include "alloc.h"
 #include "par_IO.h"
 
+int alloc_error(char* arr_name)
+{
+	fprintf(stderr,"not enough memory for %s!\n", arr_name);
+	quit(2);
+	return 2;
+}
+
 
 int alloc_arrays() {
 	extern double ***h, ***hstart, ***hend, ***htest;
@@ -39,9 +46,3 @@ int alloc_arrays() {
 	return 0;
 }
 
-int alloc_error(char* arr_name)
-{
-	fprintf(stderr,"not enough memory for %s!\n", arr_name);
-	quit(2);
-	return 2;
-}

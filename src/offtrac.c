@@ -29,6 +29,8 @@
 #include "read.h"
 #include "tracer_utilities.h"
 #include "timekeeper.h"
+#include "output_variables.h"
+#include "step.h"
 
 #include "ideal_age.h"
 #include "cfcs_sf6.h"
@@ -101,7 +103,6 @@ int main( int argc, char *argv[] )
 {
 
 	int err, i, j, k;
-	double frac;
 	static int m;
 
 	int varmap[NOVARS];
@@ -352,7 +353,6 @@ void alloc_fields(void)
 	int m;
 
 	extern double *var[NOVARS];
-	extern double junk[(NZ + 1) * (NXMEM) * (NYMEM)];
 	extern long varsize[NOVARS];
 	extern int flags[NOVARS];
 

@@ -9,6 +9,7 @@
 #include "io.h"
 #include "util.h"
 #include "output_variables.h"
+#include "read.h"
 
 // Auxiliary variables
 int mAGE;
@@ -26,8 +27,6 @@ extern struct parameters run_parameters;
 
 void allocate_age (  ) {
 	printf("Allocating age arrays\n");
-
-	int i, j, k;
 
 	// Allocate working and output arrays
 	mn_age = alloc3d(NZ,NXMEM,NYMEM);

@@ -305,7 +305,6 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 	char infile[25], inpath[1000];
 	FILE *file;
 	int status;
-	int nmonths;
 	double fact0,fact1,fact2;
 
 	int uhfileid,vhfileid,wdfileid;
@@ -614,7 +613,6 @@ void read_var2d( char *inpath, char *varname, double **data)
 
 	int i,j;
 	int err, cdfid, timeid, varid;
-	char infile[100];
 	FILE *file;
 	int status;
 	size_t start[MAX_NC_VARS];

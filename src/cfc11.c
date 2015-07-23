@@ -17,6 +17,8 @@
 #include <netcdf.h>
 #include <string.h>
 #include "io.h"
+#include "util.h"
+#include "output_variables.h"
 
 double ***mn_cfc11;
 double ***cfc11_init;
@@ -54,17 +56,15 @@ void allocate_cfc11 ( ) {
 
 void read_tracer_boundary ( ) {
 
-	int err, i, j, cdfid, timeid;
-	int status, varid;
+	int i, cdfid, timeid;
+	unsigned int status, varid;
 	char infile[25], inpath[200];
 	FILE *file;
 	long  start[MAX_NC_VARS];
 	long  end[MAX_NC_VARS];
 	char varname[20];
-	const int numatm = NUMATMVALS;
 	extern struct parameters run_parameters;
 
-	int tempidx;
 	sprintf(infile,"cfc_sf6_bc.nc");
 	strcpy(inpath, run_parameters.forcing_path);
 	strcat(inpath, infile);

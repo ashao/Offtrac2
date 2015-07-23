@@ -10,6 +10,7 @@
 #include "util.h"
 #include "output_variables.h"
 #include "timekeeper.h"
+#include "read.h"
 
 // Auxiliary variables
 int mTTD;
@@ -27,8 +28,6 @@ extern struct timekeeper_t timekeeper;
 
 void allocate_ttd (  ) {
 	printf("Allocating TTD  arrays\n");
-
-	int i, j, k;
 
 	// Set index in tracer array
 
@@ -102,7 +101,7 @@ void initialize_ttd( ) {
 
 void step_ttd(  ){
 
-	int i,j,k;
+	int i,j;
 
 	if (timekeeper.iteration_counter < run_parameters.num_ttd_intervals) {
 		for(i=0;i<NXMEM;i++)
