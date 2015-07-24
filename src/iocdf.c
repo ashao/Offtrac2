@@ -1136,8 +1136,9 @@ void read_field(int cdfid, FILE *fileptr, char varname[],
     if (((size_x == NXTOT) || (size_x == NXTOT+1)) &&
         ((size_y == NYTOT) || (size_y == NYTOT+1)))
     {
-      for (k=start_array_z;k<size_z+start_array_z;k++) 
-        err *= read_layer(variable+k*NXMEM*NYMEM,fileptr,flt);
+      for (k=start_array_z;k<size_z+start_array_z;k++)
+	printf("USING THIS\n"); 
+//        err *= read_layer(variable+k*NXMEM*NYMEM,fileptr,flt);
     }
     else if (((size_x == 0) && (size_y == 0))) {
       if (pe_here == 0) err *= fread((void *)variable,8*size_z,1,fileptr);

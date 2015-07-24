@@ -56,12 +56,13 @@ void allocate_cfc11 ( ) {
 
 void read_tracer_boundary ( ) {
 
-	int i, cdfid, timeid;
-	unsigned int status, varid;
+	int i, cdfid, timeid, err;
+	unsigned int status; 
+	int varid;
 	char infile[25], inpath[200];
 	FILE *file;
-	long  start[MAX_NC_VARS];
-	long  end[MAX_NC_VARS];
+	unsigned long  start[MAX_NC_VARS];
+	unsigned long  end[MAX_NC_VARS];
 	char varname[20];
 	extern struct parameters run_parameters;
 

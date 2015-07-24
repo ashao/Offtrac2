@@ -63,6 +63,7 @@ void initialize_timekeeper( void ) {
 
 void update_timekeeper( void ) {
 
+	struct timespec wallclock;
 	timekeeper.current_interval++;
 	timekeeper.averaging_counter++;
 	timekeeper.current_time = timekeeper.current_year + (double) (timekeeper.current_interval+1)/timekeeper.num_intervals_year;
@@ -88,6 +89,7 @@ void update_timekeeper( void ) {
 		exit(-1);
 	}
 	timekeeper.accumulated_time_since_writing+=timekeeper.dt;
+
 
 }
 

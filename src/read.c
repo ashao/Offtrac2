@@ -43,8 +43,8 @@ void read_grid()
 	double dyh_in[NYTOT][NXTOT], dyq_in[NYTOT][NXTOT];
 	double dyu_in[NYTOT][NXTOT], dyv_in[NYTOT][NXTOT];
 
-	long  start[MAX_NC_VARS];
-	long  end[MAX_NC_VARS];
+	unsigned long  start[MAX_NC_VARS];
+	unsigned long  end[MAX_NC_VARS];
 
 	sprintf(infile,"metrics.nc");
 
@@ -65,7 +65,7 @@ void read_grid()
 	end[0] = NYTOT;
 	end[1] = NXTOT;
 
-	printf("end %d %d\n",end[0],end[1]);
+//	printf("end %d %d\n",end[0],end[1]);
 	//HF
 	status = nc_inq_varid(cdfid, "latq", &varid);
 	if (status != NC_NOERR) handle_error("inq latq", status);

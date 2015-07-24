@@ -29,8 +29,6 @@ extern struct vardesc vars[NOVARS];
 extern struct parameters run_parameters;
 // end ashao
 
-
-
 void initialize( void )
 {
 	/* Arguments: mon - Time of the start of the run in months.             */

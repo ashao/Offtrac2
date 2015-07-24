@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include "io.h"
 #include "init.h"
 #include "metrics.h"
@@ -65,7 +66,7 @@ void step_fields( ) {
 	int ii;
 
 	const double secperyr = 365.25 * 60 * 60 * 24;
-
+	struct timespec startclock, endclock;
 	/*-----------------------------------------
 	 *
 	 *     PARAMETER VALUES
@@ -90,6 +91,7 @@ void step_fields( ) {
 	 *-----------------------------------------*/
 
 	update_transport_fields( );
+	clock_gettime(CLOCK_MONOTONIC, &startclock); 
 	printf("Calculate tracer transport. \n");
 	tracer( 0  ); /* perform transport time step */
 	merge_ml_tr();
@@ -138,8 +140,8 @@ void step_fields( ) {
 
 	merge_ml_tr();
 
-
-
+        clock_gettime(CLOCK_MONOTONIC, &endclock);
+	printf("Current step elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
 
 
 	/*-----------------------------------------
@@ -199,6 +201,7 @@ void step_fields( ) {
 	}
 
 	if (run_parameters.do_ttd)	submit_for_averaging( mn_ttd, tr[mTTD] );
+	printf("\n");
 
 	//	apply_mask(mn_h,oceanmask);
 	//	apply_mask(mn_uhtm,oceanmask);

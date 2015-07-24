@@ -94,7 +94,7 @@ void step_test( double dt ){
 					tr[mTEST][k][i][j] = 1.;
 	}
 			
-	test_inventory=calc_inventory(tr[mTEST]);
-	printf("Test tracer inventory: %e\n", calc_inventory(tr[mTEST]));
+//	test_inventory=calc_inventory(tr[mTEST]);
+	//printf("Test tracer inventory: %e\n", calc_inventory(tr[mTEST]));
 
 }
