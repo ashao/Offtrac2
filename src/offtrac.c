@@ -309,6 +309,7 @@ int main( int argc, char *argv[] )
 	rflags[map_variable_to_index("hlay")] = 1;
 
 	if (run_parameters.do_age) copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
+	if (run_parameters.do_ttd) copy_darray3d(mn_ttd,tr[mTTD],NZ,NXMEM,NYMEM);
 
 	/* Copy the variable descriptions to a list of the actual restart variables. */
 	nvar = 0;

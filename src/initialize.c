@@ -169,14 +169,17 @@ void set_run_parameters( void )
 
 	FILE *ptr_file;
 	char attribute[100], value[100];
-	char *line_read;
+	char *line_read = NULL;
 	ssize_t read;
-	size_t len;
+	size_t len = 0;
+	char fname[100];
+
+	strcpy(fname,run_parameters.namelist_file);
 
 	extern int flags[NOVARS], rflags[NOVARS];
 
 	printf("reading parameters\n");
-	ptr_file = fopen(run_parameters.namelist_file,"r");
+	ptr_file = fopen(fname,"r");
 	if (ptr_file == NULL) {
 		printf("Error: Cannot open %s\n",run_parameters.namelist_file);
 		exit(1);
@@ -296,7 +299,8 @@ void set_run_parameters( void )
 			run_parameters.num_ttd_intervals = atoi(value);
 		 
 	}
-
+	free(line_read);
+	fclose(ptr_file);
 	
 	if (run_parameters.do_age) {
 		mAGE = run_parameters.tracer_counter++;
