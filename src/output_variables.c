@@ -41,6 +41,9 @@ int map_variable_to_index( char *var_name ) {
 
 	if (!strcmp(var_name,"ttd"))	var_idx = 15;
 
+	if (!strcmp(var_name,"n2"))	var_idx = 16;
+	if (!strcmp(var_name,"n2sol"))	var_idx = 17;
+
 #ifdef CONSERVATION_CHECK
 	if (!strcmp(var_name,"test"))		var_idx = 8;
 	if (!strcmp(var_name,"test_inventory"))	var_idx = 9;

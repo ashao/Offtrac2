@@ -1,10 +1,3 @@
-/*
- * oxygen.h
- *
- *  Created on: Apr 15, 2014
- *      Author: ashao
- */
-
 #include "init.h"
 extern int mTTD;
 // Output arrays

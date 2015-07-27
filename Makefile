@@ -54,7 +54,10 @@ SRCDIR = src
 #CFLAGS= -ip -ipo -inline-level=2 -xhost -O3 -g -lpthread 
 
 CDFFLAGS= -lnetcdf
-
+# Make sure to add the Gibbs Seawater routines
+GSW_DIR= aux_src/gsw_c_v3.03/
+GSW_LIB= (GSW_DIR)/libgswteos-10.so
+GSW_INC= -I($GSW_DIR)
 
 OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/initialize.c $(SRCDIR)/iocdf.c $(SRCDIR)/par_IO.c \
@@ -70,10 +73,9 @@ OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/cfc11.c $(SRCDIR)/cfc12.c $(SRCDIR)/sf6.c \
 	$(SRCDIR)/ttd_bp.c
 
-offtrac: $(OFFSRC) $(SRCDIR)/init.h
+offtrac: $(OFFSRC) $(SRCDIR)/init.h 
 	echo compiling $(OUTNAME)
-	$(CC)  $(OFFSRC) -o $(OUTNAME) $(CDFFLAGS) $(CFLAGS) $(LDFLAGS)
-	rm -f off offsf6
+	$(CC)  $(OFFSRC) -o $(OUTNAME) $(CDFFLAGS) $(CFLAGS) $(LDFLAGS) $(GSW_LIB)		
 
 propre:
 	rm -f *.o *.u

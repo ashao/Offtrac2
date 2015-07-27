@@ -297,7 +297,16 @@ void set_run_parameters( void )
 			rflags[map_variable_to_index("ttd")] = atoi(value);
 		if (!strcmp(attribute,"num_ttd_intervals"))
 			run_parameters.num_ttd_intervals = atoi(value);
-		 
+
+		if (!strcmp(attribute,"do_n2"))
+			run_parameters.do_n2 = atoi(value);
+		if (!strcmp(attribute,"n2"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"n2sol"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"n2_restart"))
+			rflags[map_variable_to_index(attribute)] = atoi(value);
+
 	}
 	free(line_read);
 	fclose(ptr_file);
@@ -313,4 +322,8 @@ void set_run_parameters( void )
 		mCFC12 = run_parameters.tracer_counter++;
 		mSF6 = run_parameters.tracer_counter++;
 	}
+	if (run_parameters.do_n2) {
+		mN2 = run_parameters.tracer_counter++;
+	}
+
 }

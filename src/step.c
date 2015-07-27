@@ -137,6 +137,7 @@ void step_fields( ) {
 
 
 	if (run_parameters.do_ttd)	step_ttd();
+	if (run_parameters.do_n2)	step_n2();
 
 	merge_ml_tr();
 
@@ -201,12 +202,15 @@ void step_fields( ) {
 	}
 
 	if (run_parameters.do_ttd)	submit_for_averaging( mn_ttd, tr[mTTD] );
+	if (run_parameters.do_n2)	{
+
+		submit_for_averaging( mn_n2, tr[mN2] );
+		submit_for_averaging( mn_n2sol, n2sol );
+	}
+
+
 	printf("\n");
 
-	//	apply_mask(mn_h,oceanmask);
-	//	apply_mask(mn_uhtm,oceanmask);
-	//	apply_mask(mn_vhtm,oceanmask);
-	//	apply_mask(mn_wd,oceanmask);
 
 
 	/*-----------------------------------------

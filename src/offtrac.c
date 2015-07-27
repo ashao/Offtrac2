@@ -275,6 +275,11 @@ int main( int argc, char *argv[] )
 				set_darray3d_zero(mn_psf6, NZ, NXMEM, NYMEM);
 			}
 			if (run_parameters.do_ttd)	set_darray3d_zero(mn_ttd, NZ, NXMEM, NYMEM);
+
+			if (run_parameters.do_n2) {
+				set_darray3d_zero(mn_n2, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_n2sol, NZ, NXMEM, NYMEM);
+			}
 			//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
 
@@ -310,6 +315,7 @@ int main( int argc, char *argv[] )
 
 	if (run_parameters.do_age) copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
 	if (run_parameters.do_ttd) copy_darray3d(mn_ttd,tr[mTTD],NZ,NXMEM,NYMEM);
+	if (run_parameters.do_n2) copy_darray3d(mn_n2,tr[mN2],NZ,NXMEM,NYMEM);
 
 	/* Copy the variable descriptions to a list of the actual restart variables. */
 	nvar = 0;
@@ -422,6 +428,10 @@ void alloc_fields(void)
 		var[map_variable_to_index("psf6")] = &mn_psf6[0][0][0];
 	}
 	if (run_parameters.do_ttd) var[map_variable_to_index("ttd")] = &mn_ttd[0][0][0];
+	if (run_parameters.do_n2) {
+		var[map_variable_to_index("n2")] = &mn_n2[0][0][0];
+		var[map_variable_to_index("n2sol")] = &mn_n2sol[0][0][0];
+	}
 	//var[18] = &mn_rml[0][0][0];
 
 	// end ashao
