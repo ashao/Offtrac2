@@ -35,8 +35,10 @@
 #include "ideal_age.h"
 #include "cfcs_sf6.h"
 #include "ttd_bp.h"
+#include "n2_module.h"
 /*-------------------------------------------------------------------*
  *                                                                   *
+ *
  *     define variables and subroutines
  *                                                                   *
  *-------------------------------------------------------------------*/

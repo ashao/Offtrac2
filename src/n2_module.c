@@ -22,7 +22,7 @@
 #include "n2_module.h"
 #include "alloc.h"
 #include "init.h"
-
+#include "gsw_src/gswteos-10.h"
 
 // Auxiliary variables
 int mN2;
@@ -107,7 +107,7 @@ void initialize_n2( ) {
 				else tr[mN2][k][i][j] = 0.0;
 			}
 
-	copy_darray3d(mn_n2,tr[mAGE],NZ,NXMEM,NYMEM);
+	copy_darray3d(mn_n2,tr[mN2],NZ,NXMEM,NYMEM);
 	printf("N2 init example: %f\n",tr[mN2][15][100][100]);
 	free3d(n2_init,NZ);
 
@@ -154,11 +154,11 @@ void calc_n2_saturation( ) {
 
 	int i,j,k;
 
-	double work, pden;
-	double temp_S, S; // scaled temperature;
+	double pden;
+	double temp_S, S; // scaled temperature, salinity
 	double conc_N2;
-	extern double ***Temp;
-	extern double ***Salt;
+	extern double ***Temptm;
+	extern double ***Salttm;
 
 
 	for (k=0;k<NZ;k++)
@@ -167,17 +167,18 @@ void calc_n2_saturation( ) {
 
 				if(oceanmask[i][j])
 				{
-					temp_S = log((298.15-Temp[k][i][j])/(273.15+Temp[k][i][j]));
-					S = Salt[k][i][j];
+					temp_S = log((298.15-Temptm[k][i][j])/(273.15+Temptm[k][i][j]));
+					S = Salttm[k][i][j];
 					conc_N2 = n2_props.sat_coeffs[0] +
 							n2_props.sat_coeffs[1]*temp_S +
 							n2_props.sat_coeffs[2]*pow(temp_S,2.) +
-							n2_props.sat_coeffs[3]*pow(temp_S,3 ) +
+							n2_props.sat_coeffs[3]*pow(temp_S,3. ) +
 							S*(n2_props.sat_coeffs[4] +
 									n2_props.sat_coeffs[5]*temp_S +
-									n2_props.sat_coeffs[6]*pow(temp_S,2));
+									n2_props.sat_coeffs[6]*pow(temp_S,2.));
 
-					pden = gsw_pot_rho_t_exact(S,Temp[k][i][j],2000,2000);
+					conc_N2 = exp(conc_N2);
+					pden = gsw_rho_t_exact(S,Temptm[k][i][j],2000.0);
 					n2sol[k][i][j] = conc_N2 / pden;
 
 				}

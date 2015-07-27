@@ -20,6 +20,7 @@
 #include "ideal_age.h"
 #include "ttd_bp.h"
 #include "cfcs_sf6.h"
+#include "n2_module.h"
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
@@ -144,6 +145,11 @@ void initialize( void )
 	if (run_parameters.do_ttd) {
 		allocate_ttd();
 		initialize_ttd();
+	}
+
+	if (run_parameters.do_n2) {
+		allocate_n2();
+		initialize_n2();
 	}
 	/* zonal, meridional re-entrance    */
 	for (m=0;m<run_parameters.tracer_counter;m++) {

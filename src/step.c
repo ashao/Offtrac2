@@ -25,6 +25,7 @@
 
 #include "ideal_age.h"
 #include "cfcs_sf6.h"
+#include "n2_module.h"
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"

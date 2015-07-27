@@ -55,9 +55,9 @@ SRCDIR = src
 
 CDFFLAGS= -lnetcdf
 # Make sure to add the Gibbs Seawater routines
-GSW_DIR= aux_src/gsw_c_v3.03/
-GSW_LIB= (GSW_DIR)/libgswteos-10.so
-GSW_INC= -I($GSW_DIR)
+GSW_DIR= $(SRCDIR)/gsw_src/
+GSW_LIB= $(GSW_DIR)/libgswteos-10.so
+GSW_INC= -I$(GSW_DIR)
 
 OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/initialize.c $(SRCDIR)/iocdf.c $(SRCDIR)/par_IO.c \
@@ -71,7 +71,8 @@ OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
         $(SRCDIR)/tracer_utilities.c \
 	$(SRCDIR)/ideal_age.c \
 	$(SRCDIR)/cfc11.c $(SRCDIR)/cfc12.c $(SRCDIR)/sf6.c \
-	$(SRCDIR)/ttd_bp.c
+	$(SRCDIR)/ttd_bp.c \
+	$(SRCDIR)/n2_module.c
 
 offtrac: $(OFFSRC) $(SRCDIR)/init.h 
 	echo compiling $(OUTNAME)
