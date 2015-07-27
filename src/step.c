@@ -26,6 +26,7 @@
 #include "ideal_age.h"
 #include "cfcs_sf6.h"
 #include "n2_module.h"
+#include "ar_module.h"
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
@@ -139,6 +140,7 @@ void step_fields( ) {
 
 	if (run_parameters.do_ttd)	step_ttd();
 	if (run_parameters.do_n2)	step_n2();
+	if (run_parameters.do_ar)	step_ar();
 
 	merge_ml_tr();
 
@@ -208,6 +210,12 @@ void step_fields( ) {
 		submit_for_averaging( mn_n2, tr[mN2] );
 		submit_for_averaging( mn_n2sol, n2sol );
 	}
+	if (run_parameters.do_ar)	{
+
+		submit_for_averaging( mn_ar, tr[mAR] );
+		submit_for_averaging( mn_arsol, arsol );
+	}
+
 
 
 	printf("\n");

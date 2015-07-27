@@ -1,4 +1,3 @@
-#include "init.h"
 extern int mN2;
 // Output arrays
 extern double ***mn_n2;

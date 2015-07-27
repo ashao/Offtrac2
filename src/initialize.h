@@ -33,6 +33,8 @@ struct parameters {
 
 	int do_n2;
 
+	int do_ar;
+
 };
 
 void set_run_parameters( );

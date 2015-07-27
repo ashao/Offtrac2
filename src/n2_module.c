@@ -68,7 +68,7 @@ void initialize_n2( ) {
 	vars[map_variable_to_index(varname)].hor_grid='h';
 	vars[map_variable_to_index(varname)].z_grid='L';
 	vars[map_variable_to_index(varname)].t_grid='s';
-	strcpy(vars[map_variable_to_index(varname)].units,"mol/m^3");
+	strcpy(vars[map_variable_to_index(varname)].units,"micromol/m^3");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
@@ -78,7 +78,7 @@ void initialize_n2( ) {
 	vars[map_variable_to_index(varname)].hor_grid='h';
 	vars[map_variable_to_index(varname)].z_grid='L';
 	vars[map_variable_to_index(varname)].t_grid='s';
-	strcpy(vars[map_variable_to_index(varname)].units,"mol/m^3");
+	strcpy(vars[map_variable_to_index(varname)].units,"micromol/m^3");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
