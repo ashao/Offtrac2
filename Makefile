@@ -72,7 +72,7 @@ OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/ideal_age.c \
 	$(SRCDIR)/cfc11.c $(SRCDIR)/cfc12.c $(SRCDIR)/sf6.c \
 	$(SRCDIR)/ttd_bp.c \
-	$(SRCDIR)/n2_module.c
+	$(SRCDIR)/n2_module.c $(SRCDIR)/ar_module.c
 
 offtrac: $(OFFSRC) $(SRCDIR)/init.h 
 	echo compiling $(OUTNAME)

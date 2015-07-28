@@ -21,6 +21,7 @@
 #include "ttd_bp.h"
 #include "cfcs_sf6.h"
 #include "n2_module.h"
+#include "ar_module.h"
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"

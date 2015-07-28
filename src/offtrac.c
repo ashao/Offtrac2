@@ -36,6 +36,7 @@
 #include "cfcs_sf6.h"
 #include "ttd_bp.h"
 #include "n2_module.h"
+#include "ar_module.h"
 /*-------------------------------------------------------------------*
  *                                                                   *
  *
