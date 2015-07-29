@@ -31,6 +31,7 @@
 #include "timekeeper.h"
 #include "output_variables.h"
 #include "step.h"
+#include "gas_exchange.h"
 
 #include "ideal_age.h"
 #include "cfcs_sf6.h"
@@ -152,6 +153,7 @@ int main( int argc, char *argv[] )
 	initializemasks();
 
 	initialize_timekeeper( );
+	read_gas_exchange_fields(run_parameters.forcing_path);
 	update_transport_fields( ); // Primarily done to read in the initial layer thicknesses
 	printf("Read in fields\n");
 	initialize();

@@ -225,6 +225,7 @@ void surface_cfc11( ) {
 	int i,j,k;
 	extern double ***Temptm, ***Salttm;
 	extern struct timekeeper_t timekeeper;
+	const double Sc_coeffs = {3501.8, 210.31, 6.1851, 0.07513}; // Zheng et al. 1998
 
 	printf("Setting CFC-11 surface condition\n");
 	// Set cfc11 values to saturation at the mixed layer to mimic equilibrium with the atmosphere
@@ -238,22 +239,10 @@ void surface_cfc11( ) {
 	printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
 	printf("\tSaturation concentration: %f\n\n",cfc11_sat[100][100]);
 
-
-#ifdef NOCONC
-	for (k=0;k<NML;k++)
-		for (i=0;i<NXMEM;i++)
-			for (j=0;j<NYMEM;j++)
-				tr[mCFC11][k][i][j] = cfc11_atmconc[i][j];
-
-#else
-	for (k=0;k<NML;k++)
-		for (i=0;i<NXMEM;i++)
-			for (j=0;j<NYMEM;j++)
-				tr[mCFC11][k][i][j]=cfc11_sat[i][j];
-
-	for (i=0;i<NXMEM;i++)
-		for (j=0;j<NYMEM;j++)
-			mn_cfc11sat[i][j]+=cfc11_sat[i][j];
-#endif 
+	if (run_parameters.do_gasex)
+		gas_exchange(mCFC11,Sc_coeffs,cfc11_sat);
+	else
+		for (k=0;k<NML;k++)
+			copy_darray2d(tr[mCFC11][k],cfc11_sat[i][j],NXMEM,NYMEM);
 }
 

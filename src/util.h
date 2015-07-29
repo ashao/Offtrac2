@@ -28,6 +28,8 @@ void mult_darray3d_mv(double ***arr, int nz, int NX, int NY, double factor, doub
 void copy_fix_darray2d(double arr1[NXMEM][NYMEM], double arr2[NXMEM][NYMEM]);
 */
 void copy_darray3d(double ***arr1, double ***arr2, int nz, int NX, int NY);
+void copy_darray2d(double **arr1, double **arr2, int NX, int NY);
+
 //BX-a
 void copy_fix_darray3d(double ***arr1, double arr2[NZ][NXMEM][NYMEM], int nz, int NX, int NY);
 //BX-e

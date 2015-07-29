@@ -97,6 +97,7 @@ void sf6_saturation(  ) {
 	double TempK;
 	extern double ***Temptm, ***Salttm;
 
+
 	for (k=0;k<NZ;k++)
 		for (i=0;i<NXMEM;i++)
 			for (j=0;j<NYMEM;j++)
@@ -159,6 +160,8 @@ void surface_sf6( ) {
 	int i,j,k;
 	extern double ***Salttm, ***Temptm;
 	extern struct timekeeper_t timekeeper;
+	const double Sc_coeffs = {3531.6, 231.40, 7.2168, 0.090558}; // Wanninkhof 1992
+
 	printf("Setting SF6 surface condition\n");
 	// Set oxygen values to saturation at the mixed layer to mimic equilibrium with the atmosphere
 	sf6_find_atmconc( );
@@ -170,18 +173,10 @@ void surface_sf6( ) {
 	printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
 	printf("\tSaturation: %f\n\n",sf6_sat[100][100]);
 
-#ifdef NOCONC
-	for (k=0;k<NML;k++)
-		for (i=0;i<NXMEM;i++)
-			for (j=0;j<NYMEM;j++)
-				tr[mSF6][k][i][j] = sf6_atmconc[i][j];
-
-#else
-
-	for (k=0;k<NML;k++)
-		for (i=0;i<NXMEM;i++)
-			for (j=0;j<NYMEM;j++)
-				tr[mSF6][k][i][j]=sf6_sat[i][j];
-#endif
+	if (run_parameters.do_gasex)
+		gas_exchange(mSF6,Sc_coeffs,sf6_sat);
+	else
+		for (k=0;k<NML;k++)
+			copy_darray2d(tr[mSF6][k],sf6_sat[i][j],NXMEM,NYMEM);
 }
 

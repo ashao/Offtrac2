@@ -608,7 +608,7 @@ void read_var3d( char *inpath, char *varname, int imon, double ***data)
 	close_file(&cdfid,&file);	
 }
 */
-void read_var2d( char *inpath, char *varname, double **data)
+void read_var2d_time( char *inpath, int imon, char *varname, double **data)
 {
 
 	int i,j;
@@ -619,15 +619,17 @@ void read_var2d( char *inpath, char *varname, double **data)
 	size_t count[MAX_NC_VARS];
 	float **tmp2d;
 
-	start[0] = 0;
+	start[0] = imon;
 	start[1] = 0;
+	start[2] = 0;
 
 	err = open_input_file(inpath,&file,&cdfid,&timeid);
 	if ((status = nc_inq_varid(cdfid, varname, &varid)))
 		bzero(start, MAX_NC_VARS * sizeof(long));
 
-	count[0] = NYTOT;
-	count[1] = NXTOT;
+	count[0] = 1;
+	count[1] = NYTOT;
+	count[2] = NXTOT;
 
 	tmp2d  = alloc2d_f(NYTOT,NXTOT);
 	if ((status = nc_get_vara_float(cdfid,varid,start,count,tmp2d[0])))

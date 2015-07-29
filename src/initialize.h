@@ -24,6 +24,8 @@ struct parameters {
 	int ntime_hindcast; // Number of timesteps in hindcast fields
 
 	// Tracer flags
+	int do_gasex; // Enable gas exchange for all gas tracers
+
 	int do_age;
 
 	int do_cfcs;
