@@ -6,6 +6,7 @@
 #include "init.h"
 #include "initialize.h"
 #include "timekeeper.h"
+#include "util.h"
 
 extern struct timekeeper_t timekeeper;
 extern struct parameters run_parameters;
@@ -63,7 +64,6 @@ void initialize_timekeeper( void ) {
 
 void update_timekeeper( void ) {
 
-	struct timespec wallclock;
 	timekeeper.current_interval++;
 	timekeeper.averaging_counter++;
 	timekeeper.current_time = timekeeper.current_year + (double) (timekeeper.current_interval+1)/timekeeper.num_intervals_year;

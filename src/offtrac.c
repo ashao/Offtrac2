@@ -106,13 +106,12 @@ struct timekeeper_t timekeeper;
 int main( int argc, char *argv[] )
 {
 
-	int err, i, j, k;
+	int err, i;
 	static int m;
 
 	int varmap[NOVARS];
 	FILE *fn;
 
-	char run_name[200],namelist_file[200];
 	struct vardesc var_out[NOVARS];
 	struct varcdfinfo varinfo[NOVARS];
 	int nvar = 0, cdfid, timeid[2];

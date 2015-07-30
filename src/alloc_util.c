@@ -141,6 +141,7 @@ float** alloc2d_f(int NY, int NX)
   return arr2d;
 }
 
+
 void free2d_f(float** arr2d, int NY)
 {
   free(arr2d[0]);
@@ -149,4 +150,5 @@ void free2d_f(float** arr2d, int NY)
   free(arr2d);
   arr2d = NULL;
 }
+
 

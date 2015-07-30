@@ -1,6 +1,6 @@
 //HF new utility routines
 #include "init.h"
-#include "math.h"
+#include <math.h>
 void set_darray2d_zero(double **arr, int NX, int NY) {
 	int x, y;
 	for (x = 0; x < NX; x++)
@@ -110,6 +110,12 @@ void copy_darray2d(double **arr1, double **arr2, int NX, int NY) {
 			arr1[x][y] = arr2[x][y];
 }
 
+void copy_darray2d_f(float **arr1, float **arr2, int NX, int NY) {
+	int x, y;
+	for (x = 0; x < NX; x++)
+		for (y = 0; y < NY; y++)
+			arr1[x][y] = arr2[x][y];
+}
 //BX-a
 void copy_fix_darray3d(double ***arr1, double arr2[NZ][NXMEM][NYMEM], int nz,
 		int NX, int NY) {
@@ -146,21 +152,20 @@ double linear_interp(double x0, double y0, double x1, double y1, double xstar) {
 }
 
 void wrap_reentrance_2d( double **arr ) {
-	int i, j, k;
-	//HF10022009	zonal re-entrance
-	int ii;
 
-	for (j=0;j<=NYMEM-1;j++) {
-		arr[0][j] = arr[nx - 1][j];
-		arr[1][j] = arr[nx][j];
-		arr[nx + 1][j] = arr[2][j];
-		arr[nx + 2][j] = arr[3][j];
-	}
+	int i,j, ii;
+	//	zonal re-entrance
+		for (j=0;j<=NYMEM-1;j++) {
+			arr[nx+1][j] = arr[2][j];
+			arr[nx+2][j] = arr[3][j];
+			arr[0][j] =   arr[nx-1][j];
+			arr[1][j] =   arr[nx][j];
+		}
 	//      meridional re-entrance
-	for (i=0;i<=nx+2;i++) {
+	for (i=2;i<=nx;i++) {
 		ii = 363 - i;
-		arr[ii][ny+1] = arr[i][ny];
-		arr[ii][ny+2] = arr[i][ny-1];
+			arr[ii][ny+1] = arr[i][ny];
+			arr[ii][ny+2]   = arr[i][ny-1];
 	}
 
 }
@@ -186,7 +191,7 @@ void wrap_reentrance_3d( double ***arr, int nz ){
 			arr[k][nx + 1][j] = arr[k][2][j];
 			arr[k][nx + 2][j] = arr[k][3][j];
 		}
-	}
+	}	
 	for (i = 2; i <= nx; i++) {
 		ii = 363 - i;
 		for (k = 0; k < NZ; k++) {
@@ -194,6 +199,7 @@ void wrap_reentrance_3d( double ***arr, int nz ){
 			arr[k][ii][ny + 2] = arr[k][i][ny - 1];
 		}
 	}
+	
 }
 
 int mod(int a, int b)

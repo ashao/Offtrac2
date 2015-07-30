@@ -17,6 +17,7 @@
 #include "timekeeper.h"
 #include "util.h"
 #include "output_variables.h"
+#include "gas_exchange.h"
 
 double ***mn_sf6;
 double ***sf6_init;
@@ -31,6 +32,7 @@ int mSF6;
 extern double ****tr;
 extern int oceanmask[NXMEM][NYMEM];
 
+extern struct parameters run_parameters;
 void allocate_sf6 ( ) {
 
 	mn_sf6 = alloc3d(NZ,NXMEM,NYMEM);
@@ -157,10 +159,10 @@ void sf6_find_atmconc(  ) {
 
 void surface_sf6( ) {
 
-	int i,j,k;
+	int k;
 	extern double ***Salttm, ***Temptm;
 	extern struct timekeeper_t timekeeper;
-	const double Sc_coeffs = {3531.6, 231.40, 7.2168, 0.090558}; // Wanninkhof 1992
+	const double Sc_coeffs[4] = {3531.6, 231.40, 7.2168, 0.090558}; // Wanninkhof 1992
 
 	printf("Setting SF6 surface condition\n");
 	// Set oxygen values to saturation at the mixed layer to mimic equilibrium with the atmosphere
@@ -177,6 +179,6 @@ void surface_sf6( ) {
 		gas_exchange(mSF6,Sc_coeffs,sf6_sat);
 	else
 		for (k=0;k<NML;k++)
-			copy_darray2d(tr[mSF6][k],sf6_sat[i][j],NXMEM,NYMEM);
+			copy_darray2d(tr[mSF6][k],sf6_sat,NXMEM,NYMEM);
 }
 

@@ -22,6 +22,7 @@
 #include "timekeeper.h"
 #include "initialize.h"
 #include "read.h"
+#include "gas_exchange.h"
 
 #include "ideal_age.h"
 #include "cfcs_sf6.h"
@@ -64,10 +65,9 @@ extern struct timekeeper_t timekeeper;
  *---------------------------------------------------------------------*/
 
 void step_fields( ) {
-	int i, j, k, l, m;
+	int i, j, k,  m;
 	int ii;
 
-	const double secperyr = 365.25 * 60 * 60 * 24;
 	struct timespec startclock, endclock;
 	/*-----------------------------------------
 	 *
@@ -311,6 +311,7 @@ void update_transport_fields(  ) {
 	read_h(read_index,file_suffix,path,hend);
 
 	read_temp_and_salt(read_index,file_suffix,path);
+	update_gas_exchange_fields();
 
 }
 

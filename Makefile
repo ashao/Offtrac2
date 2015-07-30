@@ -10,7 +10,7 @@ endif
 
 # gaggle with gcc
 CC = gcc
-CFLAGS = -mfpmath=sse -flto -march=native -funroll-loops -fopenmp  -g -pipe -Ofast
+CFLAGS = -mfpmath=sse -flto -march=native -funroll-loops -fopenmp  -g -pipe -Ofast -Wall
 LDFLAGS = -I/cm/shared/apps/netcdf/gcc/64/4.3.0/include -L/cm/shared/apps/netcdf/gcc/64/4.3.0/lib
 # waddle with gcc
 #CC=gcc
@@ -69,12 +69,13 @@ OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
         $(SRCDIR)/timekeeper.c \
         $(SRCDIR)/output_variables.c \
         $(SRCDIR)/tracer_utilities.c \
+        $(SRCDIR)/gas_exchange.c \
 	$(SRCDIR)/ideal_age.c \
 	$(SRCDIR)/cfc11.c $(SRCDIR)/cfc12.c $(SRCDIR)/sf6.c \
 	$(SRCDIR)/ttd_bp.c \
 	$(SRCDIR)/n2_module.c $(SRCDIR)/ar_module.c
 
-offtrac: $(OFFSRC) $(SRCDIR)/init.h 
+offtrac: $(OFFSRC) $(SRCDIR)/init.h Makefile 
 	echo compiling $(OUTNAME)
 	$(CC)  $(OFFSRC) -o $(OUTNAME) $(CDFFLAGS) $(CFLAGS) $(LDFLAGS) $(GSW_LIB)		
 

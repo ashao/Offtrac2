@@ -17,6 +17,7 @@
 #include "timekeeper.h"
 #include "util.h"
 #include "output_variables.h"
+#include "gas_exchange.h"
 
 double ***mn_cfc12;
 double ***cfc12_init;
@@ -30,6 +31,8 @@ double ***pcfc12, ***mn_pcfc12;
 int mCFC12;
 extern double ****tr;
 extern int oceanmask[NXMEM][NYMEM];
+
+extern struct parameters run_parameters;
 void allocate_cfc12 ( ) {
 
 	mn_cfc12 = alloc3d(NZ,NXMEM,NYMEM);
@@ -157,10 +160,10 @@ void cfc12_find_atmconc(  ) {
 
 void surface_cfc12( ) {
 
-	int i,j,k;
+	int k;
 	extern double ***Salttm, ***Temptm;
 	extern struct timekeeper_t timekeeper;
-	const double Sc_coeffs = {3845.4, 228.95, 6.1908, 0.0647430}; // Zheng et al. 1998
+	const double Sc_coeffs[4] = {3845.4, 228.95, 6.1908, 0.0647430}; // Zheng et al. 1998
 
 	printf("Setting CFC-12 surface condition\n");
 	// Set oxygen values to saturation at the mixed layer to mimic equilibrium with the atmosphere
@@ -178,7 +181,7 @@ void surface_cfc12( ) {
 		gas_exchange(mCFC12,Sc_coeffs,cfc12_sat);
 	else
 		for (k=0;k<NML;k++)
-			copy_darray2d(tr[mCFC12][k],cfc12_sat[i][j],NXMEM,NYMEM);
+			copy_darray2d(tr[mCFC12][k],cfc12_sat,NXMEM,NYMEM);
 
 }
 

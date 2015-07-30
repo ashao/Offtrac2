@@ -76,9 +76,16 @@ void submit_for_averaging( double ***average_array, double ***variable_snapshot 
 	for (k=0;k<NZ;k++)
 		for (i=0;i<NXMEM;i++)
 			for (j=0;j<NYMEM;j++) {
-				average_array[k][i][j] += variable_snapshot[k][i][j]*timekeeper.dt;
-				if (timekeeper.averaging_counter == run_parameters.wrint)
+
+				if (run_parameters.do_averaging) {
+					average_array[k][i][j] += variable_snapshot[k][i][j]*timekeeper.dt;
+						if (timekeeper.averaging_counter == run_parameters.wrint)
 					average_array[k][i][j] *= 1.0/timekeeper.accumulated_time_since_writing;
+				}
+				else {
+					average_array[k][i][j] = variable_snapshot[k][i][j];
+				}
+				
 			}
 
 }

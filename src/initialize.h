@@ -19,7 +19,8 @@ struct parameters {
 	char new_restartfile[100]; // restart file name
 	char timestep[7]; // '5day' or 'month'
 	
-	int wrint; // Averaging interval
+	int wrint; // Output interval
+	int do_averaging; // Whether the output is averaged or not
 	int ntime_climatology; // Number of time stamps in climatology forcing
 	int ntime_hindcast; // Number of timesteps in hindcast fields
 

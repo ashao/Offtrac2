@@ -29,12 +29,14 @@ void copy_fix_darray2d(double arr1[NXMEM][NYMEM], double arr2[NXMEM][NYMEM]);
 */
 void copy_darray3d(double ***arr1, double ***arr2, int nz, int NX, int NY);
 void copy_darray2d(double **arr1, double **arr2, int NX, int NY);
+void copy_darray2d_f(float **arr1, float **arr2, int NX, int NY);
 
 //BX-a
 void copy_fix_darray3d(double ***arr1, double arr2[NZ][NXMEM][NYMEM], int nz, int NX, int NY);
 //BX-e
 
 
+int mod(int a, int b);
 // ashao
 double linear_interp( double x0, double y0,  double x1, double y1, double xstar);
 int calc_hindindex(int inmon, int nmonths);

@@ -199,9 +199,10 @@ void set_run_parameters( void )
 
 	while( (read = getline(&line_read,&len,ptr_file)) != -1 ) {
 
-		// Set intervals of time integration
 		sscanf(line_read,"%s %s",attribute,value);
-		printf("Setting %s to %s\n",attribute,value);
+		
+		// Set intervals of time integration
+//		printf("Setting %s to %s\n",attribute,value);
 		if (!strcmp(attribute,"syear"))
 			run_parameters.syear = atoi(value);
 		if (!strcmp(attribute,"sinterval"))
@@ -261,14 +262,16 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"wd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 
-		if (!strcmp(attribute,"do_age")){
+		if (!strcmp(attribute,"do_age"))
 			run_parameters.do_age = atoi(value);
-		}
+		
 		if (!strcmp(attribute,"age"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"age_restart"))
 			rflags[map_variable_to_index("age")] = atoi(value);
 
+		if (!strcmp(attribute,"do_gasex"))
+			run_parameters.do_gasex = atoi(value);
 		if (!strcmp(attribute,"do_cfcs")) {
 			run_parameters.do_cfcs = atoi(value);
 		}
@@ -327,7 +330,6 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ar_restart"))
 			rflags[map_variable_to_index(attribute)] = atoi(value);
-
 	}
 	free(line_read);
 	fclose(ptr_file);

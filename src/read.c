@@ -305,7 +305,6 @@ void read_uvw(int imon, char *fieldtype, char *readpath)
 	char infile[25], inpath[1000];
 	FILE *file;
 	int status;
-	double fact0,fact1,fact2;
 
 	int uhfileid,vhfileid,wdfileid;
 
@@ -608,41 +607,59 @@ void read_var3d( char *inpath, char *varname, int imon, double ***data)
 	close_file(&cdfid,&file);	
 }
 */
-void read_var2d_time( char *inpath, int imon, char *varname, double **data)
+void read_var2d_time( char *inpath, int imon, char *varname, float **data)
 {
 
-	int i,j;
-	int err, cdfid, timeid, varid;
-	FILE *file;
+	int i,j,ii;
+	int cdfid, varid;
 	int status;
-	size_t start[MAX_NC_VARS];
-	size_t count[MAX_NC_VARS];
-	float **tmp2d;
+	size_t start[4];
+	size_t count[4];
+	float tmp2d[NYTOT][NXTOT];
+	char readpath[1000];
 
 	start[0] = imon;
 	start[1] = 0;
 	start[2] = 0;
 
-	err = open_input_file(inpath,&file,&cdfid,&timeid);
+	strcpy(readpath,inpath);
+
+	if ((status = nc_open(readpath, NC_NOWRITE, &cdfid)))
+           ERR(status);
 	if ((status = nc_inq_varid(cdfid, varname, &varid)))
-		bzero(start, MAX_NC_VARS * sizeof(long));
+           ERR(status);
 
 	count[0] = 1;
 	count[1] = NYTOT;
 	count[2] = NXTOT;
 
-	tmp2d  = alloc2d_f(NYTOT,NXTOT);
 	if ((status = nc_get_vara_float(cdfid,varid,start,count,tmp2d[0])))
 		ERR(status);
-		for (i=0;i<NXTOT;i++)
-			for (j=0;j<NYTOT;j++)
-				data[i+2][j+2]= tmp2d[j][i];
 
-	wrap_reentrance_2d(data);
+	for (i=0;i<NXTOT;i++)
+		for (j=0;j<NYTOT;j++)
+			data[i+2][j+2]= tmp2d[j][i];
 
-	free2d_f(tmp2d,NZ);
-	close_file(&cdfid,&file);
+	for (i=2;i<NXMEM;i++)
+		data[i][211] = data[i][210];
 
+	for (j=0;j<=NYMEM-1;j++) {
+              data[nx+1][j] = data[2][j];
+	      data[nx+2][j] = data[3][j];
+              data[0][j] =   data[nx-1][j];
+              data[1][j] =   data[nx][j];
+            }
+        
+	for (i = 2; i <= nx; i++) {
+                ii = 363 - i;
+                        data[ii][ny + 1] = data[i][ny];
+                        data[ii][ny + 2] = data[i][ny - 1];
+                }
+
+
+//	wrap_reentrance_2d(data);
+
+	nc_close(cdfid);
 }
 
 void read_var3d(char *readpath, char *varname, int imon, double ***readarray)

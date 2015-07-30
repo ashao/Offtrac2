@@ -24,7 +24,6 @@ void allocate_ts( ) {
 
 void read_temp_and_salt( int imon, char *fieldtype, char* path) {
 	char filename[50];
-	char saltpath[300];
 	char temppath[300];
 
 	strcpy(temppath,path);
@@ -100,14 +99,14 @@ double calc_inventory( double ***array ) {
 
 double linear_interpolation(const double xin[], const double yin[], double xi, int numin) {
 
-        int i,j,flipidx;
+        int i,flipidx;
         int intpidx1,intpidx2;
         int decreasing;
         double deltax,dist;
         double x[numin],y[numin];
         double y0,y1,x0,x1,yi;
-
         // first check to see if xin increases or decreases
+
         
         if (xin[numin-1]>xin[0]) decreasing = 0;
         if (xin[numin-1]<xin[0]) decreasing = 1; 
@@ -147,7 +146,14 @@ double linear_interpolation(const double xin[], const double yin[], double xi, i
         y1 = y[ intpidx2 ];
         x0 = x[ intpidx1 ];
         x1 = x[ intpidx2 ];
-        yi = y0 + (y1-y0)*(xi-x0)/(x1-x0);
+
+	if ( fabs(x1-x0) < fmax(fabs(x1),fabs(x0))*EPSILON )
+		return(y1);	
+	else if ( fabs(y1-y0) < fmax(fabs(y1),fabs(y0))*EPSILON )
+		return(y1);
+	else {
+	        yi = y0 + (y1-y0)*(xi-x0)/(x1-x0);
 //        if (x0>1900) printf("x0,x1: %f,%f\ny0,y1: %f,%f\nxi,yi: %f/%f\n",x0,x1,y0,y1,xi,yi);
-        return(yi);
+        	return(yi);
+	}
 }

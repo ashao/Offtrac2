@@ -19,6 +19,7 @@
 #include "io.h"
 #include "util.h"
 #include "output_variables.h"
+#include "gas_exchange.h"
 
 double ***mn_cfc11;
 double ***cfc11_init;
@@ -36,6 +37,7 @@ double sval;
 extern double ****tr;
 extern int oceanmask[NXMEM][NYMEM];
 tracer_boundary atmconc[NUMTRANSIENT];
+extern struct parameters run_parameters;
 
 void allocate_cfc11 ( ) {
 
@@ -56,7 +58,7 @@ void allocate_cfc11 ( ) {
 
 void read_tracer_boundary ( ) {
 
-	int i, cdfid, timeid, err;
+	int i, cdfid, timeid;
 	unsigned int status; 
 	int varid;
 	char infile[25], inpath[200];
@@ -70,7 +72,7 @@ void read_tracer_boundary ( ) {
 	strcpy(inpath, run_parameters.forcing_path);
 	strcat(inpath, infile);
 	printf("\nLooking for file '%s'.\n",inpath);
-	err = open_input_file(inpath,&file,&cdfid,&timeid);
+	open_input_file(inpath,&file,&cdfid,&timeid);
 
 	start[0] = 0;
 	end[0] = NUMATMVALS;
@@ -110,7 +112,6 @@ void read_tracer_boundary ( ) {
 void initialize_cfc11 ( ) {
 	int i, j, k;
 	char varname[200];
-	extern char restart_filename[200];
 	extern struct parameters run_parameters;
 	extern struct vardesc vars[NOVARS];
 
@@ -188,17 +189,11 @@ void cfc11_find_atmconc(  ) {
 	const double equatorbound[2] = {10,-10}; // Set the latitudes where to start interpolating atmospheric concentrations
 	extern struct timekeeper_t timekeeper;
 	double hemisphere_concentrations[2];
-	double time[NUMATMVALS], atmval[NUMATMVALS];
 	double currtime;
 
 	currtime = timekeeper.current_time;
 
 	// Interpolate in time to find the atmospheric concentration
-	for (i=0;i<NUMATMVALS;i++) {
-		time[i] = atmconc[mCFC11].time[i];
-		atmval[i] = atmconc[mCFC11].nval[i];
-
-	}
 	hemisphere_concentrations[0] = linear_interpolation(
 			atmconc[CFC11IDX].time, atmconc[CFC11IDX].nval, currtime, NUMATMVALS);
 	hemisphere_concentrations[1] = linear_interpolation(
@@ -222,10 +217,10 @@ void cfc11_find_atmconc(  ) {
 
 void surface_cfc11( ) {
 
-	int i,j,k;
+	int k;
 	extern double ***Temptm, ***Salttm;
 	extern struct timekeeper_t timekeeper;
-	const double Sc_coeffs = {3501.8, 210.31, 6.1851, 0.07513}; // Zheng et al. 1998
+	const double Sc_coeffs[4] = {3501.8, 210.31, 6.1851, 0.07513}; // Zheng et al. 1998
 
 	printf("Setting CFC-11 surface condition\n");
 	// Set cfc11 values to saturation at the mixed layer to mimic equilibrium with the atmosphere
@@ -237,12 +232,12 @@ void surface_cfc11( ) {
 	printf("\tTime: %f\n",timekeeper.current_time);
 	printf("\tAtmospheric Concentration: %f\n",cfc11_atmconc[100][100]);
 	printf("\tSalinity: %f\t Temperature: %f\n",Salttm[0][100][100],Temptm[0][100][100]);
-	printf("\tSaturation concentration: %f\n\n",cfc11_sat[100][100]);
+	printf("\tSaturation concentration: %f\n\n",cfc11_sat[100][200]);
 
 	if (run_parameters.do_gasex)
 		gas_exchange(mCFC11,Sc_coeffs,cfc11_sat);
 	else
 		for (k=0;k<NML;k++)
-			copy_darray2d(tr[mCFC11][k],cfc11_sat[i][j],NXMEM,NYMEM);
+			copy_darray2d(tr[mCFC11][k],cfc11_sat,NXMEM,NYMEM);
 }
 
