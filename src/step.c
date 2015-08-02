@@ -28,6 +28,9 @@
 #include "cfcs_sf6.h"
 #include "n2_module.h"
 #include "ar_module.h"
+#include "biotic.h"
+#include "oxygen.h"
+#include "phosphate.h"
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
@@ -142,6 +145,15 @@ void step_fields( ) {
 	if (run_parameters.do_n2)	step_n2();
 	if (run_parameters.do_ar)	step_ar();
 
+	if (run_parameters.do_oxygen) {
+
+		update_phosphate_fields();
+		biotic_sms( 1, timekeeper.dt );
+		step_oxygen();
+		step_phosphate();
+
+	}
+
 	merge_ml_tr();
 
         clock_gettime(CLOCK_MONOTONIC, &endclock);
@@ -208,14 +220,24 @@ void step_fields( ) {
 	if (run_parameters.do_n2)	{
 
 		submit_for_averaging( mn_n2, tr[mN2] );
-		submit_for_averaging( mn_n2sol, n2sol );
+		submit_for_averaging( mn_n2sat, n2sat );
 	}
 	if (run_parameters.do_ar)	{
 
 		submit_for_averaging( mn_ar, tr[mAR] );
-		submit_for_averaging( mn_arsol, arsol );
+		submit_for_averaging( mn_arsat, arsat );
 	}
 
+	if (run_parameters.do_oxygen) {
+
+		submit_for_averaging(mn_oxygen,tr[mOXYGEN]);
+		submit_for_averaging(mn_jo2,jo2);
+		submit_for_averaging(mn_o2sat,o2_sat);
+		submit_for_averaging(mn_phos,tr[mPHOSPHATE]);
+		submit_for_averaging(mn_dop,tr[mDOP]);
+		submit_for_averaging(mn_jpo4,jpo4);
+
+	}
 
 
 	printf("\n");
@@ -309,7 +331,7 @@ void update_transport_fields(  ) {
 
 	read_uvw(read_index,file_suffix,path);
 	read_h(read_index,file_suffix,path,hend);
-
+	z_depth(hend,depth);
 	read_temp_and_salt(read_index,file_suffix,path);
 	update_gas_exchange_fields();
 

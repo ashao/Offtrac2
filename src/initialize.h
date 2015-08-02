@@ -38,6 +38,8 @@ struct parameters {
 
 	int do_ar;
 
+	int do_oxygen;
+
 };
 
 void set_run_parameters( );

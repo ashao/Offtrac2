@@ -38,6 +38,8 @@
 #include "ttd_bp.h"
 #include "n2_module.h"
 #include "ar_module.h"
+#include "oxygen.h"
+#include "phosphate.h"
 /*-------------------------------------------------------------------*
  *                                                                   *
  *
@@ -64,6 +66,7 @@ const double misval = -1.e+6;
 double depth[NZ][NXMEM][NYMEM];
 
 double ***h, ***hstart, ***hend;
+double ***depth;
 double ***htest;
 double ***uhtm;
 double ***vhtm;
@@ -282,11 +285,11 @@ int main( int argc, char *argv[] )
 
 			if (run_parameters.do_n2) {
 				set_darray3d_zero(mn_n2, NZ, NXMEM, NYMEM);
-				set_darray3d_zero(mn_n2sol, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_n2sat, NZ, NXMEM, NYMEM);
 			}
 			if (run_parameters.do_ar) {
 				set_darray3d_zero(mn_ar, NZ, NXMEM, NYMEM);
-				set_darray3d_zero(mn_arsol, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_arsat, NZ, NXMEM, NYMEM);
 			}
 			//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
@@ -323,8 +326,19 @@ int main( int argc, char *argv[] )
 
 	if (run_parameters.do_age) copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
 	if (run_parameters.do_ttd) copy_darray3d(mn_ttd,tr[mTTD],NZ,NXMEM,NYMEM);
+	if (run_parameters.do_cfcs)
+		{
+			copy_darray3d(mn_cfc11,tr[mCFC11],NZ,NXMEM,NYMEM);
+			copy_darray3d(mn_cfc12,tr[mCFC12],NZ,NXMEM,NYMEM);
+			copy_darray3d(mn_sf6,tr[mSF6],NZ,NXMEM,NYMEM);
+		}
 	if (run_parameters.do_n2) copy_darray3d(mn_n2,tr[mN2],NZ,NXMEM,NYMEM);
 	if (run_parameters.do_ar) copy_darray3d(mn_ar,tr[mAR],NZ,NXMEM,NYMEM);
+	if (run_parameters.do_oxygen) {
+		copy_darray3d(mn_oxygen,tr[mOXYGEN],NZ,NXMEM,NYMEM);
+		copy_darray3d(mn_phos,tr[mPHOSPHATE],NZ,NXMEM,NYMEM);
+		copy_darray3d(mn_dop,tr[mDOP],NZ,NXMEM,NYMEM);
+	}
 
 	/* Copy the variable descriptions to a list of the actual restart variables. */
 	nvar = 0;
@@ -439,11 +453,11 @@ void alloc_fields(void)
 	if (run_parameters.do_ttd) var[map_variable_to_index("ttd")] = &mn_ttd[0][0][0];
 	if (run_parameters.do_n2) {
 		var[map_variable_to_index("n2")] = &mn_n2[0][0][0];
-		var[map_variable_to_index("n2sol")] = &mn_n2sol[0][0][0];
+		var[map_variable_to_index("n2sol")] = &mn_n2sat[0][0][0];
 	}
 	if (run_parameters.do_ar) {
 		var[map_variable_to_index("ar")] = &mn_ar[0][0][0];
-		var[map_variable_to_index("arsol")] = &mn_arsol[0][0][0];
+		var[map_variable_to_index("arsol")] = &mn_arsat[0][0][0];
 	}
 	//var[18] = &mn_rml[0][0][0];
 

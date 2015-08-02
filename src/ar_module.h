@@ -1,8 +1,8 @@
 extern int mAR;
 // Output arrays
 extern double ***mn_ar;
-extern double ***mn_arsol;
-extern double ***arsol;
+extern double ***mn_arsat;
+extern double ***arsat;
 // Working arrays
 extern double ***ar_init;
 

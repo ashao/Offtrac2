@@ -47,8 +47,6 @@ double curr_atmpres[NXMEM][NYMEM];
 const int nmonths = 12;
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-
-
 void gas_exchange( int tridx, const double Sc_coeffs[4], double **sat) {
 
 	int iter;
@@ -201,10 +199,7 @@ void update_gas_exchange_fields( ) {
 			curr_atmpres[i][j] = linear_interpolation(tarr,datarr,curr_yearfrac,2);
 		}
 	printf("Gas Exchange:\n");
-	printf("\tTime: %f Start: %d %f End:%d %f\n",curr_yearfrac,idx0,t0,idx1,t1);
-	printf("\tKw: %e Pressure: %e\n",ocmip.kw[idx0][0][0],ocmip.atmpres[idx0][209][100]);
-	printf("\tKw: %e Pressure: %e\n",ocmip.kw[idx1][0][0],ocmip.atmpres[idx1][209][100]);
-	printf("\tKw: %e Pressure: %e\n",curr_kw[0][0],curr_atmpres[209][100]);
+	printf("\tKw: %e Pressure: %e\n",curr_kw[100][100],ocmip.atmpres[100][100]);
 
 }
 

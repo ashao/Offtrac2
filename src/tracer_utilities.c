@@ -36,7 +36,7 @@ void read_temp_and_salt( int imon, char *fieldtype, char* path) {
 
 }
 
-void z_depth(double h[NZ][NXMEM][NYMEM], double depth[NZ][NXMEM][NYMEM]) {
+void z_depth(double ***h, double ***depth) {
 	/* compute depth in meters for use in tracer depth dependent functions
 	 * Ivan Lima - Nov 2002 */
 	int i, j, k;

@@ -542,71 +542,6 @@ void read_h(int imon, char *fieldtype, char *readpath, double ***hread)
 
 
 
-/* ashao: Read data routines (UH, VH, WD, T, S) for hindcast runs */
-/*
-void read_var3d( char *inpath, char *varname, int imon, double ***data)
-{
-
-	int i,j,k,ii;
-	int err, cdfid, timeid, varid;
-	char infile[25];
-	FILE *file;
-	int status;
-	int inxt,iprv;
-	size_t start[MAX_NC_VARS];
-	size_t count[MAX_NC_VARS];
-	double ***tmp3d;
-
-	start[0] = imon;
-	start[1] = 0;
-	start[2] = 0;
-	start[3] = 0;
-
-	err = open_input_file(inpath,&file,&cdfid,&timeid);
-	if ((status = nc_inq_varid(cdfid, varname, &varid)))
-		bzero(start, MAX_NC_VARS * sizeof(long));
-
-
-	count[0] = 1;
-	count[1] = NZ;
-	count[2] = NYTOT;
-	count[3] = NXTOT;
-
-	//    for (i=0;i<4;i++)
-	//	printf("start[%d]: %d,count[%d]: %d\n",i,start[i],i,count[i]);
-
-	tmp3d  = alloc3d(NZ,NYTOT,NXTOT);
-	if ((status = nc_get_vara_double(cdfid,varid,start,count,tmp3d[0][0])))
-		ERR(status);
-	for (k=0;k<count[1];k++)
-		for (i=0;i<NXTOT;i++)
-			for (j=0;j<NYTOT;j++)
-				data[k][i+2][j+2]= tmp3d[k][j][i];
-
-
-	for (k=0;k<NZ;k++) {
-		for (j=0;j<=NYMEM-1;j++) {
-			data[k][nx+1][j] = data[k][2][j];
-			data[k][nx+2][j] = data[k][3][j];
-			data[k][0][j] =   data[k][nx-1][j];
-			data[k][1][j] =   data[k][nx][j];
-		}
-	}
-#ifdef REENTRANT_Y
-	//      meridional re-entrance
-	for (i=2;i<=nx;i++) {
-		ii = 363 - i;
-		for (k=0;k<NZ;k++) {
-			data[k][ii][ny+1] = data[k][i][ny];
-			data[k][ii][ny+2]   = data[k][i][ny-1];
-		}
-	}
-#endif
-	free3d(tmp3d,NZ);
-
-	close_file(&cdfid,&file);	
-}
-*/
 void read_var2d_time( char *inpath, int imon, char *varname, float **data)
 {
 
@@ -736,5 +671,120 @@ void read_var3d(char *readpath, char *varname, int imon, double ***readarray)
 	}
 
 	close_file(&cdfid,&file);
+
+}
+
+
+void read_woa_file(int imon, double ***harray, double ***outarray, char *filename, char *varname, double conv_factor) {
+
+	int i,j,k;
+	int err, cdfid, timeid;
+	char infile[25], inpath[200];
+	FILE *file;
+	int status;
+
+	int levo2id;
+
+	size_t start[MAX_NC_VARS];
+	size_t count[MAX_NC_VARS];
+
+	float*** tmp3d;
+	double*** oxytmp;
+
+	extern ***depth;
+	double po4obsprof[NZWOA];
+	double levitus_depths[NZWOA] = {0, 10, 20, 30, 50, 75, 100,
+			125, 150, 200, 250, 300, 400, 500, 600,
+			700, 800, 900, 1000, 1100, 1200, 1300,
+			1400, 1500, 1750, 2000, 2500, 3000,
+			3500, 4000, 4500, 5000, 5500};
+
+//	printf("Reading from WOA09 climatology: \n");
+
+	//   sprintf(infile,"lev94_o2.nc");
+	sprintf(infile,filename);
+	strcpy(inpath, directory);
+	strcat(inpath, infile);
+
+	printf("Looking for file '%s'.\n",inpath);
+
+	err = open_input_file(inpath,&file,&cdfid,&timeid);
+	if (err != 0) {
+		strcat(inpath, ".cdf");
+		err = open_input_file(inpath,&file,&cdfid,&timeid);
+		if (err != 0) {
+			printf("Unable to find Levitus O2 file.\n");
+			exit(-73);
+		}
+	}
+
+	if ((status = nc_inq_varid(cdfid, varname, &levo2id)))
+		ERR(status);
+
+	bzero(start, MAX_NC_VARS * sizeof(long));
+
+	count[0] = 1;
+	count[1] = NZWOA;
+	count[2] = NYTOT;
+	count[3] = NXTOT;
+
+	tmp3d = alloc3d_f(NZWOA,NYTOT,NXTOT);
+	oxytmp = alloc3d(NZWOA,NXMEM,NYMEM);
+
+	start[0] = 0;
+
+	if ((status = nc_get_vara_float(cdfid,levo2id,start,count,tmp3d[0][0])))
+		ERR(status);
+
+	for (k=0;k<NZWOA;k++) {
+		for (i=0;i<NXTOT;i++) {
+			for (j=0;j<NYTOT;j++) {
+				oxytmp[k][i+2][j+2]= tmp3d[k][j][i]*conv_factor;
+			}
+		}
+	}
+	//  temporary bug fix for northern-most row (j=211)
+/*
+	for (i=2;i<NXMEM;i++) {
+		for (k=0;k<NZWOA;k++) {
+			oxytmp[k][i][211] = oxytmp[k][i][210];
+		}
+	}
+*/
+//	wrap_reentrance_3d(oxytmp,NZWOA);
+
+	for (i=0;i<NXMEM;i++) {
+		for (j=0;j<NYMEM;j++) {
+			if (oceanmask[i][j]) {
+				for (k=0;k<NZWOA;k++)
+					po4obsprof[k] = oxytmp[k][i][j];
+				for (k=0;k<NZ;k++) {
+					outarray[k][i][j] = lin_interp(depth[k][i][j], po4obsprof,
+							levitus_depths, 0, NZWOA);
+					if (outarray[k][i][j] < 0.e0) outarray[k][i][j] = 0.;
+				}
+                                for (k = 0; k <= 2; k = k + 2) {
+                                        outarray[k][i][j] = lin_interp(((depth[k][i][j] + depth[k
+                                                        + 1][i][j]) / 2.), po4obsprof, levitus_depths, 0,
+                                                        NZWOA);
+                                        if (outarray[k][i][j] < 0.e0)
+                                                outarray[k][i][j] = 0.;
+                                        outarray[k + 1][i][j] = outarray[k][i][j];
+                                }
+
+
+			} else {
+				for (k=0;k<NZ;k++ ) {
+					outarray[k][i][j] = misval;
+				}
+			}
+		}
+	}
+
+	wrap_reentrance_3d(outarray,NZ);
+	free3d_f(tmp3d, NZWOA);
+	free3d(oxytmp, NZWOA);
+	close_file(&cdfid,&file);
+
 
 }

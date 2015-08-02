@@ -1,8 +1,8 @@
 extern int mN2;
 // Output arrays
 extern double ***mn_n2;
-extern double ***mn_n2sol;
-extern double ***n2sol;
+extern double ***mn_n2sat;
+extern double ***n2sat;
 // Working arrays
 extern double ***n2_init;
 

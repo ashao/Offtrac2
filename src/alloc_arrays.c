@@ -18,6 +18,7 @@ int alloc_error(char* arr_name)
 
 int alloc_arrays() {
 	extern double ***h, ***hstart, ***hend, ***htest;
+	extern double ***depth;
 	extern double ***mn_h;
 	extern double ***uhtm, ***mn_uhtm;
 	extern double ***vhtm, ***mn_vhtm;
@@ -31,6 +32,7 @@ int alloc_arrays() {
 	if (! (h = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("h");
 	if (! (hstart = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("hstart");
 	if (! (hend = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("hend");
+	if (! (depth = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("depth");
 	if (! (htest = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("hend");
 	if (! (Temptm = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("Temptm");
 	if (! (Salttm = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("Salttm");

@@ -28,10 +28,10 @@
 int mN2;
 // Output arrays
 double ***mn_n2;
-double ***mn_n2sol;
+double ***mn_n2sat;
 // Working arrays
 double ***n2_init;
-double ***n2sol;
+double ***n2sat;
 extern double ****tr;
 extern int oceanmask[NXMEM][NYMEM];
 extern struct vardesc vars[NOVARS];
@@ -45,8 +45,8 @@ void allocate_n2 (  ) {
 
 	// Allocate working and output arrays
 	mn_n2 = alloc3d(NZ,NXMEM,NYMEM);
-	mn_n2sol = alloc3d(NZ,NXMEM,NYMEM);
-	n2sol = alloc3d(NZ,NXMEM,NYMEM);
+	mn_n2sat = alloc3d(NZ,NXMEM,NYMEM);
+	n2sat = alloc3d(NZ,NXMEM,NYMEM);
 	n2_init = alloc3d(NZ,NXMEM,NYMEM);
 
 }
@@ -73,7 +73,7 @@ void initialize_n2( ) {
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
 	strcpy(varname,"n2sol");
-	strcpy(vars[map_variable_to_index(varname)].name,"mn_n2sol");
+	strcpy(vars[map_variable_to_index(varname)].name,"mn_n2sat");
 	strcpy(vars[map_variable_to_index(varname)].longname,"N2 Saturation");
 	vars[map_variable_to_index(varname)].hor_grid='h';
 	vars[map_variable_to_index(varname)].z_grid='L';
@@ -92,7 +92,7 @@ void initialize_n2( ) {
 	else {
 		// Initialize N2 to saturation everywhere in the ocean
 		calc_n2_saturation();
-		copy_darray3d( n2_init, n2sol, NZ, NXMEM, NYMEM );
+		copy_darray3d( n2_init, n2sat, NZ, NXMEM, NYMEM );
 		printf("Ideal n2 initialized to saturation globally\n");
 	}
 
@@ -179,28 +179,28 @@ void calc_n2_saturation( ) {
 
 					conc_N2 = exp(conc_N2);
 					pden = gsw_rho_t_exact(S,Temptm[k][i][j],2000.0);
-					n2sol[k][i][j] = conc_N2 / pden;
+					n2sat[k][i][j] = conc_N2 / pden;
 
 				}
 				else {
-					n2sol[k][i][j] = 0.0;
+					n2sat[k][i][j] = 0.0;
 				}
 			}
 }
 
 void step_n2( ) {
 
-	int i,j,k;
+		// Surface source of Argon
+		int k;
 
-	calc_n2_saturation( );
 
-	for (k=0;k<NML;k++)
-		for (i=0; i<NXMEM; i++)
-			for (j=0;j<NYMEM; j++) {
-				// Set surface to saturation
-				tr[mN2][k][i][j] = n2sol[k][i][j];
+		calc_ar_saturation( );
 
-			}
+		if (run_parameters.do_gasex)
+			gas_exchange(mN2,n2_props.Sc_coeffs,n2sat);
+		else
+			for (k=0;k<NML;k++)
+				copy_darray2d(tr[mN2][k],n2sat,NXMEM,NYMEM);
 
 
 

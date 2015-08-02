@@ -157,6 +157,15 @@ void initialize( void )
 		allocate_ar();
 		initialize_ar();
 	}
+
+	if (run_parameters.do_oxygen) {
+		allocate_oxygen( );
+		initialize_oxygen( );
+
+		allocate_phosphate( );
+		initialize_phosphate();
+
+	}
 	/* zonal, meridional re-entrance    */
 	for (m=0;m<run_parameters.tracer_counter;m++) {
 		for (k=0;k<NZ;k++) {
@@ -330,26 +339,37 @@ void set_run_parameters( void )
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ar_restart"))
 			rflags[map_variable_to_index(attribute)] = atoi(value);
+
+		if (!strcmp(attribute,"do_oxygen"))
+			run_parameters.do_oxygen = atoi(value);
 	}
 	free(line_read);
 	fclose(ptr_file);
 	
-	if (run_parameters.do_age) {
+	if (run_parameters.do_age)
 		mAGE = run_parameters.tracer_counter++;
-	}
-	if (run_parameters.do_ttd) {
+
+	if (run_parameters.do_ttd)
 		mTTD = run_parameters.tracer_counter++;
-	}
+
 	if (run_parameters.do_cfcs) { 
 		mCFC11 = run_parameters.tracer_counter++;
 		mCFC12 = run_parameters.tracer_counter++;
 		mSF6 = run_parameters.tracer_counter++;
 	}
-	if (run_parameters.do_n2) {
+	if (run_parameters.do_n2)
 		mN2 = run_parameters.tracer_counter++;
-	}
-	if (run_parameters.do_ar) {
+
+	if (run_parameters.do_ar)
 		mAR = run_parameters.tracer_counter++;
+
+	if (run_parameters.do_oxygen) {
+		mOXYGEN = run_parameters.tracer_counter++;
+		mPHOSPHATE = run_parameters.tracer_counter++;
+		mDOP = run_parameters.tracer_counter++;
+
+
 	}
+
 
 }

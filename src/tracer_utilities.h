@@ -6,7 +6,7 @@
  */
 
 
-void z_depth(double h[NZ][NXMEM][NYMEM], double depth[NZ][NXMEM][NYMEM]);
+void z_depth(double ***h, double ***depth);
 void allocate_ts( );
 void read_temp_and_salt( int imon, char *fieldtype, char *path);
 double calc_inventory( double ***array );

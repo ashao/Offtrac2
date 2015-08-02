@@ -28,10 +28,10 @@
 int mAR;
 // Output arrays
 double ***mn_ar;
-double ***mn_arsol;
+double ***mn_arsat;
 // Working arrays
 double ***ar_init;
-double ***arsol;
+double ***arsat;
 extern double ****tr;
 extern int oceanmask[NXMEM][NYMEM];
 extern struct vardesc vars[NOVARS];
@@ -45,8 +45,8 @@ void allocate_ar (  ) {
 
 	// Allocate working and output arrays
 	mn_ar = alloc3d(NZ,NXMEM,NYMEM);
-	mn_arsol = alloc3d(NZ,NXMEM,NYMEM);
-	arsol = alloc3d(NZ,NXMEM,NYMEM);
+	mn_arsat = alloc3d(NZ,NXMEM,NYMEM);
+	arsat = alloc3d(NZ,NXMEM,NYMEM);
 	ar_init = alloc3d(NZ,NXMEM,NYMEM);
 
 }
@@ -92,7 +92,7 @@ void initialize_ar( ) {
 	else {
 		// Initialize AR to saturation everywhere in the ocean
 		calc_ar_saturation();
-		copy_darray3d( ar_init, arsol, NZ, NXMEM, NYMEM );
+		copy_darray3d( ar_init, arsat, NZ, NXMEM, NYMEM );
 		printf("Ideal ar initialized to saturation globally\n");
 	}
 
@@ -132,10 +132,10 @@ void initialize_ar_properties ( )
 
 
 	// Wanninkhof 1992
-    ar_props.Sc_coeffs[0] = 1909.1;
-    ar_props.Sc_coeffs[1] = 125.09;
-    ar_props.Sc_coeffs[2] = 3.9012;
-    ar_props.Sc_coeffs[3] = 0.048953;
+	ar_props.Sc_coeffs[0] = 1909.1;
+	ar_props.Sc_coeffs[1] = 125.09;
+	ar_props.Sc_coeffs[2] = 3.9012;
+	ar_props.Sc_coeffs[3] = 0.048953;
 
 	// Hamme and Emerson 2004
 	ar_props.sat_coeffs[0] = 2.79150;
@@ -180,30 +180,27 @@ void calc_ar_saturation( ) {
 
 					conc_AR = exp(conc_AR);
 					pden = gsw_rho_t_exact(S,Temptm[k][i][j],2000.0);
-					arsol[k][i][j] = conc_AR / pden;
+					arsat[k][i][j] = conc_AR / pden;
 
 				}
 				else {
-					arsol[k][i][j] = 0.0;
+					arsat[k][i][j] = 0.0;
 				}
 			}
 }
 
 void step_ar( ) {
+	// Surface source of Argon
+	int k;
 
-	int i,j,k;
 
 	calc_ar_saturation( );
 
-	for (k=0;k<NML;k++)
-		for (i=0; i<NXMEM; i++)
-			for (j=0;j<NYMEM; j++) {
-				// Set surface to saturation
-				tr[mAR][k][i][j] = arsol[k][i][j];
-
-			}
-
-
+	if (run_parameters.do_gasex)
+		gas_exchange(mAR,ar_props.Sc_coeffs,arsat);
+	else
+		for (k=0;k<NML;k++)
+			copy_darray2d(tr[mAR][k],arsat,NXMEM,NYMEM);
 
 }
 
