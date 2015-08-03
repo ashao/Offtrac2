@@ -691,7 +691,9 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 	float*** tmp3d;
 	double*** oxytmp;
 
+	extern double misval;
 	extern ***depth;
+	extern int oceanmask[NXMEM][NYMEM];
 	double po4obsprof[NZWOA];
 	double levitus_depths[NZWOA] = {0, 10, 20, 30, 50, 75, 100,
 			125, 150, 200, 250, 300, 400, 500, 600,
@@ -703,7 +705,7 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 
 	//   sprintf(infile,"lev94_o2.nc");
 	sprintf(infile,filename);
-	strcpy(inpath, directory);
+	strcpy(inpath, run_parameters.forcing_path);
 	strcat(inpath, infile);
 
 	printf("Looking for file '%s'.\n",inpath);
@@ -759,12 +761,12 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 				for (k=0;k<NZWOA;k++)
 					po4obsprof[k] = oxytmp[k][i][j];
 				for (k=0;k<NZ;k++) {
-					outarray[k][i][j] = lin_interp(depth[k][i][j], po4obsprof,
+					outarray[k][i][j] = linear_interpolation(depth[k][i][j], po4obsprof,
 							levitus_depths, 0, NZWOA);
 					if (outarray[k][i][j] < 0.e0) outarray[k][i][j] = 0.;
 				}
                                 for (k = 0; k <= 2; k = k + 2) {
-                                        outarray[k][i][j] = lin_interp(((depth[k][i][j] + depth[k
+                                        outarray[k][i][j] = linear_interpolation(((depth[k][i][j] + depth[k
                                                         + 1][i][j]) / 2.), po4obsprof, levitus_depths, 0,
                                                         NZWOA);
                                         if (outarray[k][i][j] < 0.e0)

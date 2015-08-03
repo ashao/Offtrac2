@@ -200,7 +200,7 @@ void step_ar( ) {
 		gas_exchange(mAR,ar_props.Sc_coeffs,arsat);
 	else
 		for (k=0;k<NML;k++)
-			copy_darray2d(tr[mAR][k],arsat,NXMEM,NYMEM);
+			copy_darray2d(tr[mAR][k],arsat[k],NXMEM,NYMEM);
 
 }
 

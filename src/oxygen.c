@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <math.h>
-
+#include <string.h>
 #include "oxygen.h"
 #include "biotic.h"
 #include "init.h"
+#include "io.h"
 #include "phosphate.h"
 #include "netcdf.h"
 #include "alloc.h"
@@ -11,6 +12,7 @@
 #include "util.h"
 #include "oxygen.h"
 #include "timekeeper.h"
+#include "initialize.h"
 
 /* OXYGEN VARIABLE DECLARATIONS */
 // Auxiliary variables
@@ -26,9 +28,12 @@ double ***o2_sat;
 double oxyflux[NXMEM][NYMEM];
 double ***jo2;
 extern double ****tr;
+extern double ***hend;
 extern int oceanmask[NXMEM][NYMEM];
 
 extern struct timekeeper_t timekeeper;
+extern struct vardesc vars[NOVARS];
+extern struct parameters run_parameters;
 
 void allocate_oxygen (  ) {
 	printf("Allocating oxygen arrays\n");
@@ -44,9 +49,8 @@ void allocate_oxygen (  ) {
 	oxy_init = alloc3d(NZ,NXMEM,NYMEM);
 }
 
-void initialize_oxygen(int imon ) {
+void initialize_oxygen( ) {
 
-	extern double ***hend;
 	extern double misval;
 	char varname[100];
 
@@ -90,12 +94,12 @@ void initialize_oxygen(int imon ) {
 	}
 	else {
 		printf("Initializing oxygen from WOA09\n");
-		read_woa_file(imon, hend, oxy_init, "woa09.o2.nc", "LEVO2",1e-3);
+		read_woa_file(0, hend, oxy_init, "woa09.o2.nc", "LEVO2",1e-3);
 	}
 
 	apply_mask(oxy_init,oceanmask);
 	// Copy the initialized tracer value over to main trace array
-	copy_darray3d(tr[mOXYGEN],oxy_init);
+	copy_darray3d(tr[mOXYGEN],oxy_init,NZ,NXMEM,NYMEM);
 
 	free3d(oxy_init,NZ);
 
@@ -157,7 +161,6 @@ void oxygen_saturation(double ***T, double ***S)
 void apply_oxygen_jterms( ) {
 	int i,j,k;
 
-	extern double hend[NZ][NXMEM][NYMEM];
 	extern double misval;
 	// j terms here are calculated from biotic_sms routine in biotic.c
 	printf("Example jo2/o2: %e/%f\n",jo2[10][127][127],tr[mOXYGEN][10][127][127]);
@@ -182,18 +185,17 @@ void step_oxygen( ) {
 	int i,j,k;
 	extern double ****tr;
 
-	// Set oxygen values to saturation at the mixed layer to mimic equilibrium with the atmosphere
 	extern double ***Temptm;
 	extern double ***Salttm;
 	const double Sc_coeffs[4] = {1953.4, 128.00, 3.9918, 0.050091};
 
-	oxygen_saturation(Temptm, Salttm, o2_sat);
+	oxygen_saturation(Temptm, Salttm);
 	apply_oxygen_jterms();
 
 	if (run_parameters.do_gasex)
 		gas_exchange(mOXYGEN,Sc_coeffs,o2_sat);
 	else
 		for (k=0;k<NML;k++)
-			copy_darray2d(tr[mOXYGEN][k],o2_sat[0]);
+			copy_darray2d(tr[mOXYGEN][k],o2_sat[0],NXMEM,NYMEM);
 }
 

@@ -63,7 +63,6 @@ const double misval = -1.e+6;
 
 // mn_ refers to mean value for output interval, WRINT (see init.h)
 // Fields from HIM/GOLD/MOM6 output
-double depth[NZ][NXMEM][NYMEM];
 
 double ***h, ***hstart, ***hend;
 double ***depth;

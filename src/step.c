@@ -46,6 +46,7 @@ extern double test_inventory;
 
 extern double ****tr;
 extern double ***hstart, ***h, ***hend;
+extern double ***depth;
 
 extern double ***mn_h, ***h;
 extern double ***mn_uhtm, ***uhtm;
@@ -150,7 +151,7 @@ void step_fields( ) {
 		update_phosphate_fields();
 		biotic_sms( 1, timekeeper.dt );
 		step_oxygen();
-		step_phosphate();
+		apply_phosphate_jterms();
 
 	}
 

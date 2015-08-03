@@ -14,15 +14,14 @@ extern double ***mn_jo2;
 extern double mn_oxyflux[NXMEM][NYMEM];
 // Working arrays
 extern double ***oxy_init;
-extern double o2_sat[NZ][NXMEM][NYMEM];
+extern double ***o2_sat;
 extern double oxyflux[NXMEM][NYMEM];
 extern double ***jo2;
 
 /* SUBROUTINE PROTOTYPES */
 void allocate_oxygen(  );
-void initialize_oxygen( int imon );
-void oxygen_saturation(double ***T, double ***S,
-		double ***o2_sat);
+void initialize_oxygen( );
+void oxygen_saturation(double ***T, double ***S);
 
 void surface_oxygen();
 void apply_oxygen_jterms();

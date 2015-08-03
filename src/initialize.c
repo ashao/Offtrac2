@@ -22,6 +22,8 @@
 #include "cfcs_sf6.h"
 #include "n2_module.h"
 #include "ar_module.h"
+#include "oxygen.h"
+#include "phosphate.h"
 
 #ifdef CONSERVATION_CHECK
 #include "conservation_check.h"

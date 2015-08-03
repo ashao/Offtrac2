@@ -44,7 +44,7 @@
 #undef CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
 
 
-#define NOVARS 20              /*  Number of variables used in        */
+#define NOVARS 25              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */
@@ -232,6 +232,6 @@
 #define KD   1.00e-5		/* was 1.00e-5		*/
 #endif
 
-
+#define NZWOA 33
 
 

@@ -31,4 +31,4 @@ extern double flux_pop[NXMEM][NYMEM];
 void allocate_phosphate( );
 void initialize_phosphate(  );
 void apply_phosphate_jterms();
-
+void step_phosphate( );

@@ -4,13 +4,15 @@
  *  Created on: Apr 15, 2014
  *      Author: ashao
  */
+#include <stdio.h>
+#include <string.h>
 #include "init.h"
 #include "netcdf.h"
 #include "phosphate.h"
 #include "alloc.h"
-#include <stdio.h>
-
+#include "io.h"
 #include "timekeeper.h"
+#include "initialize.h"
 /* PHOSPHATE VARIABLE DECLARATIONS */
 // Auxiliary variables
 int mPHOSPHATE;
@@ -38,6 +40,9 @@ double flux_pop[NXMEM][NYMEM];
 double ***dop_init;
 
 extern struct timekeeper_t timekeeper;
+extern struct vardesc vars[NOVARS];
+extern struct parameters run_parameters;
+
 void allocate_phosphate(  )
 {
 	int i,j,k;
@@ -65,7 +70,6 @@ void initialize_phosphate( int imon ) {
 	int i,j,k;
 	extern double ***hend;
 	extern double ****tr;
-	extern char restart_filename[200];
 	char varname[100];
 
 	printf("Phosphate index in main tracer array: %d\n",mPHOSPHATE);
@@ -108,10 +112,10 @@ void initialize_phosphate( int imon ) {
 
 
 	if (run_parameters.restart_flag) {
-		printf("Initializing phosphate from restart: %s\n",restart_filename);
-		read_var3d( restart_filename, "mn_phos", 0, phosphate_init);
-		printf("Initializing dop from restart: %s\n",restart_filename);
-		read_var3d( restart_filename, "mn_dop", 0, dop_init);
+		printf("Initializing phosphate from restart: %s\n",run_parameters.restartfile);
+		read_var3d( run_parameters.restartfile, "mn_phos", 0, phosphate_init);
+		printf("Initializing dop from restart: %s\n",run_parameters.restartfile);
+		read_var3d( run_parameters.restartfile, "mn_dop", 0, dop_init);
 	}
 
 
@@ -144,8 +148,8 @@ void apply_phosphate_jterms( ) {
 			//BX - reinstated by HF
 			if (oceanmask[i][j]) {
 				for (k = 0; k < NZ; k++) {
-					if (hend[k][i][j]>EPSILON) tr[mPHOSPHATE][k][i][j] += dt * jpo4[k][i][j];
-					if (hend[k][i][j]>EPSILON) tr[mDOP][k][i][j] += dt * jdop[k][i][j];
+					if (hend[k][i][j]>EPSILON) tr[mPHOSPHATE][k][i][j] += timekeeper.dt * jpo4[k][i][j];
+					if (hend[k][i][j]>EPSILON) tr[mDOP][k][i][j] += timekeeper.dt * jdop[k][i][j];
 					}
 				
 			} else {
@@ -160,3 +164,4 @@ void apply_phosphate_jterms( ) {
 
 
 }
+

@@ -6,12 +6,15 @@
 #include "step.h"
 #include "phosphate.h"
 #include "oxygen.h"
+#include "timekeeper.h"
+#include "alloc.h"
+
 #define OXYGEN
 #define PHOSPHATE
 
 const double r_bio_tau = 1.0 / (30.0 * 86400.0); 
 extern const double misval;
-
+extern struct timekeeper_t timekeeper;
 
 # ifdef N15_CYCLE
 extern const double parm_n15_std_fraction;
@@ -87,7 +90,7 @@ extern int mDON_15n;
 # endif
 #endif /* NITRATE */
 
-void update_phosphate_field( ) {
+void update_phosphate_fields( ) {
 
 	int i,j,k;
 	float t0, t1; // Interpolation times

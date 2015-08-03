@@ -200,7 +200,7 @@ void step_n2( ) {
 			gas_exchange(mN2,n2_props.Sc_coeffs,n2sat);
 		else
 			for (k=0;k<NML;k++)
-				copy_darray2d(tr[mN2][k],n2sat,NXMEM,NYMEM);
+				copy_darray2d(tr[mN2][k],n2sat[k],NXMEM,NYMEM);
 
 
 
