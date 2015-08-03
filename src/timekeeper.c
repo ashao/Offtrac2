@@ -41,7 +41,7 @@ void initialize_timekeeper( void ) {
 	// Check to see if we should begin by reading a hindcast year
 	if (run_parameters.use_hindcast) {
 
-		timekeeper.read_hind_flag = run_parameters.syear >= BEGHIND && run_parameters.syear <= ENDHIND;
+		timekeeper.read_hind_flag = run_parameters.syear >= BEGHIND && run_parameters.eyear <= ENDHIND;
 		if (timekeeper.read_hind_flag)
 			timekeeper.current_interval = mod(run_parameters.sinterval - 1,timekeeper.num_intervals_year);
 

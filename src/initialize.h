@@ -18,6 +18,7 @@ struct parameters {
 	char restartfile[100]; // restart file name 
 	char new_restartfile[100]; // restart file name
 	char timestep[7]; // '5day' or 'month'
+	char woa_path[1000]; // Path to WOA files
 	
 	int wrint; // Output interval
 	int do_averaging; // Whether the output is averaged or not

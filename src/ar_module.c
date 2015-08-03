@@ -23,7 +23,7 @@
 #include "alloc.h"
 #include "init.h"
 #include "gsw_src/gswteos-10.h"
-
+#include "gas_exchange.h"
 // Auxiliary variables
 int mAR;
 // Output arrays
@@ -197,7 +197,7 @@ void step_ar( ) {
 	calc_ar_saturation( );
 
 	if (run_parameters.do_gasex)
-		gas_exchange(mAR,ar_props.Sc_coeffs,arsat);
+		gas_exchange(mAR,ar_props.Sc_coeffs,arsat[0]);
 	else
 		for (k=0;k<NML;k++)
 			copy_darray2d(tr[mAR][k],arsat[k],NXMEM,NYMEM);

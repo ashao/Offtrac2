@@ -25,3 +25,4 @@ void oxygen_saturation(double ***T, double ***S);
 
 void surface_oxygen();
 void apply_oxygen_jterms();
+void step_oxygen();

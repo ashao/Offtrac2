@@ -23,7 +23,7 @@
 #include "alloc.h"
 #include "init.h"
 #include "gsw_src/gswteos-10.h"
-
+#include "gas_exchange.h"
 // Auxiliary variables
 int mN2;
 // Output arrays
@@ -190,14 +190,14 @@ void calc_n2_saturation( ) {
 
 void step_n2( ) {
 
-		// Surface source of Argon
+		// Surface source of Nitrogen
 		int k;
 
 
-		calc_ar_saturation( );
+		calc_n2_saturation( );
 
 		if (run_parameters.do_gasex)
-			gas_exchange(mN2,n2_props.Sc_coeffs,n2sat);
+			gas_exchange(mN2,n2_props.Sc_coeffs,n2sat[0]);
 		else
 			for (k=0;k<NML;k++)
 				copy_darray2d(tr[mN2][k],n2sat[k],NXMEM,NYMEM);

@@ -458,6 +458,14 @@ void alloc_fields(void)
 		var[map_variable_to_index("ar")] = &mn_ar[0][0][0];
 		var[map_variable_to_index("arsol")] = &mn_arsat[0][0][0];
 	}
+	if (run_parameters.do_oxygen) {
+		var[map_variable_to_index("oxygen")] = &mn_oxygen[0][0][0];
+		var[map_variable_to_index("o2sat")] = &mn_o2sat[0][0][0];
+		var[map_variable_to_index("jo2")] = &mn_jo2[0][0][0];
+		var[map_variable_to_index("po4")] = &mn_phos[0][0][0];
+		var[map_variable_to_index("dop")] = &mn_dop[0][0][0];
+		var[map_variable_to_index("jpo4")] = &mn_jpo4[0][0][0];
+	}
 	//var[18] = &mn_rml[0][0][0];
 
 	// end ashao

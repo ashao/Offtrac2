@@ -121,7 +121,7 @@ void read_gas_exchange_fields(char *inpath) {
 
 	}
 
-	printf("\tKw: %e Pressure: %e\n",ocmip.kw[0][100][100],ocmip.atmpres[0][100][100]);
+	printf("\tKw: %e Pressure: %e\n",(double) ocmip.kw[0][100][100], (double) ocmip.atmpres[0][100][100]);
 	// Use netcdf function to read in time;
 	start[0] = 0;
 	count[0] = nmonths;
@@ -158,6 +158,7 @@ void update_gas_exchange_fields( ) {
 	double tarr[2],datarr[2];
 	
 	idx0 = 0;
+	idx1 = 1;
 	if (curr_yearfrac>ocmip.maxtime) {
 		idx0 = nmonths-1;
 		idx1 = 0;
@@ -173,12 +174,15 @@ void update_gas_exchange_fields( ) {
 		t1 = ocmip.time[idx1]-1.0;
 	}
 	else {
-		while (curr_yearfrac<ocmip.time[idx0])
+		printf("curr_yearfrac: %f ocmip.time[%d]: %f",curr_yearfrac,idx1,ocmip.time[idx1]);
+		while (curr_yearfrac>ocmip.time[idx1]) {
 			idx0++;
-
-		idx1=idx0+1;
+			idx1=idx0+1;
+			printf("idx0: %d idx1: %d\n",idx0,idx1);
+		}
 		t0 = ocmip.time[idx0];
 		t1 = ocmip.time[idx1];
+		printf("Interpolation Time Interval: %d %d %f %f\n",idx0,idx1,t0,t1);
 
 	}
 
@@ -198,8 +202,8 @@ void update_gas_exchange_fields( ) {
 			datarr[1] = (double) ocmip.atmpres[idx1][i][j];
 			curr_atmpres[i][j] = linear_interpolation(tarr,datarr,curr_yearfrac,2);
 		}
-	printf("Gas Exchange:\n");
-	printf("\tKw: %e Pressure: %e\n",curr_kw[100][100],ocmip.atmpres[100][100]);
+	printf("Gas Exchange @ Year Fraction: %f:\n",curr_yearfrac);
+	printf("\tKw: %e Pressure: %e\n",curr_kw[100][100],curr_atmpres[100][100]);
 
 }
 

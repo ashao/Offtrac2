@@ -8,7 +8,9 @@
 #include "oxygen.h"
 #include "timekeeper.h"
 #include "alloc.h"
-
+#include "tracer_utilities.h"
+#include "util.h"
+#include "read.h"
 #define OXYGEN
 #define PHOSPHATE
 
@@ -255,13 +257,13 @@ void biotic_sms(int ibiodt, double dt)
 
 	dt_bio = dt / (double) ibiodt;
 	frac_dt_bio = 1.0 / (double) ibiodt;
-	set_darray3d_zero(jpo4,NZ);
-	set_darray3d_zero(jdop,NZ);
-	set_darray3d_zero(jremdop,NZ);
-	set_darray3d_zero(jprod,NZ);
-	set_darray3d_zero(jremin,NZ);
+	set_darray3d_zero(jpo4,NZ,NXMEM,NYMEM);
+	set_darray3d_zero(jdop,NZ,NXMEM,NYMEM);
+	set_darray3d_zero(jremdop,NZ,NXMEM,NYMEM);
+	set_darray3d_zero(jprod,NZ,NXMEM,NYMEM);
+	set_darray3d_zero(jremin,NZ,NXMEM,NYMEM);
 	set_fix_darray2d_zero(flux_pop);
-	set_darray3d_zero(jo2,NZ);
+	set_darray3d_zero(jo2,NZ,NXMEM,NYMEM);
 
 	//    printf("conc_obs_layer(h,po4_star_lev,po4_star_lay)\n");
 	//    conc_obs_layer(h,po4_star_lev,po4_star_lay);

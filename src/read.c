@@ -14,6 +14,8 @@
 #include "metrics.h"
 #include "initialize.h"
 #include "timekeeper.h"
+#include "tracer_utilities.h"
+
 
 extern double areagr[NXMEM][NYMEM];
 
@@ -688,11 +690,11 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 	size_t start[MAX_NC_VARS];
 	size_t count[MAX_NC_VARS];
 
-	float*** tmp3d;
+	double*** tmp3d;
 	double*** oxytmp;
-
+	double hml_mid;
 	extern double misval;
-	extern ***depth;
+	extern double ***depth;
 	extern int oceanmask[NXMEM][NYMEM];
 	double po4obsprof[NZWOA];
 	double levitus_depths[NZWOA] = {0, 10, 20, 30, 50, 75, 100,
@@ -705,7 +707,7 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 
 	//   sprintf(infile,"lev94_o2.nc");
 	sprintf(infile,filename);
-	strcpy(inpath, run_parameters.forcing_path);
+	strcpy(inpath, run_parameters.woa_path);
 	strcat(inpath, infile);
 
 	printf("Looking for file '%s'.\n",inpath);
@@ -730,12 +732,12 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 	count[2] = NYTOT;
 	count[3] = NXTOT;
 
-	tmp3d = alloc3d_f(NZWOA,NYTOT,NXTOT);
+	tmp3d = alloc3d(NZWOA,NYTOT,NXTOT);
 	oxytmp = alloc3d(NZWOA,NXMEM,NYMEM);
 
 	start[0] = 0;
 
-	if ((status = nc_get_vara_float(cdfid,levo2id,start,count,tmp3d[0][0])))
+	if ((status = nc_get_vara_double(cdfid,levo2id,start,count,tmp3d[0][0])))
 		ERR(status);
 
 	for (k=0;k<NZWOA;k++) {
@@ -761,17 +763,19 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 				for (k=0;k<NZWOA;k++)
 					po4obsprof[k] = oxytmp[k][i][j];
 				for (k=0;k<NZ;k++) {
-					outarray[k][i][j] = linear_interpolation(depth[k][i][j], po4obsprof,
-							levitus_depths, 0, NZWOA);
+					outarray[k][i][j] = linear_interpolation(levitus_depths,po4obsprof,depth[k][i][j],
+							NZWOA);
 					if (outarray[k][i][j] < 0.e0) outarray[k][i][j] = 0.;
 				}
-                                for (k = 0; k <= 2; k = k + 2) {
-                                        outarray[k][i][j] = linear_interpolation(((depth[k][i][j] + depth[k
-                                                        + 1][i][j]) / 2.), po4obsprof, levitus_depths, 0,
-                                                        NZWOA);
+				hml_mid = 0;
+				for (k=0;k<NML;k++)
+					hml_mid += depth[k][i][j]/ (double) NML;
+								
+                                for (k = 0; k < NML; k++) {
+                                        outarray[k][i][j] = linear_interpolation(levitus_depths,po4obsprof,
+						hml_mid,NZWOA);
                                         if (outarray[k][i][j] < 0.e0)
                                                 outarray[k][i][j] = 0.;
-                                        outarray[k + 1][i][j] = outarray[k][i][j];
                                 }
 
 
@@ -784,7 +788,7 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 	}
 
 	wrap_reentrance_3d(outarray,NZ);
-	free3d_f(tmp3d, NZWOA);
+	free3d(tmp3d, NZWOA);
 	free3d(oxytmp, NZWOA);
 	close_file(&cdfid,&file);
 

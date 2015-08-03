@@ -13,6 +13,9 @@
 #include "oxygen.h"
 #include "timekeeper.h"
 #include "initialize.h"
+#include "output_variables.h"
+#include "gas_exchange.h"
+#include "read.h"
 
 /* OXYGEN VARIABLE DECLARATIONS */
 // Auxiliary variables
@@ -193,7 +196,7 @@ void step_oxygen( ) {
 	apply_oxygen_jterms();
 
 	if (run_parameters.do_gasex)
-		gas_exchange(mOXYGEN,Sc_coeffs,o2_sat);
+		gas_exchange(mOXYGEN,Sc_coeffs,o2_sat[0]);
 	else
 		for (k=0;k<NML;k++)
 			copy_darray2d(tr[mOXYGEN][k],o2_sat[0],NXMEM,NYMEM);

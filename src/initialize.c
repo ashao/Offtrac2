@@ -331,7 +331,7 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"n2sol"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"n2_restart"))
-			rflags[map_variable_to_index(attribute)] = atoi(value);
+			rflags[map_variable_to_index("n2")] = atoi(value);
 
 		if (!strcmp(attribute,"do_ar"))
 			run_parameters.do_ar = atoi(value);
@@ -340,10 +340,32 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"arsol"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ar_restart"))
-			rflags[map_variable_to_index(attribute)] = atoi(value);
+			rflags[map_variable_to_index("ar")] = atoi(value);
 
+		// Oxygen		
 		if (!strcmp(attribute,"do_oxygen"))
 			run_parameters.do_oxygen = atoi(value);
+		if (!strcmp(attribute,"woa_path"))
+			strcpy(run_parameters.woa_path,value);
+		if (!strcmp(attribute,"oxygen"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"o2sat"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"jo2"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"po4"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"dop"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"jpo4"))
+			flags[map_variable_to_index(attribute)] = atoi(value);
+		if (!strcmp(attribute,"oxygen_restart"))
+			rflags[map_variable_to_index("oxygen")] = atoi(value);
+		if (!strcmp(attribute,"po4_restart"))
+			rflags[map_variable_to_index("po4")] = atoi(value);
+		if (!strcmp(attribute,"dop_restart"))
+			rflags[map_variable_to_index("dop")] = atoi(value);
+
 	}
 	free(line_read);
 	fclose(ptr_file);

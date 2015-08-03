@@ -48,12 +48,12 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"arsat"))	var_idx = 19;
 
 	if (!strcmp(var_name,"oxygen")) var_idx = 20;
-	if (!strcmp(var_name,"o2sat")) var_idx = 20;
-	if (!strcmp(var_name,"jo2")) var_idx = 21;
+	if (!strcmp(var_name,"o2sat")) var_idx = 21;
+	if (!strcmp(var_name,"jo2")) var_idx = 22;
 
-	if (!strcmp(var_name,"po4")) var_idx = 22;
-	if (!strcmp(var_name,"dop")) var_idx = 23;
-	if (!strcmp(var_name,"jpo4")) var_idx = 24;
+	if (!strcmp(var_name,"po4")) var_idx = 23;
+	if (!strcmp(var_name,"dop")) var_idx = 24;
+	if (!strcmp(var_name,"jpo4")) var_idx = 25;
 
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);

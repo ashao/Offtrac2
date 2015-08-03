@@ -13,6 +13,12 @@
 #include "io.h"
 #include "timekeeper.h"
 #include "initialize.h"
+#include "read.h"
+#include "alloc.h"
+#include "gas_exchange.h"
+#include "output_variables.h"
+#include "util.h"
+
 /* PHOSPHATE VARIABLE DECLARATIONS */
 // Auxiliary variables
 int mPHOSPHATE;
@@ -74,7 +80,7 @@ void initialize_phosphate( int imon ) {
 
 	printf("Phosphate index in main tracer array: %d\n",mPHOSPHATE);
 	printf("Setting phosphate variable description...");
-	strcpy(varname,"phosphate");
+	strcpy(varname,"po4");
 	strcpy(vars[map_variable_to_index(varname)].name,"mn_po4");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Phosphate concentration");
 	vars[map_variable_to_index(varname)].hor_grid='h';
