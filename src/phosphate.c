@@ -111,10 +111,6 @@ void initialize_phosphate( int imon ) {
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
 
-	printf("Initializing phosphate from WOA09\n");
-	read_woa_file(imon, hend, phosphate_init, "woa09.phos.nc", "p_an",1e-3);
-	printf("Initializing DOP to zero\n");
-	set_darray3d_zero(dop_init, NZ, NXMEM, NYMEM);
 
 
 	if (run_parameters.restart_flag) {
@@ -122,6 +118,12 @@ void initialize_phosphate( int imon ) {
 		read_var3d( run_parameters.restartfile, "mn_phos", 0, phosphate_init);
 		printf("Initializing dop from restart: %s\n",run_parameters.restartfile);
 		read_var3d( run_parameters.restartfile, "mn_dop", 0, dop_init);
+	}
+	else {
+		printf("Initializing phosphate from WOA09\n");
+		read_woa_file(imon, hend, phosphate_init, "woa09.phos.nc", "p_an",1e-3);
+		printf("Initializing DOP to zero\n");
+		set_darray3d_zero(dop_init, NZ, NXMEM, NYMEM);
 	}
 
 

@@ -150,6 +150,9 @@ void update_phosphate_fields( ) {
 			}
 	}
 
+	free3d(phos0,NZ);
+	free3d(phos1,NZ);
+
 }
 
 void biotic_sms(int ibiodt, double dt)
