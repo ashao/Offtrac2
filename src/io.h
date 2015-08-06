@@ -33,7 +33,7 @@ size_t write_field(int cdfid, FILE *fileptr, struct vardesc vars,
 
 void create_file(char filename[], int type, struct vardesc vars[], int novars,
                  FILE **fileptr, int *cdfid, int *timeid, 
-                 struct varcdfinfo varinfo[], int output_prec_float);
+                 struct varcdfinfo varinfo[], int output_prec_float, int nrecs);
 
 int name_output_file(char name[], double day, int noexdig,
                      char filepath[], char directory[]);

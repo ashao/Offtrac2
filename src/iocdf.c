@@ -78,7 +78,7 @@ extern int Y0abs;                    /* The absolute index of Y0 on   */
 #endif
 
 size_t write_field(int cdfid, FILE *fileptr, struct vardesc vars,
-                   struct varcdfinfo varinfo, size_t nrec, double *variable)
+                   struct varcdfinfo varinfo, size_t nrec, double *variable, int ntime)
 {
 
 /*   This subrountine will write a full variable, either 1 snapshot of */
@@ -233,7 +233,7 @@ size_t write_time(int cdfid, FILE *fileptr, int timeid, size_t nrec,
 }
 void create_file(char filename[], int type, struct vardesc vars[], int novars,
                  FILE **fileptr, int *cdfid, int *timeid, 
-                 struct varcdfinfo varinfo[], int output_prec_float)
+                 struct varcdfinfo varinfo[], int output_prec_float, int nrecs)
 {
 
 #ifdef NETCDF_OUTPUT
@@ -501,7 +501,7 @@ void create_file(char filename[], int type, struct vardesc vars[], int novars,
 
       *timeid = -1;
       for (k=0;k<novars;k++) if (vars[k].t_grid != '1') {
-        status = nc_def_dim(*cdfid, "Time", timekeeper.write_intervals, &dayid);
+        status = nc_def_dim(*cdfid, "Time", nrecs, &dayid);
         if (status != NC_NOERR) handle_error("Dim Time",status);
         status = nc_def_var (*cdfid, "Time", NC_DOUBLE, 1, &dayid, &dayvid);
         if (status != NC_NOERR) handle_error("Var Time",status);

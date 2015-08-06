@@ -172,7 +172,7 @@ int main( int argc, char *argv[] )
 	// force float precision output with last argument
 	printf("Making NETCDF %s file\n", run_parameters.outputfile);
 	create_file(run_parameters.outputfile, NETCDF_FILE, var_out, nvar, &fn, &cdfid,
-			timeid, varinfo, 1);
+			timeid, varinfo, 1, timekeeper.write_intervals);
 	// don't force
 	// create_file(output_filename, NETCDF_FILE, var_out, nvar, &fn, &cdfid, timeid, varinfo, 0);
 	printf("Closing file \n");
@@ -351,7 +351,7 @@ int main( int argc, char *argv[] )
 
 	// do NOT force float precision output with last argument
 	create_file(run_parameters.new_restartfile, NETCDF_FILE, var_out, nvar, &fn, &cdfid,
-			timeid, varinfo, 0);
+			timeid, varinfo, 0, 0);
 
 
 	for (m = 0; m < NOVARS; m++)
