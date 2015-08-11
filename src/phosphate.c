@@ -91,7 +91,7 @@ void initialize_phosphate( int imon ) {
 	vars[map_variable_to_index(varname)].mval=MISVAL;
 
 	strcpy(varname,"dop");
-	strcpy(vars[map_variable_to_index(varname)].name,"mn_o2sat");
+	strcpy(vars[map_variable_to_index(varname)].name,"mn_dop");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Dissolved organic phosphorous concentration");
 	vars[map_variable_to_index(varname)].hor_grid='h';
 	vars[map_variable_to_index(varname)].z_grid='L';
@@ -115,7 +115,7 @@ void initialize_phosphate( int imon ) {
 
 	if (run_parameters.restart_flag) {
 		printf("Initializing phosphate from restart: %s\n",run_parameters.restartfile);
-		read_var3d( run_parameters.restartfile, "mn_phos", 0, phosphate_init);
+		read_var3d( run_parameters.restartfile, "mn_po4", 0, phosphate_init);
 		printf("Initializing dop from restart: %s\n",run_parameters.restartfile);
 		read_var3d( run_parameters.restartfile, "mn_dop", 0, dop_init);
 	}

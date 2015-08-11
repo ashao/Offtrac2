@@ -78,7 +78,7 @@ extern int Y0abs;                    /* The absolute index of Y0 on   */
 #endif
 
 size_t write_field(int cdfid, FILE *fileptr, struct vardesc vars,
-                   struct varcdfinfo varinfo, size_t nrec, double *variable, int ntime)
+                   struct varcdfinfo varinfo, size_t nrec, double *variable)
 {
 
 /*   This subrountine will write a full variable, either 1 snapshot of */

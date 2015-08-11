@@ -174,11 +174,9 @@ void update_gas_exchange_fields( ) {
 		t1 = ocmip.time[idx1]-1.0;
 	}
 	else {
-		printf("curr_yearfrac: %f ocmip.time[%d]: %f",curr_yearfrac,idx1,ocmip.time[idx1]);
 		while (curr_yearfrac>ocmip.time[idx1]) {
 			idx0++;
 			idx1=idx0+1;
-			printf("idx0: %d idx1: %d\n",idx0,idx1);
 		}
 		t0 = ocmip.time[idx0];
 		t1 = ocmip.time[idx1];
