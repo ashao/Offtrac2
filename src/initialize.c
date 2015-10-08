@@ -247,6 +247,8 @@ void set_run_parameters( void )
 			strcpy(run_parameters.restartfile,value);
 		if (!strcmp(attribute,"wrint"))
 			run_parameters.wrint = atoi(value);
+		if (!strcmp(attribute,"do_averaging"))
+			run_parameters.do_averaging = atoi(value);
 
 		// Set forcing characteristics
 		if (!strcmp(attribute,"ntime_climatology"))
