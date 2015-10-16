@@ -10,8 +10,8 @@ endif
 
 # tern with gcc
 CC = gcc
-CFLAGS = -march=native -fopenmp  -g -O3 
-LDFLAGS = -I/ltraid3/ashao/tern/local/include/ -L/ltraid3/ashao/tern/local/lib -lnetcdf
+CFLAGS =  -fopenmp  -g -O3 -march="athlon64" -lm  
+LDFLAGS = -I/ltraid3/ashao/waddle/local/include/ -L/ltraid3/ashao/waddle/local/lib -lnetcdf
 
 # gaggle with gcc
 #CC = gcc
@@ -20,7 +20,7 @@ LDFLAGS = -I/ltraid3/ashao/tern/local/include/ -L/ltraid3/ashao/tern/local/lib -
 
 # waddle with gcc
 #CC=gcc
-#CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe -static
+#CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe 
 #LDFLAGS=-L/usr/local/netcdf4-gfort/lib -I/usr/local/netcdf4-gfort/include -L/usr/local/hdf5/lib -I/usr/local/hdf5/include -I/usr/local/zlib/include -L/usr/local/zlib/lib  -lhdf5 
 #LDFLAGS = -L/ltraid3/ashao/waddle/local/lib -I/ltraid3/ashao/waddle/local/include
 
