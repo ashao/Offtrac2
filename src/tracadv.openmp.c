@@ -22,6 +22,7 @@
 #include "initialize.h"
 
 extern struct timekeeper_t timekeeper;
+extern struct parameters run_parameters;
 
 static double dmax1, dmax2, dmin1, dmin2;
 #define D_MAX(a,b) (dmax1=(a),dmax2=(b),((dmax1) > (dmax2)) ?\
@@ -862,12 +863,13 @@ double hlst[NYMEM];
 		h[k][i][j] = fract1*hstart[k][i][j] + fract2*hend[k][i][j];
 //BX 		h[k][i][j] = hend[k][i][j];
 # endif
-#ifdef CONSERVATION_CHECK
-	  	htest[k][i][j] = hnew[k][i][j]-hend[k][i][j]; 
+
+		if (run_parameters.conservation_check)
+			htest[k][i][j] = hnew[k][i][j]-hend[k][i][j];
 //		printf("htest(%d,%d,%d)=%g,hend=%g\n",
 //		       k,i,j,htes
 //		htest[k][i][j] = h[k][i][j];
-#endif
+
 	    }
 	}
     }

@@ -28,11 +28,9 @@ void allocate_test (  ) {
 
 	int i, j, k;
 
-	// Set index in tracer array
-	mTEST = 0;
-
 	// Allocate working and output arrays
-	mn_test = alloc3d(NZ,NXMEM,NYMEM);	
+	mn_test = alloc3d(NZ,NXMEM,NYMEM);
+	mn_htest = alloc3d(NZ,NXMEM,NYMEM);
 }
 
 void initialize_test( ) {
@@ -98,3 +96,4 @@ void step_test( double dt ){
 	//printf("Test tracer inventory: %e\n", calc_inventory(tr[mTEST]));
 
 }
+

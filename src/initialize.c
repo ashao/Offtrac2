@@ -25,9 +25,7 @@
 #include "oxygen.h"
 #include "phosphate.h"
 
-#ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
-#endif
 
 extern struct vardesc vars[NOVARS];
 extern struct parameters run_parameters;
@@ -43,7 +41,7 @@ void initialize( void )
 	extern double ****tr;
 
 	// Setup the variable descriptions
-	
+
 	strcpy(varname,"depth");
 	strcpy(vars[map_variable_to_index(varname)].name,"Depth");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Depth to bottom");
@@ -53,7 +51,7 @@ void initialize( void )
 	strcpy(vars[map_variable_to_index(varname)].units,"m");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
-	
+
 	strcpy(varname,"geolat");
 	strcpy(vars[map_variable_to_index(varname)].name,"geolat");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Latitude on tripolar grid");
@@ -63,7 +61,7 @@ void initialize( void )
 	strcpy(vars[map_variable_to_index(varname)].units,"Degrees N");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
-	
+
 	strcpy(varname,"geolon");
 	strcpy(vars[map_variable_to_index(varname)].name,"geolon");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Longitude on tripolar grid");
@@ -73,7 +71,7 @@ void initialize( void )
 	strcpy(vars[map_variable_to_index(varname)].units,"Degrees E");
 	vars[map_variable_to_index(varname)].mem_size='d';
 	vars[map_variable_to_index(varname)].mval=MISVAL;
-	
+
 	strcpy(varname,"wetmask");
 	strcpy(vars[map_variable_to_index(varname)].name,"wetmask");
 	strcpy(vars[map_variable_to_index(varname)].longname,"Wetmask");
@@ -140,10 +138,10 @@ void initialize( void )
 		read_tracer_boundary( );
 	}
 
-#ifdef CONSERVATION_CHECK
-	allocate_test();
-	initialize_test();
-#endif
+	if (run_parameters.conservation_check) {
+		allocate_test();
+		initialize_test();
+	}
 
 	if (run_parameters.do_ttd) {
 		allocate_ttd();
@@ -211,9 +209,9 @@ void set_run_parameters( void )
 	while( (read = getline(&line_read,&len,ptr_file)) != -1 ) {
 
 		sscanf(line_read,"%s %s",attribute,value);
-		
+
 		// Set intervals of time integration
-//		printf("Setting %s to %s\n",attribute,value);
+		//		printf("Setting %s to %s\n",attribute,value);
 		if (!strcmp(attribute,"syear"))
 			run_parameters.syear = atoi(value);
 		if (!strcmp(attribute,"sinterval"))
@@ -277,7 +275,7 @@ void set_run_parameters( void )
 
 		if (!strcmp(attribute,"do_age"))
 			run_parameters.do_age = atoi(value);
-		
+
 		if (!strcmp(attribute,"age"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"age_restart"))
@@ -307,14 +305,12 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"psf6"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 
-#ifdef CONSERVATION_CHECK
-		if (!strcmp(attribute,"test"))
-			flags[map_variable_to_index(attribute)] = atoi(value);
-		if (!strcmp(attribute,"test_inventory"))
-			flags[map_variable_to_index(attribute)] = atoi(value);
-		if (!strcmp(attribute,"htest"))
-			flags[map_variable_to_index(attribute)] = atoi(value);
-#endif
+
+		if (!strcmp(attribute,"conservation_check")) {
+			run_parameters.conservation_check = atoi(value);
+			flags["test"] = 1;
+			flags["htest"] = 1;
+		}
 
 		if (!strcmp(attribute,"do_ttd")) {
 			run_parameters.do_ttd = atoi(value);
@@ -371,7 +367,10 @@ void set_run_parameters( void )
 	}
 	free(line_read);
 	fclose(ptr_file);
-	
+
+	if (run_parameters.conservation_check)
+		mTEST = run_parameters.tracer_counter++;
+
 	if (run_parameters.do_age)
 		mAGE = run_parameters.tracer_counter++;
 
@@ -393,8 +392,6 @@ void set_run_parameters( void )
 		mOXYGEN = run_parameters.tracer_counter++;
 		mPHOSPHATE = run_parameters.tracer_counter++;
 		mDOP = run_parameters.tracer_counter++;
-
-
 	}
 
 

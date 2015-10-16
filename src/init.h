@@ -39,12 +39,8 @@
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
 
-#undef NOCONC			/* Use partial pressure instead of
-				 concentration for CFCS */
-#undef CONSERVATION_CHECK	/* Enable a TTD-like tracer and output htest */
 
-
-#define NOVARS 26              /*  Number of variables used in        */
+#define NOVARS 28              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */

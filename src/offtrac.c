@@ -290,6 +290,10 @@ int main( int argc, char *argv[] )
 				set_darray3d_zero(mn_ar, NZ, NXMEM, NYMEM);
 				set_darray3d_zero(mn_arsat, NZ, NXMEM, NYMEM);
 			}
+			if (run_parameters.conservation_check) {
+				set_darray3d_zero(mn_test, NZ, NXMEM, NYMEM);
+				set_darray3d_zero(mn_htest, NZ, NXMEM, NYMEM);
+			}
 			//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
 
@@ -465,6 +469,11 @@ void alloc_fields(void)
 		var[map_variable_to_index("po4")] = &mn_phos[0][0][0];
 		var[map_variable_to_index("dop")] = &mn_dop[0][0][0];
 		var[map_variable_to_index("jpo4")] = &mn_jpo4[0][0][0];
+	}
+
+	if (run_parameters.conservation_check) {
+		var[map_variable_to_index("test")] = &mn_test[0][0][0];
+		var[map_variable_to_index("htest")] = &mn_htest[0][0][0];
 	}
 	//var[18] = &mn_rml[0][0][0];
 

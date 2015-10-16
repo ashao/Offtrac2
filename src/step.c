@@ -32,12 +32,7 @@
 #include "oxygen.h"
 #include "phosphate.h"
 
-#ifdef CONSERVATION_CHECK
 #include "conservation_check.h"
-extern int mTEST;
-extern  double ***mn_test;
-extern double test_inventory;
-#endif
 
 #include "ttd_bp.h"
 /*---------------------------------------------------------------------
@@ -124,22 +119,15 @@ void step_fields( ) {
 		surface_cfc11();
 		surface_cfc12();
 		surface_sf6();
-# ifdef NOCONC
 
-		copy_darray3d(pcfc11,tr[mCFC11],NZ,NXMEM,NYMEM);
-		copy_darray3d(pcfc12,tr[mCFC12],NZ,NXMEM,NYMEM);
-		copy_darray3d(psf6,tr[mSF6],NZ,NXMEM,NYMEM);
-# else
 		divide_darray3d(pcfc11,tr[mCFC11],cfc11_sol);
 		divide_darray3d(pcfc12,tr[mCFC12],cfc12_sol);
 		divide_darray3d(psf6,tr[mSF6],sf6_sol);
-# endif
 	}
 
-#ifdef CONSERVATION_CHECK
-	step_test();
-	submit_for_averaging(mn_test,tr[mTEST]);
-#endif
+	if (run_parameters.conservation_check)
+		step_test();
+
 
 
 	if (run_parameters.do_ttd)	step_ttd();
@@ -157,7 +145,7 @@ void step_fields( ) {
 
 	merge_ml_tr();
 
-        clock_gettime(CLOCK_MONOTONIC, &endclock);
+	clock_gettime(CLOCK_MONOTONIC, &endclock);
 	printf("Current step elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
 
 
@@ -205,6 +193,11 @@ void step_fields( ) {
 	submit_for_averaging( mn_uhtm, uhtm );
 	submit_for_averaging( mn_vhtm, vhtm );
 	submit_for_averaging( mn_wd, wd );
+
+	if (run_parameters.conservation_check) {
+		submit_for_averaging(mn_test,tr[mTEST]);
+		submit_for_averaging(mn_htest,htest);
+	}
 
 	if (run_parameters.do_age)	submit_for_averaging( mn_age, tr[mAGE]) ;
 

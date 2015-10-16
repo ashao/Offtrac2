@@ -55,6 +55,9 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"dop")) var_idx = 24;
 	if (!strcmp(var_name,"jpo4")) var_idx = 25;
 
+	if (!strcmp(var_name,"htest")) var_idx = 26;
+	if (!strcmp(var_name,"test")) var_idx = 27;
+
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);
 		exit( -2 );

@@ -25,20 +25,16 @@ struct parameters {
 	int ntime_climatology; // Number of time stamps in climatology forcing
 	int ntime_hindcast; // Number of timesteps in hindcast fields
 
+	int conservation_check; // Enables the output of htest and a TTD-like tracer to check conservaiton
+
 	// Tracer flags
 	int do_gasex; // Enable gas exchange for all gas tracers
-
 	int do_age;
-
 	int do_cfcs;
-
 	int do_ttd;
 	int num_ttd_intervals;
-
 	int do_n2;
-
 	int do_ar;
-
 	int do_oxygen;
 
 };
