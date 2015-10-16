@@ -8,7 +8,7 @@ endif
 #CC=gcc
 #CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe -static
 
-# tern with gcc
+# waddle with gcc
 CC = gcc
 CFLAGS =  -fopenmp  -g -O3 -march="athlon64" -lm  
 LDFLAGS = -I/ltraid3/ashao/waddle/local/include/ -L/ltraid3/ashao/waddle/local/lib -lnetcdf
@@ -17,12 +17,6 @@ LDFLAGS = -I/ltraid3/ashao/waddle/local/include/ -L/ltraid3/ashao/waddle/local/l
 #CC = gcc
 #CFLAGS = -mfpmath=sse -flto -march=native -funroll-loops -fopenmp  -g -pipe -Ofast 
 #LDFLAGS = -I/cm/shared/apps/netcdf/gcc/64/4.3.0/include -L/cm/shared/apps/netcdf/gcc/64/4.3.0/lib
-
-# waddle with gcc
-#CC=gcc
-#CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe 
-#LDFLAGS=-L/usr/local/netcdf4-gfort/lib -I/usr/local/netcdf4-gfort/include -L/usr/local/hdf5/lib -I/usr/local/hdf5/include -I/usr/local/zlib/include -L/usr/local/zlib/lib  -lhdf5 
-#LDFLAGS = -L/ltraid3/ashao/waddle/local/lib -I/ltraid3/ashao/waddle/local/include
 
 #CFLAGS = -g 
 #debug for gcc
