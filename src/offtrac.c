@@ -32,6 +32,7 @@
 #include "output_variables.h"
 #include "step.h"
 #include "gas_exchange.h"
+#include "conservation_check.h"
 
 #include "ideal_age.h"
 #include "cfcs_sf6.h"
@@ -175,8 +176,9 @@ int main( int argc, char *argv[] )
 			timeid, varinfo, 1, timekeeper.write_intervals);
 	// don't force
 	// create_file(output_filename, NETCDF_FILE, var_out, nvar, &fn, &cdfid, timeid, varinfo, 0);
-	printf("Closing file \n");
-	close_file(&cdfid, &fn);
+//	printf("Closing file: %d \n",cdfid);
+//	close_file(&cdfid, &fn); // Deprecated because always writing netcdf
+	nc_close(cdfid);
 
 	/* Allocate the memory for the fields to be calculated.		*/
 	printf("allocating fields\n");
@@ -240,6 +242,7 @@ int main( int argc, char *argv[] )
 			printf("Writing time interval %i variables out to netCDF\n\n", timekeeper.current_interval);
 			printf("Accumulated averaging time (days): %f\n",timekeeper.accumulated_time_since_writing/86400);
 			status = nc_open(run_parameters.outputfile, NC_WRITE, &cdfid);
+			printf("cdfid: %d\n",cdfid);
 			if (status != NC_NOERR)
 			{
 				strcpy(message, "Opening file");

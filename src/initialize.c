@@ -308,8 +308,8 @@ void set_run_parameters( void )
 
 		if (!strcmp(attribute,"conservation_check")) {
 			run_parameters.conservation_check = atoi(value);
-			flags["test"] = 1;
-			flags["htest"] = 1;
+			flags[map_variable_to_index("test")] = 1;
+			flags[map_variable_to_index("htest")] = 1;
 		}
 
 		if (!strcmp(attribute,"do_ttd")) {

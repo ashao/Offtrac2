@@ -128,7 +128,7 @@
                                /*  in NetCDF format or in unformatted */
                                /*  C binary.                          */
 #endif
-#define NETCDF4					/*	Enable netCDF4 output which uses
+#undef NETCDF4					/*	Enable netCDF4 output which uses
 									chunking for better read performance */
 
 #ifdef PARALLEL_X

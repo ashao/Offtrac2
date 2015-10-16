@@ -8,10 +8,16 @@ endif
 #CC=gcc
 #CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe -static
 
-# gaggle with gcc
+# tern with gcc
 CC = gcc
-CFLAGS = -mfpmath=sse -flto -march=native -funroll-loops -fopenmp  -g -pipe -Ofast -Wall
-LDFLAGS = -I/cm/shared/apps/netcdf/gcc/64/4.3.0/include -L/cm/shared/apps/netcdf/gcc/64/4.3.0/lib
+CFLAGS = -march=native -fopenmp  -g -O3 
+LDFLAGS = -I/ltraid3/ashao/tern/local/include/ -L/ltraid3/ashao/tern/local/lib -lnetcdf
+
+# gaggle with gcc
+#CC = gcc
+#CFLAGS = -mfpmath=sse -flto -march=native -funroll-loops -fopenmp  -g -pipe -Ofast 
+#LDFLAGS = -I/cm/shared/apps/netcdf/gcc/64/4.3.0/include -L/cm/shared/apps/netcdf/gcc/64/4.3.0/lib
+
 # waddle with gcc
 #CC=gcc
 #CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe -static
@@ -53,7 +59,7 @@ SRCDIR = src
 #CFLAGS= -ip -ipo -inline-level=2 -xhost -O3 -g -openmp -lpthread 
 #CFLAGS= -ip -ipo -inline-level=2 -xhost -O3 -g -lpthread 
 
-CDFFLAGS= -lnetcdf
+CDFFLAGS= 
 # Make sure to add the Gibbs Seawater routines
 GSW_DIR= $(SRCDIR)/gsw_src/
 GSW_LIB= $(GSW_DIR)/libgswteos-10.so
@@ -73,7 +79,9 @@ OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/ideal_age.c \
 	$(SRCDIR)/cfc11.c $(SRCDIR)/cfc12.c $(SRCDIR)/sf6.c \
 	$(SRCDIR)/ttd_bp.c \
-	$(SRCDIR)/n2_module.c $(SRCDIR)/ar_module.c
+	$(SRCDIR)/n2_module.c $(SRCDIR)/ar_module.c \
+	$(SRCDIR)/oxygen.c $(SRCDIR)/phosphate.c $(SRCDIR)/biotic.c \
+	$(SRCDIR)/conservation_check.c
 
 offtrac: $(OFFSRC) $(SRCDIR)/init.h Makefile 
 	echo compiling $(OUTNAME)

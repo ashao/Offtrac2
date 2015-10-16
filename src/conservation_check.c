@@ -15,6 +15,7 @@
 int mTEST;
 // Output arrays
 double ***mn_test;
+double ***mn_htest;
 // Working arrays
 double test_inventory;
 extern double ****tr;
@@ -50,18 +51,8 @@ void initialize_test( ) {
         vars[map_variable_to_index(varname)].mem_size='d';
         vars[map_variable_to_index(varname)].mval=MISVAL;
 
-	strcpy(varname,"test_inventory");
-        strcpy(vars[map_variable_to_index(varname)].name,"test_inventory");
-        strcpy(vars[map_variable_to_index(varname)].longname,"Test tracer inventory");
-        vars[map_variable_to_index(varname)].hor_grid='1';
-        vars[map_variable_to_index(varname)].z_grid='n';
-        vars[map_variable_to_index(varname)].t_grid='s';
-        strcpy(vars[map_variable_to_index(varname)].units,"none");
-        vars[map_variable_to_index(varname)].mem_size='d';
-        vars[map_variable_to_index(varname)].mval=MISVAL;
-
 	strcpy(varname,"htest");
-        strcpy(vars[map_variable_to_index(varname)].name,"htest");
+        strcpy(vars[map_variable_to_index(varname)].name,"mn_htest");
         strcpy(vars[map_variable_to_index(varname)].longname,"hend-hnew");
         vars[map_variable_to_index(varname)].hor_grid='h';
         vars[map_variable_to_index(varname)].z_grid='L';
