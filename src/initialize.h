@@ -10,6 +10,7 @@ struct parameters {
 	int eyear, einterval; // Model end time
 	int use_hindcast; // 0 for normalyear, 1 for hindcast
 	int restart_flag; // '1' for restart, '0' for cold start
+	int adjoint_integration; // 1 for adjoint
 	int tracer_counter; // Use this to keep track of total number of tracers;
 	char forcing_path[1000]; // Directory to forcing
 	char normalyear_path[1000]; // Directory to forcing
@@ -19,6 +20,7 @@ struct parameters {
 	char new_restartfile[100]; // restart file name
 	char timestep[7]; // '5day' or 'month'
 	char woa_path[1000]; // Path to WOA files
+	char adjoint_initfile[1000]; // Path to adjoint initialization file
 	
 	int wrint; // Output interval
 	int do_averaging; // Whether the output is averaged or not
@@ -36,6 +38,7 @@ struct parameters {
 	int do_n2;
 	int do_ar;
 	int do_oxygen;
+	int do_adjttd;
 
 };
 
