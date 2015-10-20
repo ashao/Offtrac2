@@ -29,6 +29,7 @@
 #include "read.h"
 #include "tracer_utilities.h"
 #include "timekeeper.h"
+#include "adjoint_timekeeper.h"
 #include "output_variables.h"
 #include "step.h"
 #include "gas_exchange.h"
@@ -154,7 +155,13 @@ int main( int argc, char *argv[] )
 	read_D();
 	initializemasks();
 
-	initialize_timekeeper( );
+
+	if (run_parameters.adjoint_integration)
+		initialize_adjoint_timekeeper( );
+	else
+		initialize_timekeeper( );
+
+
 	read_gas_exchange_fields(run_parameters.forcing_path);
 	update_transport_fields( ); // Primarily done to read in the initial layer thicknesses
 	printf("Read in fields\n");
@@ -211,7 +218,10 @@ int main( int argc, char *argv[] )
 		 *     integrate 1 time step
 		 *
 		 *----------------------------------*/
-		update_timekeeper( );
+		if (run_parameters.adjoint_integration)
+			update_adjoint_timekeeper();
+		else
+			update_timekeeper( );
 		//		printf("Iteration counter: %d\n",timekeeper.iteration_counter);
 		printf("Iteration: %d Year: %d Interval: %d Ending timestamp: %f\n",
 				timekeeper.iteration_counter,timekeeper.current_year,
@@ -285,6 +295,8 @@ int main( int argc, char *argv[] )
 			}
 			if (run_parameters.do_ttd)	set_darray3d_zero(mn_ttd, NZ, NXMEM, NYMEM);
 
+			if (run_parameters.do_adjttd) set_darray2d_zero(mn_adjttd,NXMEM,NYMEM);
+
 			if (run_parameters.do_n2) {
 				set_darray3d_zero(mn_n2, NZ, NXMEM, NYMEM);
 				set_darray3d_zero(mn_n2sat, NZ, NXMEM, NYMEM);
@@ -332,6 +344,9 @@ int main( int argc, char *argv[] )
 
 	if (run_parameters.do_age) copy_darray3d(mn_age,tr[mAGE],NZ,NXMEM,NYMEM);
 	if (run_parameters.do_ttd) copy_darray3d(mn_ttd,tr[mTTD],NZ,NXMEM,NYMEM);
+
+	if (run_parameters.adjttd_restart) copy_darray3d(adjttd_init,tr[mADJOINT],NZ,NXMEM,NYMEM);
+
 	if (run_parameters.do_cfcs)
 		{
 			copy_darray3d(mn_cfc11,tr[mCFC11],NZ,NXMEM,NYMEM);
@@ -478,7 +493,12 @@ void alloc_fields(void)
 		var[map_variable_to_index("test")] = &mn_test[0][0][0];
 		var[map_variable_to_index("htest")] = &mn_htest[0][0][0];
 	}
-	//var[18] = &mn_rml[0][0][0];
+
+	if (run_parameters.do_adjttd) {
+		var[map_variable_to_index("adjttd")] = &mn_adjttd[0][0];
+		var[map_variable_to_index("adjttd_restart")] = &adjttd_init[0][0][0];
+	}
+
 
 	// end ashao
 

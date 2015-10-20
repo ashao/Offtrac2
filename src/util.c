@@ -60,6 +60,21 @@ void mult_darray3d(double ***arr, int nz, int NX, int NY, double factor) {
 			for (y = 0; y < NY; y++)
 				arr[z][x][y] *= factor;
 }
+
+void add_darray2d(double **arr1, double **arr2, int NX, int NY) {
+	int x, y;
+		for (x = 0; x < NX; x++)
+			for (y = 0; y < NY; y++)
+				arr1[x][y] += arr2[x][y];
+}
+
+void mult_darray2d(double **arr, int NX, int NY, double factor) {
+	int x, y;
+		for (x = 0; x < NX; x++)
+			for (y = 0; y < NY; y++)
+				arr[x][y] *= factor;
+}
+
 //BX-a
 void mult_fix_darray2d_mv(double arr[NXMEM][NYMEM], double factor,
 		double D[NXMEM][NYMEM], double mv) {

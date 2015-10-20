@@ -24,6 +24,7 @@
 #include "ar_module.h"
 #include "oxygen.h"
 #include "phosphate.h"
+#include "adjoint_ttd.h"
 
 #include "conservation_check.h"
 
@@ -166,6 +167,12 @@ void initialize( void )
 		initialize_phosphate();
 
 	}
+
+	if (run_parameters.do_adjttd) {
+		allocate_adjttd();
+		initialize_adjttd();
+	}
+
 	/* zonal, meridional re-entrance    */
 	for (m=0;m<run_parameters.tracer_counter;m++) {
 		for (k=0;k<NZ;k++) {
@@ -228,6 +235,8 @@ void set_run_parameters( void )
 			run_parameters.restart_flag = atoi(value);
 		if (!strcmp(attribute,"timestep"))
 			strcpy(run_parameters.timestep,value);
+		if (!strcmp(attribute,"adjoint_integration"))
+			run_parameters.adjoint_integration=atoi(value);
 
 		// Set input and output
 		if (!strcmp(attribute,"forcing_path"))
@@ -315,6 +324,13 @@ void set_run_parameters( void )
 		if (!strcmp(attribute,"do_ttd")) {
 			run_parameters.do_ttd = atoi(value);
 		}
+
+		if (!strcmp(attribute,"do_adjttd")) {
+			run_parameters.do_adjttd = atoi(value);
+			flags[map_variable_to_index("adjttd")]=1;
+			rflags[map_variable_to_index("adjttd_restart")]=1;
+		}
+
 		if (!strcmp(attribute,"ttd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);
 		if (!strcmp(attribute,"ttd_restart"))
@@ -376,6 +392,9 @@ void set_run_parameters( void )
 
 	if (run_parameters.do_ttd)
 		mTTD = run_parameters.tracer_counter++;
+
+	if (run_parameters.do_adjttd)
+		mADJOINT = run_parameters.tracer_counter++;
 
 	if (run_parameters.do_cfcs) { 
 		mCFC11 = run_parameters.tracer_counter++;

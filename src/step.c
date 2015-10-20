@@ -20,6 +20,7 @@
 #include "tracer_utilities.h"
 #include "output_variables.h"
 #include "timekeeper.h"
+#include "adjoint_timekeeper.h"
 #include "initialize.h"
 #include "read.h"
 #include "gas_exchange.h"
@@ -143,6 +144,11 @@ void step_fields( ) {
 
 	}
 
+	if (run_parameters.do_adjttd) {
+		merge_ml_tr();
+		step_adjttd();
+	}
+
 	merge_ml_tr();
 
 //	clock_gettime(CLOCK_MONOTONIC, &endclock);
@@ -233,6 +239,7 @@ void step_fields( ) {
 
 	}
 
+	// NOTE: NO Calls for adjoint TTD here because the averaging is treated slightly differently, see step_adjttd
 
 	printf("\n");
 
@@ -300,6 +307,7 @@ void update_transport_fields(  ) {
 	char file_suffix[100];
 	char path[1000];
 	int read_index;
+	const double adjoint_factor = -1.0; // Reverses the sign of velocities for adjoint integrations
 
 	copy_darray3d(hstart,hend,NZ,NXMEM,NYMEM);
 	copy_darray3d(h,hstart,NZ,NXMEM,NYMEM);
@@ -325,6 +333,12 @@ void update_transport_fields(  ) {
 	read_temp_and_salt(read_index,file_suffix,path);
 	if (run_parameters.do_gasex)
 		update_gas_exchange_fields();
+
+	if (run_parameters.adjoint_integration) {
+		mult_darray3d(uhtm, NZ, NXMEM, NYMEM, adjoint_factor);
+		mult_darray3d(vhtm, NZ, NXMEM, NYMEM, adjoint_factor);
+		mult_darray3d(wd, NZ, NXMEM, NYMEM, adjoint_factor);
+	}
 
 }
 

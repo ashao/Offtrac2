@@ -58,6 +58,8 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"htest")) var_idx = 26;
 	if (!strcmp(var_name,"test")) var_idx = 27;
 
+	if (!strcmp(var_name,"adjttd")) var_idx = 28;
+
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);
 		exit( -2 );
@@ -86,6 +88,25 @@ void submit_for_averaging( double ***average_array, double ***variable_snapshot 
 					average_array[k][i][j] = variable_snapshot[k][i][j];
 				}
 				
+			}
+
+}
+
+void submit_for_averaging_2d( double **average_array, double **variable_snapshot ) {
+
+	int i, j;
+		for (i=0;i<NXMEM;i++)
+			for (j=0;j<NYMEM;j++) {
+
+				if (run_parameters.do_averaging) {
+					average_array[i][j] += variable_snapshot[i][j]*timekeeper.dt;
+						if (timekeeper.averaging_counter == run_parameters.wrint)
+					average_array[i][j] *= 1.0/timekeeper.accumulated_time_since_writing;
+				}
+				else {
+					average_array[i][j] = variable_snapshot[i][j];
+				}
+
 			}
 
 }
