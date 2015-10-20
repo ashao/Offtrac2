@@ -32,17 +32,20 @@ CC = gcc
 #OUTNAME = offtrac.cfcs
 SRCDIR = src
 OBJDIR = obj
+DEPDIR = .d
 
 ##############################
 # Things you probably shouldn't change
 ##############################
 
 # Make compilation use 1 compiler per physical CPU core
+# This is a slightly conservative choice, and could be changed
+# up or down depending on user tolerance
 CORECOUNT := $(shell lscpu -p | egrep -v ^\# | cut -d, -f2 | sort -u | wc -l )
 MAKEFLAGS = -j$(CORECOUNT)
 
-# Make the output directory
-$(shell mkdir -p $(OBJDIR))
+# Make the output directory and dependency directory
+$(shell mkdir -p $(OBJDIR) $(DEPDIR))
 
 ifeq ($(CC),gcc)
 # Detect if we're dealing with gcc 4.6 or later
@@ -98,6 +101,8 @@ LDFLAGS = -L$(NETCDF)/lib -lnetcdf
 
 LDFLAGS += -lrt -lm
 
+DEPFLAGS = -MMD -MP -MT $@ -MF $(DEPDIR)/$(*F).Td
+
 # Make sure to add the Gibbs Seawater routines
 GSW_DIR= $(SRCDIR)/gsw_src/
 GSW_LIB= $(GSW_DIR)/libgswteos-10.so
@@ -106,7 +111,7 @@ GSW_INC= -I$(GSW_DIR)
 # Compile all files in $(SRCDIR)
 SRCS := $(wildcard $(SRCDIR)/*.c)
 # Put the objects into $(OBJDIR) so as not to clutter up our sources
-OBJS := $(subst $(SRCDIR),$(OBJDIR), $(SRCS:.c=.o))
+OBJS := $(subst $(SRCDIR),$(OBJDIR),$(SRCS:.c=.o))
 
 # Make the executable by linking together all the object files.
 $(OUTNAME): $(OBJS)
@@ -114,18 +119,30 @@ $(OUTNAME): $(OBJS)
 
 # This is the make rule for compiling a source file into an object
 # file. Each object file depends upon its corresponding source file,
-# as well as the Makefile and init.h.
-$(OBJS) : $(OBJDIR)/%.o : $(SRCDIR)/%.c Makefile $(SRCDIR)/init.h
-	@$(CC) $(CFLAGS) -c $< -o $@
+# as well as the Makefile. It also creates the dependency-tracking
+# info and places it in $(DEPDIR), as a separate step so compilation
+# failures won't change it. The header file dependencies for each
+# source file are thus tracked by the -include directive at the bottom
+# of this Makefile.
+$(OBJS) : $(OBJDIR)/%.o : $(SRCDIR)/%.c Makefile
+	$(CC) $(CFLAGS) -c $< -o $@ $(DEPFLAGS)
+	@mv -f $(DEPDIR)/$(*F).Td $(DEPDIR)/$(*F).d
 
 propre:
-	rm -f $(OBJDIR)/*.o *.u
+	rm -f $(OBJDIR)/*.o $(DEPDIR)/* *.u
 
 cleaner:
-	rm -f $(OUTNAME) $(OBJDIR)/*.o *.u 
+	rm -f $(OUTNAME) $(OBJDIR)/*.o $(DEPDIR)/* *.u 
 
 clean:
-	rm -f $(OUTNAME) $(OBJDIR)/*.o *.u
+	rm -f $(OUTNAME) $(OBJDIR)/*.o $(DEPDIR)/* *.u
 
 # This tells make that these rules don't actually make anything
-.PHONY: printinfo setup clean cleaner propre
+.PHONY: clean cleaner propre
+
+# This ensures make won't fail if the dependency file doesn't exist
+$(DEPDIR)/%.d: ;
+
+# This gives make all the dependency information, but won't cause make
+# to fail if they don't exist
+-include $(subst $(SRCDIR),$(DEPDIR),$(SRCS:.c=.d))
