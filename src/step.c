@@ -93,7 +93,7 @@ void step_fields( ) {
 	 *-----------------------------------------*/
 
 	update_transport_fields( );
-//	clock_gettime(CLOCK_MONOTONIC, &startclock); 
+	clock_gettime(CLOCK_MONOTONIC, &startclock); 
 	printf("Calculate tracer transport. \n");
 	tracer( 0  ); /* perform transport time step */
 	merge_ml_tr();
@@ -151,7 +151,7 @@ void step_fields( ) {
 
 	merge_ml_tr();
 
-//	clock_gettime(CLOCK_MONOTONIC, &endclock);
+	clock_gettime(CLOCK_MONOTONIC, &endclock);
 	printf("Current step elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
 
 
