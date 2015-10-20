@@ -10,18 +10,19 @@
 #include "util.h"
 #include "output_variables.h"
 #include "read.h"
+#include "timekeeper.h"
 
 // Auxiliary variables
 int mADJOINT;
 // Output arrays
-double ***mn_adjttd;
+double **mn_adjttd;
 // Working arrays
 double ***adjttd_init;
 extern double ****tr;
 extern int oceanmask[NXMEM][NYMEM];
 extern struct vardesc vars[NOVARS];
 extern struct parameters run_parameters;
-
+extern struct timekeeper_t timekeeper;
 
 void allocate_adjttd(  ) {
 	printf("Allocating adjoint TTD arrays\n");
@@ -66,7 +67,7 @@ void initialize_adjttd( ) {
 
 	}
 	else {
-		read_var3d( run_parameters.adjoint_initfile, "adjttd_init", 0, adjttd_init )
+		read_var3d( run_parameters.adjoint_initfile, "adjttd_init", 0, adjttd_init );
 		printf("Adjoint TTD initialized from file\n");
 	}
 

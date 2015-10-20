@@ -39,7 +39,7 @@ struct parameters {
 	int do_ar;
 	int do_oxygen;
 	int do_adjttd;
-
+  	int adjttd_restart;
 };
 
 void set_run_parameters( );

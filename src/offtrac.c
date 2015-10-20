@@ -30,6 +30,7 @@
 #include "tracer_utilities.h"
 #include "timekeeper.h"
 #include "adjoint_timekeeper.h"
+#include "adjoint_ttd.h"
 #include "output_variables.h"
 #include "step.h"
 #include "gas_exchange.h"

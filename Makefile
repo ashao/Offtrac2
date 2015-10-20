@@ -75,7 +75,7 @@ OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
 	$(SRCDIR)/ttd_bp.c \
 	$(SRCDIR)/n2_module.c $(SRCDIR)/ar_module.c \
 	$(SRCDIR)/oxygen.c $(SRCDIR)/phosphate.c $(SRCDIR)/biotic.c \
-	$(SRCDIR)/conservation_check.c
+	$(SRCDIR)/conservation_check.c $(SRCDIR)/adjoint_ttd.c $(SRCDIR)/adjoint_timekeeper.c
 
 offtrac: $(OFFSRC) $(SRCDIR)/init.h Makefile 
 	echo compiling $(OUTNAME)

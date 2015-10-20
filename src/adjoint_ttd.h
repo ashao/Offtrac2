@@ -8,7 +8,7 @@
 #include "init.h"
 extern int mADJOINT;
 // Output arrays
-extern double ***mn_adjttd;
+extern double **mn_adjttd;
 // Working arrays
 extern double ***adjttd_init;
 

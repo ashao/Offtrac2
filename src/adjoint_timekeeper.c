@@ -10,9 +10,9 @@
 
 extern struct timekeeper_t timekeeper;
 extern struct parameters run_parameters;
-const int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
-const double seconds_in_year = (double) 365 * 24 * 60 * 60;
-const double seconds_in_day = (double) 24 * 60 * 60;
+extern const int days_in_month[12];
+extern const double seconds_in_year;
+extern const double seconds_in_day;
 
 void initialize_adjoint_timekeeper( void ) {
 
