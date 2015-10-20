@@ -1,85 +1,105 @@
-#OUTNAME = offtrac.cfcs
-#CC=gcc
+##############################
+# Things you need to set
+##############################
 
-ifeq ($(strip $(OUTNAME)),)
-OUTNAME=offtrac
-endif
+NETCDF = /usr/local/netcdf4
+# Other options:
+#NETCDF = /ltraid3/ashao/waddle/local/
+#NETCDF = /cm/shared/apps/netcdf/gcc/64/4.3.0/
+#NETCDF = /usr/local
 
-#CC=gcc
-#CFLAGS = -O3 -g -fopenmp -lm -lpthread --fast-math -march="athlon64" -pipe -static
+##############################
+# Things you might need to set
+##############################
 
-# waddle with gcc
+OPENMP = 0
+
+DEBUG = 1
+# 0 is no debugging at all
+# 1 is -g
+# 2 is more runtime debugging
+
 CC = gcc
-CFLAGS =  -fopenmp  -g -O3 -march="athlon64" -lm  
-LDFLAGS = -I/ltraid3/ashao/waddle/local/include/ -L/ltraid3/ashao/waddle/local/lib -lnetcdf
 
-# gaggle with gcc
-#CC = gcc
-#CFLAGS = -mfpmath=sse -flto -march=native -funroll-loops -fopenmp  -g -pipe -Ofast 
-#LDFLAGS = -I/cm/shared/apps/netcdf/gcc/64/4.3.0/include -L/cm/shared/apps/netcdf/gcc/64/4.3.0/lib
+#ARCHFLAGS = -march="athlon64"
+#ARCHFLAGS = -march="i686"
 
-#CFLAGS = -g 
-#debug for gcc
-#CFLAGS = -fbounds-check -g
+#CFLAGS += -lpthread
+#CFLAGS += -pipe
+#CFLAGS += -static
+#CFLAGS += -funroll-loops
 
-#CFLAGS = -ffast-math -O2 -march="athlon64" -pipe
-#CFLAGS = -ffast-math -O2 -pipe
-
-#ocean
-#CFLAGS = -O1 -pipe  -pg -g
-#CFLAGS = -ffast-math -O3 -march="athlon64" -pipe -g
-
-#yucatan with icc:
-#CFLAGS = -O1 -march="i686"  -pipe
-#yucatan gcc debugging
-#CFLAGS = -O1 -march="i686"  -pipe  -pg -Wuninitialized
-#CFLAGS = -g -march="i686"  -pipe -fbounds-check -Wall
-#yucatan icc debugging with idb
-#CFLAGS = -march="i686"  -pipe -g -lm
-
-#CDFFLAGS = -lm -I/usr/local/include -L/usr/local/lib -E -source_listing
-#CDFFLAGS = -g -lm -lnetcdf -I/usr/local/include -L/usr/local/lib 
-
-#CDFFLAGS = -lm -lnetcdf -I/usr/local/include -L/usr/local/lib 
-#CDFFLAGS = -lm -lnetcdf -I/usr/include/netcdf-3 -L/usr/lib64 
-
-#LDFLAGS = -lm -ftrap -lnetcdf -I/usr/local/include -L/usr/local/lib
-#LDFLAGS = -lm -ftrap -lnetcdf -I/usr/include -L/usr/lib
-#LDFLAGS = -lm -lnetcdf -I/usr/local/include -L/usr/local/lib
+#OUTNAME = offtrac.cfcs
 SRCDIR = src
 
-#pendragon with icc
-#CC=icc
-#CFLAGS= -ip -ipo -inline-level=2 -xhost -O3 -g -openmp -lpthread 
-#CFLAGS= -ip -ipo -inline-level=2 -xhost -O3 -g -lpthread 
+##############################
+# Things you shouldn't change
+##############################
 
-CDFFLAGS= 
+ifeq ($(CC),gcc)
+# Detect if we're dealing with gcc 4.6 or later
+CC_IS_GCC46PLUS := $(shell echo `gcc -dumpversion | cut -f1-2 -d.` \>= 4.6 | bc )
+# Detect if we're compiling to a 64-bit target
+CC_IS_GCCX64 := $(shell gcc -v 2>&1 | egrep -c '^Target:.*x86_64' )
+endif
+
+ifeq ($(strip $(OUTNAME)),)
+OUTNAME = offtrac
+endif
+
+ifeq ($(strip $(ARCHFLAGS)),)
+ARCHFLAGS = -march=native
+endif
+
+ifeq ($(CC),icc)
+# icc flags
+CFLAGS += -Wall -O2 -ip -ipo -inline-level=2 -xHOST
+else ifeq ($(CC),gcc)
+# gcc flags
+CFLAGS += -Wall
+#CFLAGS += -Werror # Someday soon...
+ifeq ($(CC_IS_GCC46PLUS),1)
+# gcc >= 4.6 flags
+CFLAGS += -Ofast -flto
+else
+# gcc < 4.6 flags
+CFLAGS += -O3 -ffast-math
+endif
+ifneq ($(CC_IS_GCCX64),1)
+# 32-bit gcc flags
+CFLAGS += -mfpmath=sse
+endif
+endif
+
+ifneq ($(DEBUG),0)
+CFLAGS += -g
+ifneq ($(DEBUG),1)
+ifeq ($(CC),icc)
+CFLAGS += -fp-trap-all=all,noinexact
+else ifeq ($(CC),gcc)
+CFLAGS += -ftrapv
+endif
+endif
+endif
+
+CFLAGS += -lm
+
+ifneq ($(OPENMP),0)
+CFLAGS += -fopenmp
+endif
+
+LDFLAGS = -I$(NETCDF)/include/ -L$(NETCDF)/lib -lnetcdf -lrt
+
 # Make sure to add the Gibbs Seawater routines
 GSW_DIR= $(SRCDIR)/gsw_src/
 GSW_LIB= $(GSW_DIR)/libgswteos-10.so
 GSW_INC= -I$(GSW_DIR)
 
-OFFSRC = $(SRCDIR)/offtrac.c $(SRCDIR)/read.c \
-	$(SRCDIR)/initialize.c $(SRCDIR)/iocdf.c $(SRCDIR)/par_IO.c \
-	$(SRCDIR)/tracadv.openmp.c $(SRCDIR)/step.c \
-        $(SRCDIR)/alloc_trac.c \
-        $(SRCDIR)/alloc_util.c $(SRCDIR)/alloc_arrays.c \
-	$(SRCDIR)/masks.c $(SRCDIR)/set_metrics.c\
-	$(SRCDIR)/util.c \
-        $(SRCDIR)/timekeeper.c \
-        $(SRCDIR)/output_variables.c \
-        $(SRCDIR)/tracer_utilities.c \
-        $(SRCDIR)/gas_exchange.c \
-	$(SRCDIR)/ideal_age.c \
-	$(SRCDIR)/cfc11.c $(SRCDIR)/cfc12.c $(SRCDIR)/sf6.c \
-	$(SRCDIR)/ttd_bp.c \
-	$(SRCDIR)/n2_module.c $(SRCDIR)/ar_module.c \
-	$(SRCDIR)/oxygen.c $(SRCDIR)/phosphate.c $(SRCDIR)/biotic.c \
-	$(SRCDIR)/conservation_check.c $(SRCDIR)/adjoint_ttd.c $(SRCDIR)/adjoint_timekeeper.c
+OFFSRC = $(wildcard $(SRCDIR)/*.c)
 
-offtrac: $(OFFSRC) $(SRCDIR)/init.h Makefile 
+$(OUTNAME): $(OFFSRC) $(SRCDIR)/init.h Makefile 
 	echo compiling $(OUTNAME)
-	$(CC)  $(OFFSRC) -o $(OUTNAME) $(CDFFLAGS) $(CFLAGS) $(LDFLAGS) $(GSW_LIB)		
+	$(CC)  $(OFFSRC) -o $(OUTNAME) $(CFLAGS) $(LDFLAGS) $(GSW_LIB)		
 
 propre:
 	rm -f *.o *.u
