@@ -12,7 +12,7 @@ NETCDF = /usr/local/netcdf4
 # Things you might need to set
 ##############################
 
-OPENMP = 0
+OPENMP = 1
 
 DEBUG = 1
 # 0 is no debugging at all
