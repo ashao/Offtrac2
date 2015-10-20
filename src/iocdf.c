@@ -911,7 +911,7 @@ void find_input_file(char name[], char name2[], char fltname[], double day,
 
 int open_input_file(char filename[], FILE **fileptr, int *cdfid, int *timeid) {
 
-  int status, return_val = 0, i, j = 0;
+  int status, return_val = 0, i;
 
 #ifdef NETCDF_OUTPUT
   *fileptr = NULL;

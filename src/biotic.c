@@ -159,7 +159,7 @@ void biotic_sms(int ibiodt, double dt)
 {
 	int i, j, k, l, kjunk;
 	int kcomp, kmax;
-	double po4obsprof[NZWOA], junk;
+	double junk;
 # ifdef PROGNOSTIC
 	double feobsprof[NZPHOS];
 # endif
@@ -178,9 +178,10 @@ void biotic_sms(int ibiodt, double dt)
 	double imbal, flux_rem;
 	double D_ij, dt_bio, frac_dt_bio;
 	double po4[NZ], dop[NZ];
-	double flux_pop_ij, flux_sed_ij, fclog, fdlog;
+	double flux_pop_ij;
 
 # ifdef NITRATE
+	double flux_sed_ij, fclog, fdlog;
 	const double r_N_P = 16.0;
 	const double r_N_P_diaz = r_N_P;
 	const double r_N_P_denit = 104.0;
@@ -210,12 +211,6 @@ void biotic_sms(int ibiodt, double dt)
 	//ratio_o2_sw = 1.00075;
 #endif
 
-	int nzlevitus = NZWOA;
-	double levitus_depths[NZWOA] = {0, 10, 20, 30, 50, 75, 100,
-			120, 150, 200, 250, 300, 400, 500, 600,
-			700, 800, 900, 1000, 1100, 1200, 1300,
-			1400, 1500, 1750, 2000, 2500, 3000,
-			3500, 4000, 4500, 5000, 5500};
 # ifdef PROGNOSTIC
 	double light_lim[NZ];
 	double t_lim[NZ];
@@ -240,9 +235,9 @@ void biotic_sms(int ibiodt, double dt)
 #  endif
 	extern double k_Fe; // mol/m3
 # endif /* PROGNOSTIC */
-	//BX # ifdef NITRATE
+# if defined NITRATE || defined PROGNOSTIC
 	const double eps_lim = 1.e-9; // since (po4/dt)*dt is NOT exactly == po4!!
-	//BX # endif
+# endif /* NITRATE || PROGNOSTIC */
 
 	phi_p = 0.67;
 	kappa_p = 1.0 / (1.0 * 360.0 * 86400.0);
@@ -822,7 +817,7 @@ void biotic_sms(int ibiodt, double dt)
 
 				imbal = flux_rem - flux_pop_ij;
 				if (flux_pop_ij < 0.0)
-					printf("flux_pop[%d][%d] = %g\n", i, j, k, flux_pop_ij);
+					printf("flux_pop[%d][%d][%d] = %g\n", i, j, k, flux_pop_ij);
 				if (fabs(imbal) > flux_pop_ij*1e-4) { /* error tolerance = 0.01% */
 					printf("mass imbalance (P) at grid point %i,%i \n",i,j);
 					printf("flux_pop,flux_rem,imbal,D,kcomp,kmax = %g,%g,%g,%g,%i,%i \n",

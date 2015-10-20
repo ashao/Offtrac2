@@ -51,7 +51,6 @@ extern struct parameters run_parameters;
 
 void allocate_phosphate(  )
 {
-	int i,j,k;
 	// Base the indices of the main tracer array off of the oxygen index
 	printf("mDOP: %d mPHOSPHATE: %d\n",mDOP,mPHOSPHATE);
 	mn_phos = alloc3d(NZ,NXMEM,NYMEM);

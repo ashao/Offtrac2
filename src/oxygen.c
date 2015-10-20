@@ -41,8 +41,6 @@ extern struct parameters run_parameters;
 void allocate_oxygen (  ) {
 	printf("Allocating oxygen arrays\n");
 
-	int i, j, k;
-
 	// Allocate working and output arrays
 	mn_oxygen = alloc3d(NZ,NXMEM,NYMEM);
 	jo2 = alloc3d(NZ,NXMEM,NYMEM);
@@ -54,7 +52,6 @@ void allocate_oxygen (  ) {
 
 void initialize_oxygen( ) {
 
-	extern double misval;
 	char varname[100];
 
 	printf("Oxygen index in main tracer array: %d\n",mOXYGEN);
@@ -185,7 +182,7 @@ void apply_oxygen_jterms( ) {
 }
 
 void step_oxygen( ) {
-	int i,j,k;
+	int k;
 	extern double ****tr;
 
 	extern double ***Temptm;

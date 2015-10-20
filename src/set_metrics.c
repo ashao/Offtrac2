@@ -89,7 +89,6 @@ void set_metrics(void)
   int i,j;
   extern double areagr[NXMEM][NYMEM];
   double Iareagr[NXMEM][NYMEM];
-  extern double D[NXMEM][NYMEM];
 
 /*    Calculate the values of the metric terms that might be used     */
 /*  and save them in arrays.                                          */

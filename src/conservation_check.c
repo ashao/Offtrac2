@@ -27,8 +27,6 @@ extern struct parameters run_parameters;
 void allocate_test (  ) {
 	printf("Allocating age arrays\n");
 
-	int i, j, k;
-
 	// Allocate working and output arrays
 	mn_test = alloc3d(NZ,NXMEM,NYMEM);
 	mn_htest = alloc3d(NZ,NXMEM,NYMEM);

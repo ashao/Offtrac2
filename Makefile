@@ -56,8 +56,7 @@ ifeq ($(CC),icc)
 CFLAGS += -Wall -O2 -ip -ipo -inline-level=2 -xHOST
 else ifeq ($(CC),gcc)
 # gcc flags
-CFLAGS += -Wall
-#CFLAGS += -Werror # Someday soon...
+CFLAGS += -Wall -Wno-unknown-pragmas -Werror
 ifeq ($(CC_IS_GCC46PLUS),1)
 # gcc >= 4.6 flags
 CFLAGS += -Ofast -flto
