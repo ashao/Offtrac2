@@ -24,17 +24,25 @@ CC = gcc
 #ARCHFLAGS = -march="athlon64"
 #ARCHFLAGS = -march="i686"
 
-#CFLAGS += -lpthread
 #CFLAGS += -pipe
 #CFLAGS += -static
 #CFLAGS += -funroll-loops
+#LDFLAGS += -lpthread
 
 #OUTNAME = offtrac.cfcs
 SRCDIR = src
+OBJDIR = obj
 
 ##############################
-# Things you shouldn't change
+# Things you probably shouldn't change
 ##############################
+
+# Make compilation use 1 compiler per physical CPU core
+CORECOUNT := $(shell lscpu -p | egrep -v ^\# | cut -d, -f2 | sort -u | wc -l )
+MAKEFLAGS = -j$(CORECOUNT)
+
+# Make the output directory
+$(shell mkdir -p $(OBJDIR))
 
 ifeq ($(CC),gcc)
 # Detect if we're dealing with gcc 4.6 or later
@@ -81,31 +89,43 @@ endif
 endif
 endif
 
-CFLAGS += -lm
-
 ifneq ($(OPENMP),0)
 CFLAGS += -fopenmp
 endif
 
-LDFLAGS = -I$(NETCDF)/include/ -L$(NETCDF)/lib -lnetcdf -lrt
+CFLAGS += -I$(NETCDF)/include/
+LDFLAGS = -L$(NETCDF)/lib -lnetcdf
+
+LDFLAGS += -lrt -lm
 
 # Make sure to add the Gibbs Seawater routines
 GSW_DIR= $(SRCDIR)/gsw_src/
 GSW_LIB= $(GSW_DIR)/libgswteos-10.so
 GSW_INC= -I$(GSW_DIR)
 
-OFFSRC = $(wildcard $(SRCDIR)/*.c)
+# Compile all files in $(SRCDIR)
+SRCS := $(wildcard $(SRCDIR)/*.c)
+# Put the objects into $(OBJDIR) so as not to clutter up our sources
+OBJS := $(subst $(SRCDIR),$(OBJDIR), $(SRCS:.c=.o))
 
-$(OUTNAME): $(OFFSRC) $(SRCDIR)/init.h Makefile 
-	echo compiling $(OUTNAME)
-	$(CC)  $(OFFSRC) -o $(OUTNAME) $(CFLAGS) $(LDFLAGS) $(GSW_LIB)		
+# Make the executable by linking together all the object files.
+$(OUTNAME): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(GSW_LIB)
+
+# This is the make rule for compiling a source file into an object
+# file. Each object file depends upon its corresponding source file,
+# as well as the Makefile and init.h.
+$(OBJS) : $(OBJDIR)/%.o : $(SRCDIR)/%.c Makefile $(SRCDIR)/init.h
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 propre:
-	rm -f *.o *.u
+	rm -f $(OBJDIR)/*.o *.u
 
 cleaner:
-	rm -f offtrac *.o *.u 
+	rm -f $(OUTNAME) $(OBJDIR)/*.o *.u 
 
 clean:
-	rm -f offtrac $(SRCDIR)/*.o *.u off
+	rm -f $(OUTNAME) $(OBJDIR)/*.o *.u
 
+# This tells make that these rules don't actually make anything
+.PHONY: printinfo setup clean cleaner propre
