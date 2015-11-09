@@ -432,7 +432,8 @@ void alloc_fields(void)
 				varsize[m] = 1;
 				break;
 			default:
-				printf("Unknown layer axis[%d] %c.\n", m, vars[m].z_grid);
+			        printf("Unknown layer axis[%d] %02x.\n", m, vars[m].z_grid);
+				varsize[m] = 0;
 			}
 
 			var[m] = calloc((size_t) varsize[m], sizeof(double));
