@@ -10,6 +10,7 @@
 #include "util.h"
 #include "output_variables.h"
 #include "timekeeper.h"
+#include "tracer_utilities.h"
 
 // Auxiliary variables
 int mTEST;
@@ -37,6 +38,7 @@ void initialize_test( ) {
 //	extern char restart_filename[200];
 //	extern double misval;
 	char varname[100];
+	double inventory;
 
 	printf("Setting test variable description...");
 	strcpy(varname,"test");
@@ -67,12 +69,17 @@ void initialize_test( ) {
 			for (k=0;k<NML;k++)	tr[mTEST][k][i][j] = 1.0;	
 			for (k=NML;k<NZ;k++)	tr[mTEST][k][i][j] = 0.0;
 		}
+
+	inventory=calc_inventory(tr[mTEST]);
+	printf("Test tracer inventory: %e\n", inventory);
 }
 
 void step_test( double dt ){
 
 	int i,j,k;
 	extern struct timekeeper_t timekeeper;
+	double inventory;
+
 	if (timekeeper.iteration_counter < 2){
 		printf("Injecting tracer into mixed layer\n");
 		for(i=0;i<NXMEM;i++)
@@ -81,8 +88,8 @@ void step_test( double dt ){
 					tr[mTEST][k][i][j] = 1.;
 	}
 			
-//	test_inventory=calc_inventory(tr[mTEST]);
-	//printf("Test tracer inventory: %e\n", calc_inventory(tr[mTEST]));
+	inventory=calc_inventory(tr[mTEST]);
+	printf("Test tracer inventory: %e\n", inventory);
 
 }
 
