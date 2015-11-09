@@ -126,8 +126,14 @@ size_t write_field(int cdfid, FILE *fileptr, struct vardesc vars,
       }
       else {
 # if (defined(PARALLEL_Y) || defined(PARALLEL_X)) && !defined(PARALLEL_IO)
-        double out_array[(NXTOT+1)*(NYTOT+1)];
+        double * out_array;
         int zindex, i, j, k;
+
+	out_array = malloc(sizeof(double)*(NXTOT+1)*(NYTOT+1));
+	if (out_array == NULL) {
+	  sprintf(message,"OOM");
+	  handle_error(message, -1);
+	}
 
         if (vars.z_grid == '1') {zindex = 3;}
         else if (vars.t_grid == '1') zindex = 0;
@@ -149,11 +155,18 @@ size_t write_field(int cdfid, FILE *fileptr, struct vardesc vars,
             }
           }
         }
+	free(out_array);
 # else
 /*  With 2-D or 3-D arrays, the data is copied to another field to     */
 /*  eliminate the halo regions.                                        */
-        double out_array[NXMEM*NYMEM*(NZ+1)];
+        double * out_array;
         int i, j, k, xst, yst, xysize;
+
+	out_array = malloc(sizeof(double)*NXMEM*NYMEM*(NZ+1));
+	if (out_array == NULL) {
+	  sprintf(message,"OOM");
+	  handle_error(message, -1);
+	}
 
         xst = nx-varinfo.x_size+1; yst = ny-varinfo.y_size+1; 
         xysize = varinfo.y_size*varinfo.x_size;
@@ -170,6 +183,8 @@ size_t write_field(int cdfid, FILE *fileptr, struct vardesc vars,
 	
         status = nc_put_vara_double(cdfid, varinfo.id, start,
                                     varinfo.count, &out_array[0]);
+
+	free(out_array);
 
         if (status != NC_NOERR) {
           strcpy(message,"put m "); strcat(message,vars.name);
