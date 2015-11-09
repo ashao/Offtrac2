@@ -84,16 +84,11 @@ double calc_inventory( double ***array ) {
 
 	inventory = 0.0;
 
-	for(i=0;i<NXMEM;i++)
-		for(j=0;j<NYMEM;j++) {
-			if(D[i][j]>MINIMUM_DEPTH)
-				for(k=0;k<NZ;k++) {
+	for(k=0;k<NZ;k++)
+	  for(i=2;i<NXMEM-2;i++)
+	    for(j=2;j<NYMEM-2;j++) 
+	      inventory += oceanmask[i][j]*hend[k][i][j]*areagr[i][j]*array[k][i][j];
 
-					inventory += hend[k][i][j]*areagr[i][j]*array[k][i][j];
-
-				}
-
-		}
 	return inventory;
 }
 
