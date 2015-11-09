@@ -33,7 +33,7 @@ int alloc_arrays() {
 	if (! (hstart = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("hstart");
 	if (! (hend = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("hend");
 	if (! (depth = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("depth");
-	if (! (htest = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("hend");
+	if (! (htest = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("htest");
 	if (! (Temptm = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("Temptm");
 	if (! (Salttm = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("Salttm");
 	if (! (mn_h = alloc3d(NZ,NXMEM,NYMEM))) alloc_error("mn_h");
