@@ -39,10 +39,11 @@ DEPDIR = .d
 ##############################
 
 # Make compilation use 1 compiler per physical CPU core
+#
 # This is a slightly conservative choice, and could be changed
 # up or down depending on user tolerance
 CORECOUNT := $(shell lscpu -p | egrep -v ^\# | cut -d, -f2 | sort -u | wc -l )
-MAKEFLAGS = -j$(CORECOUNT)
+MAKEFLAGS += -j$(CORECOUNT)
 
 # Make the output directory and dependency directory
 $(shell mkdir -p $(OBJDIR) $(DEPDIR))
@@ -113,17 +114,18 @@ SRCS := $(wildcard $(SRCDIR)/*.c)
 # Put the objects into $(OBJDIR) so as not to clutter up our sources
 OBJS := $(subst $(SRCDIR),$(OBJDIR),$(SRCS:.c=.o))
 
-# Make the executable by linking together all the object files.
+# Make the executable by linking together all the object files
 $(OUTNAME): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(GSW_LIB)
 
 # This is the make rule for compiling a source file into an object
-# file. Each object file depends upon its corresponding source file,
-# as well as the Makefile. It also creates the dependency-tracking
-# info and places it in $(DEPDIR), as a separate step so compilation
-# failures won't change it. The header file dependencies for each
-# source file are thus tracked by the -include directive at the bottom
-# of this Makefile.
+# file. It also creates the dependency-tracking info and places it in
+# $(DEPDIR) as a separate step so compilation failures won't change it.
+#
+# Each object file depends upon its corresponding source file, as well
+# as the Makefile. The header file dependencies for each source file
+# are thus tracked by the -include directive at the bottom of this
+# Makefile.
 $(OBJS) : $(OBJDIR)/%.o : $(SRCDIR)/%.c Makefile
 	$(CC) $(CFLAGS) -c $< -o $@ $(DEPFLAGS)
 	@mv -f $(DEPDIR)/$(*F).Td $(DEPDIR)/$(*F).d
