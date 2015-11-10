@@ -20,6 +20,7 @@ double ***mn_htest;
 // Working arrays
 double test_inventory;
 extern double ****tr;
+extern double ***hend;
 extern int oceanmask[NXMEM][NYMEM];
 extern struct vardesc vars[NOVARS];
 extern struct parameters run_parameters;
@@ -70,7 +71,7 @@ void initialize_test( ) {
 			for (k=NML;k<NZ;k++)	tr[mTEST][k][i][j] = 0.0;
 		}
 
-	inventory=calc_inventory(tr[mTEST]);
+	inventory=calc_inventory(tr[mTEST], hend);
 	printf("Test tracer inventory: %e\n", inventory);
 }
 
@@ -88,7 +89,7 @@ void step_test( double dt ){
 					tr[mTEST][k][i][j] = 1.;
 	}
 			
-	inventory=calc_inventory(tr[mTEST]);
+	inventory=calc_inventory(tr[mTEST], hend);
 	printf("Test tracer inventory: %e\n", inventory);
 
 }
