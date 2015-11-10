@@ -40,7 +40,7 @@
                                /* layers for all BGC variables       */
 
 
-#define NOVARS 30              /*  Number of variables used in        */
+#define NOVARS 40              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */
