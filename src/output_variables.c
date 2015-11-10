@@ -64,11 +64,12 @@ int map_variable_to_index( char *var_name ) {
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);
 		exit( -2 );
-	}
-	else	{
+	} else if (var_idx >= NOVARS) {
+	        printf("ERROR: var_idx %d exceeds NOVARS\n", var_idx);
+		exit( -2 );
+	} else {
 //		printf("%s index = %d\n",var_name,var_idx);
 		return var_idx;
-
 	}
 
 }
