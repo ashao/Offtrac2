@@ -122,7 +122,7 @@ int main( int argc, char *argv[] )
 	int nvar = 0, cdfid, timeid[2];
 
 
-	double *timeptr;
+	double *timeptr, timeindays;
 
 	//BX-a  for testing only
 	int status;
@@ -261,7 +261,8 @@ int main( int argc, char *argv[] )
 				handle_error(message, status);
 			}
 
-			timeptr = &timekeeper.current_time;
+			timeindays = timekeeper.current_time * 365;
+			timeptr = &timeindays;
 			err = write_time(cdfid, fn, timeid[0], timekeeper.num_records, timeptr);
 			if (err == -1)
 				printf("Error writing day.\n");
