@@ -587,8 +587,8 @@ double hlst[NYMEM];
 /*      interface is wd[[k][i][j]= ea[k][i][j] and eb[k-1][i][j]        */
 #pragma omp for  private(i,j,k,hup,hlos)
    for (k=0; k<=NZ-1; k++) {   	
+     for (i=X1; i<=nx; i++) {
       for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
 
 	    if (wd[k][i][j] == 0.0) {
 	      wdh[k][i][j] = 0.0;
@@ -605,11 +605,8 @@ double hlst[NYMEM];
 	    }
 	    else {
 	      hup = hnew[k][i][j] - ((k<2) ? MLMIN : EPSILON);
-	      if (k != NZ-1) {
-		hlos = D_MAX(0.0,wd[k+1][i][j]);
-	      } else {
-		hlos = 0.0;
-	      }
+	      // ASSERT(wd[NZ]==0); //XXX add check loop
+	      hlos = D_MAX(0.0,wd[k+1][i][j]);
 	      if (((hup + wd[k][i][j] - hlos) < 0.0) &&
 		  ((0.5*hup + wd[k][i][j]) < 0.0)) {
 		wdh[k][i][j] = D_MIN(-0.5*hup,-hup+hlos);
