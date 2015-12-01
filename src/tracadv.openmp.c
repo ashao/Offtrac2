@@ -160,7 +160,7 @@ void tracer(int itts)
   
   double bet[NXMEM];        /* bet and gam are variables used by the  */
   double gam[NZ][NXMEM];    /* tridiagonal solver.                    */
-  double hnew0[NXMEM];      /* The original topmost layer thickness,  */
+  double hnew0;      /* The original topmost layer thickness,  */
 #if defined AGE2 || defined AGE3
   //  extern double hnew[NZ][NXMEM][NYMEM];
   extern double ***hnew;
@@ -218,7 +218,7 @@ double hlst[NYMEM];
     if(ebr == NULL) {
 	fprintf(stderr,"not enough memory for ebr!\n");
     }
-  wdh = alloc3d(NZ,NXMEM,NYMEM);
+  wdh = alloc3d(NZ+1,NXMEM,NYMEM);
     if(wdh == NULL) {
 	fprintf(stderr,"not enough memory for wdh!\n");
     }
@@ -730,15 +730,16 @@ double hlst[NYMEM];
       for (j=Y1; j<=ny; j++) {
 
 	  for (i=X1; i<=nx; i++) {
-	      hnew0[i] = hnew[0][i][j];
+	      hnew0 = hnew[0][i][j];
 	      bet[i]=1.0/(hnew[0][i][j] + ebr[0][i][j] + wdh[0][i][j]);
 
 	      for (m=0;m<run_parameters.tracer_counter;m++)
-		  tr[m][0][i][j] = bet[i]*(hnew0[i]*tr[m][0][i][j]);
+		  tr[m][0][i][j] = bet[i]*(hnew0*tr[m][0][i][j]);
 	  }
 
 	  for (k=1;k<=NZ-1;k++) {
 	      for (i=X1;i<=nx;i++) {
+		  hnew0 = hnew[k][i][j];
 		  gam[k][i] = ebr[k-1][i][j] * bet[i];
 
 		  bet[i]=1.0/(hnew[k][i][j] + ebr[k][i][j] +
@@ -746,7 +747,7 @@ double hlst[NYMEM];
 		  
 
 		  for (m=0;m<run_parameters.tracer_counter;m++)
-		      tr[m][k][i][j] = bet[i] * (hnew[k][i][j]*tr[m][k][i][j] +
+		      tr[m][k][i][j] = bet[i] * (hnew0*tr[m][k][i][j] +
 						 ear[k][i][j]*(tr[m][k-1][i][j]) );
 	      }	      
 	  }
@@ -761,16 +762,11 @@ double hlst[NYMEM];
 
 /* update hvol with diapycnal fluxes */
 #pragma omp for  private(i,j,k)
-      for (k=0;k<NZ-1;k++) {
+      for (k=0;k<NZ;k++) {
 	  for (i=X1; i<=nx; i++)
 	      for (j=Y1; j<=ny; j++)
 		  hnew[k][i][j] += (wdh[k][i][j] - wdh[k+1][i][j]);
       }
-
-#pragma omp for  private(i,j)
-      for (i=X1; i<=nx; i++)
-	  for (j=Y1; j<=ny; j++)
-	      hnew[NZ-1][i][j] += wdh[NZ-1][i][j];
 
 #pragma omp for  private(i,j,k)
       for (k=0;k<=NZ-1;k++)
@@ -1005,7 +1001,7 @@ double hlst[NYMEM];
   free3d(vhr, NZ);
   free3d(ear, NZ);
   free3d(ebr, NZ);
-  free3d(wdh, NZ);
+  free3d(wdh, NZ+1);
 #if !defined AGE2 && !defined AGE3
   free3d(hnew, NZ);
 #endif
