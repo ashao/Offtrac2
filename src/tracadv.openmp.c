@@ -158,8 +158,8 @@ void tracer(int itts)
   double ***ebr;
   double ***wdh;
   
-  double bet[NXMEM];        /* bet and gam are variables used by the  */
-  double gam[NZ][NXMEM];    /* tridiagonal solver.                    */
+  double bet[NYMEM];        /* bet and gam are variables used by the  */
+  double gam[NZ][NYMEM];    /* tridiagonal solver.                    */
   double hnew0;      /* The original topmost layer thickness,  */
 #if defined AGE2 || defined AGE3
   //  extern double hnew[NZ][NXMEM][NYMEM];
@@ -727,35 +727,34 @@ double hlst[NYMEM];
       }     
  
 #pragma omp for  private(i,j,k,m,hnew0,bet,gam)
-      for (j=Y1; j<=ny; j++) {
-
-	  for (i=X1; i<=nx; i++) {
+      for (i=X1; i<=nx; i++) {
+	for (j=Y1; j<=ny; j++) {
 	      hnew0 = hnew[0][i][j];
-	      bet[i]=1.0/(hnew[0][i][j] + ebr[0][i][j] + wdh[0][i][j]);
+	      bet[j]=1.0/(hnew[0][i][j] + ebr[0][i][j] + wdh[0][i][j]);
 
 	      for (m=0;m<run_parameters.tracer_counter;m++)
-		  tr[m][0][i][j] = bet[i]*(hnew0*tr[m][0][i][j]);
-	  }
+		tr[m][0][i][j] = bet[j]*(hnew0*tr[m][0][i][j]);
+	}
 
 	  for (k=1;k<=NZ-1;k++) {
-	      for (i=X1;i<=nx;i++) {
+	    for (j=Y1; j<=ny; j++) {
 		  hnew0 = hnew[k][i][j];
-		  gam[k][i] = ebr[k-1][i][j] * bet[i];
+		  gam[k][j] = ebr[k-1][i][j] * bet[j];
 
-		  bet[i]=1.0/(hnew[k][i][j] + ebr[k][i][j] +
-			      (1.0-gam[k][i])*ear[k][i][j]);
+		  bet[j]=1.0/(hnew[k][i][j] + ebr[k][i][j] +
+			      (1.0-gam[k][j])*ear[k][i][j]);
 		  
 
 		  for (m=0;m<run_parameters.tracer_counter;m++)
-		      tr[m][k][i][j] = bet[i] * (hnew0*tr[m][k][i][j] +
+		      tr[m][k][i][j] = bet[j] * (hnew0*tr[m][k][i][j] +
 						 ear[k][i][j]*(tr[m][k-1][i][j]) );
 	      }	      
 	  }
 
 	  for (m=0;m<run_parameters.tracer_counter;m++)
 	      for (k=NZ-2;k>=0;k--) {
-		  for (i=X1;i<=nx;i++) {
-		      tr[m][k][i][j] += gam[k+1][i]*tr[m][k+1][i][j];
+		for (j=Y1; j<=ny; j++) {
+		      tr[m][k][i][j] += gam[k+1][j]*tr[m][k+1][i][j];
 		  }
        }
       } /*j*/
