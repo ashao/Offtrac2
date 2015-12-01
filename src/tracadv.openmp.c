@@ -135,13 +135,9 @@ void tracer(int itts)
 
   double ***hvol; /* The cell volume of an h-element   */
 
-  double slope[NXMEM+NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
+  double slope[NXMEM][NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
                         /* point in units of concentration (nondim.). */
-  double fluxtr[NXMEM+NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
-                        /* boundary, in m3 * conc. (nondim.).         */
-  double slope_x[NXMEM][NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
-                        /* point in units of concentration (nondim.). */
-  double fluxtr_x[NXMEM][NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
+  double fluxtr[NXMEM][NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
                         /* boundary, in m3 * conc. (nondim.).         */
 
   double ***uhr; /* The remaining zonal and meridional */
@@ -345,7 +341,7 @@ double hlst[NYMEM];
 
 #pragma omp parallel 
 {
-#pragma omp for private(i,j,k,m,minslope,slope,slope_x,uhh,vhh,fluxtr,fluxtr_xhup,hlos,ts2,hlst,hlst1,Ihnew)
+#pragma omp for private(i,j,k,m,minslope,slope,uhh,vhh,fluxtr,hup,hlos,ts2,hlst,hlst1,Ihnew)
       for (k=0;k<NZ;k++)
 	{ 
 /*    To insure positive definiteness of the thickness at each        */
@@ -365,7 +361,7 @@ double hlst[NYMEM];
 				 fabs(tr[m][k][i][j]-tr[m][k][i-1][j])) ? 
 				(tr[m][k][i+1][j]-tr[m][k][i][j]) :
 				(tr[m][k][i][j]-tr[m][k][i-1][j]));
-		slope_x[i][j][m] = umask[i][j]*umask[i-1][j] *
+		slope[i][j][m] = umask[i][j]*umask[i-1][j] *
 		  (((tr[m][k][i+1][j]-tr[m][k][i][j]) * 
 		    (tr[m][k][i][j]-tr[m][k][i-1][j]) < 0.0) ? 0.0 :
 		   ((fabs(tr[m][k][i+1][j]-tr[m][k][i-1][j])<fabs(minslope)) ?
@@ -384,7 +380,7 @@ double hlst[NYMEM];
 	    for (j=Y1;j<=ny;j++) {
 	      if (uhr[k][i][j] == 0.0) {
 		uhh[i][j] = 0.0;
-		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr_x[i][j][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[i][j][m] = 0.0;
 	      }
 	      else if (uhr[k][i][j] < 0.0) {
 
@@ -402,7 +398,7 @@ double hlst[NYMEM];
 		else uhh[i][j] = uhr[k][i][j];
 		ts2 = 0.5*(1.0 + uhh[i][j]/hvol[k][i+1][j]);
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr_x[i][j][m] = uhh[i][j]*(tr[m][k][i+1][j] - slope_x[i+1][j][m]*ts2);
+		  fluxtr[i][j][m] = uhh[i][j]*(tr[m][k][i+1][j] - slope[i+1][j][m]*ts2);
 		}
 	      }
 	      else {
@@ -422,7 +418,7 @@ double hlst[NYMEM];
 		ts2 = 0.5*(1.0 - uhh[i][j]/hvol[k][i][j]);
 
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr_x[i][j][m] = uhh[i][j]*(tr[m][k][i][j] + slope_x[i][j][m]*ts2);
+		  fluxtr[i][j][m] = uhh[i][j]*(tr[m][k][i][j] + slope[i][j][m]*ts2);
 		}
 	      }
 	    }
@@ -450,7 +446,7 @@ double hlst[NYMEM];
 		  for (m=0;m<run_parameters.tracer_counter;m++) {
 		    tr[m][k][i][j] *= hlst1;
 		    tr[m][k][i][j] = (tr[m][k][i][j] - 
-				      (fluxtr_x[i][j][m]-fluxtr_x[i-1][j][m])) * Ihnew;
+				      (fluxtr[i][j][m]-fluxtr[i-1][j][m])) * Ihnew;
 		  }
 
 		}
@@ -471,7 +467,7 @@ double hlst[NYMEM];
 				 fabs(tr[m][k][i][j]-tr[m][k][i][j-1])) ?
 				(tr[m][k][i][j+1]-tr[m][k][i][j]) : 
 				(tr[m][k][i][j]-tr[m][k][i][j-1]));
-		slope[j][m] = vmask[i][j] * vmask[i][j-1] *
+		slope[0][j][m] = vmask[i][j] * vmask[i][j-1] *
 		  (((tr[m][k][i][j+1]-tr[m][k][i][j]) *
 		    (tr[m][k][i][j]-tr[m][k][i][j-1]) < 0.0) ? 0.0 :
 		   ((fabs(tr[m][k][i][j+1]-tr[m][k][i][j-1])<fabs(minslope)) ?
@@ -488,7 +484,7 @@ double hlst[NYMEM];
 	    for (j=Y0;j<=ny;j++) {
 	      if (vhr[k][i][j] == 0.0) { 
 		vhh[j] = 0.0;
-		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[j][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[0][j][m] = 0.0;
 	      }
 	      else if (vhr[k][i][j] < 0.0) {
 
@@ -509,7 +505,7 @@ double hlst[NYMEM];
 		ts2 = 0.5*(1.0 + vhh[j]/(hvol[k][i][j+1]));
 		
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j+1] - slope[j+1][m]*ts2);
+		  fluxtr[0][j][m] = vhh[j]*(tr[m][k][i][j+1] - slope[0][j+1][m]*ts2);
 		}
 	      }
 	      else {
@@ -531,7 +527,7 @@ double hlst[NYMEM];
 		ts2 = 0.5*(1.0 - vhh[j] / (hvol[k][i][j]));
 		
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j] + slope[j][m]*ts2);
+		  fluxtr[0][j][m] = vhh[j]*(tr[m][k][i][j] + slope[0][j][m]*ts2);
 		}
 	      }
 	    }
@@ -553,7 +549,7 @@ double hlst[NYMEM];
 		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  tr[m][k][i][j] *= hlst[j];
 		  tr[m][k][i][j] = (tr[m][k][i][j] - 
-				    fluxtr[j][m] + fluxtr[j-1][m]) * Ihnew;
+				    fluxtr[0][j][m] + fluxtr[0][j-1][m]) * Ihnew;
 		}
 	      }
 	    }
