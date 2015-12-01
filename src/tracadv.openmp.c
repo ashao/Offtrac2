@@ -574,6 +574,8 @@ double hlst[NYMEM];
 #ifdef TRAC_TIMING
  clock_gettime(CLOCK_MONOTONIC, &endclock);
  printf("Step 2 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ printf("HASH %016llX %016llX\n", fhash(hnew), fhash(tr[0]));
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
  startclock = endclock;
 #endif
 
@@ -780,8 +782,6 @@ double hlst[NYMEM];
 #ifdef TRAC_TIMING
  clock_gettime(CLOCK_MONOTONIC, &endclock);
  printf("Step 4 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
- printf("HASH %016llX %016llX %016llX\n", fhash(hnew), fhash(tr[0]), fhash(wd));
- clock_gettime(CLOCK_MONOTONIC, &endclock);
  startclock = endclock;
 #endif
  
