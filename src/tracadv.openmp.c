@@ -139,7 +139,10 @@ void tracer(int itts)
                         /* point in units of concentration (nondim.). */
   double fluxtr[NXMEM+NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
                         /* boundary, in m3 * conc. (nondim.).         */
-
+  double slope_x[NXMEM][NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
+                        /* point in units of concentration (nondim.). */
+  double fluxtr_x[NXMEM][NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
+                        /* boundary, in m3 * conc. (nondim.).         */
 
   double ***uhr; /* The remaining zonal and meridional */
   double ***vhr; /* thickness fluxes, in m3.*/
@@ -342,7 +345,7 @@ double hlst[NYMEM];
 
 #pragma omp parallel 
 {
-#pragma omp for private(i,j,k,m,minslope,slope,uhh,vhh,fluxtr,hup,hlos,ts2,hlst,hlst1,Ihnew)
+#pragma omp for private(i,j,k,m,minslope,slope,slope_x,uhh,vhh,fluxtr,fluxtr_xhup,hlos,ts2,hlst,hlst1,Ihnew)
       for (k=0;k<NZ;k++)
 	{ 
 /*    To insure positive definiteness of the thickness at each        */
@@ -352,24 +355,24 @@ double hlst[NYMEM];
 /* ============================================================ */
 /*			first advect zonally			*/
 /* ============================================================ */
-	  for (j=Y1;j<=ny;j++) {
-
 /*   Calculate the i-direction profiles (slopes) of each tracer that  */
 /* is being advected.                                                 */
 //#pragma omp for  private(i,m,minslope)
+	  for (j=Y1;j<=ny;j++) {
 	    for (i=X0;i<=nx+1;i++) {
 	      for (m=0;m<run_parameters.tracer_counter;m++) {
 		minslope = 4.0*((fabs(tr[m][k][i+1][j]-tr[m][k][i][j]) < 
 				 fabs(tr[m][k][i][j]-tr[m][k][i-1][j])) ? 
 				(tr[m][k][i+1][j]-tr[m][k][i][j]) :
 				(tr[m][k][i][j]-tr[m][k][i-1][j]));
-		slope[i][m] = umask[i][j]*umask[i-1][j] *
+		slope_x[i][j][m] = umask[i][j]*umask[i-1][j] *
 		  (((tr[m][k][i+1][j]-tr[m][k][i][j]) * 
 		    (tr[m][k][i][j]-tr[m][k][i-1][j]) < 0.0) ? 0.0 :
 		   ((fabs(tr[m][k][i+1][j]-tr[m][k][i-1][j])<fabs(minslope)) ?
 		    0.5*(tr[m][k][i+1][j]-tr[m][k][i-1][j]) : 0.5*minslope));
 	      }
 	    }
+	  }
             //#pragma omp barrier
 
 /*   Calculate the i-direction fluxes of each tracer, using as much   */
@@ -377,10 +380,11 @@ double hlst[NYMEM];
 /* in the cell plus whatever part of its half of the mass flux that   */
 /* the flux through the other side does not require.                  */
 //#pragma omp for  private(i,m,hup,hlos,ts2)
+	  for (j=Y1;j<=ny;j++) {
 	    for (i=X0;i<=nx;i++) {
 	      if (uhr[k][i][j] == 0.0) {
 		uhh[i] = 0.0;
-		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[i][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr_x[i][j][m] = 0.0;
 	      }
 	      else if (uhr[k][i][j] < 0.0) {
 
@@ -398,7 +402,7 @@ double hlst[NYMEM];
 		else uhh[i] = uhr[k][i][j];
 		ts2 = 0.5*(1.0 + uhh[i]/hvol[k][i+1][j]);
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[i][m] = uhh[i]*(tr[m][k][i+1][j] - slope[i+1][m]*ts2);
+		  fluxtr_x[i][j][m] = uhh[i]*(tr[m][k][i+1][j] - slope_x[i+1][j][m]*ts2);
 		}
 	      }
 	      else {
@@ -418,7 +422,7 @@ double hlst[NYMEM];
 		ts2 = 0.5*(1.0 - uhh[i]/hvol[k][i][j]);
 
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[i][m] = uhh[i]*(tr[m][k][i][j] + slope[i][m]*ts2);
+		  fluxtr_x[i][j][m] = uhh[i]*(tr[m][k][i][j] + slope_x[i][j][m]*ts2);
 		}
 	      }
 	    }
@@ -443,7 +447,7 @@ double hlst[NYMEM];
 		  for (m=0;m<run_parameters.tracer_counter;m++) {
 		    tr[m][k][i][j] *= hlst1;
 		    tr[m][k][i][j] = (tr[m][k][i][j] - 
-				      (fluxtr[i][m]-fluxtr[i-1][m])) * Ihnew;
+				      (fluxtr_x[i][j][m]-fluxtr_x[i-1][j][m])) * Ihnew;
 		  }
 
 		}
