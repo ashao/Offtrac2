@@ -762,16 +762,10 @@ double hlst[NYMEM];
 
 /* update hvol with diapycnal fluxes */
 #pragma omp for  private(i,j,k)
-      for (k=0;k<NZ;k++) {
-	  for (i=X1; i<=nx; i++)
-	      for (j=Y1; j<=ny; j++)
-		  hnew[k][i][j] += (wdh[k][i][j] - wdh[k+1][i][j]);
-      }
-
-#pragma omp for  private(i,j,k)
       for (k=0;k<=NZ-1;k++)
 	  for (i=X1; i<=nx; i++)
 	      for (j=Y1; j<=ny; j++) {
+		  hnew[k][i][j] += (wdh[k][i][j] - wdh[k+1][i][j]);
 		  if (hnew[k][i][j] < EPSILON) hnew[k][i][j] = EPSILON;
 		  hvol[k][i][j] = DXDYh(i,j)*hnew[k][i][j];
 
