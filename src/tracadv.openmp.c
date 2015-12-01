@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 // begin yanxu
 #include <omp.h>
 // end yanxu    
@@ -97,6 +98,30 @@ void hvol_kintegral(int k, double ***hvol);
 void tracer_integral(int trnum, double ***hvol);
 void tracer_kintegral(int trnum, int k, double ***hvol);
 
+unsigned long long fhash(double ***a) {
+  unsigned long long ***v = (unsigned long long ***)a;
+  unsigned i, j, k;
+  unsigned long long x, h = 0xF0E1D2C3B4A59687ULL;
+  for (k=0; k<=NZ-1; k++) {
+    for (i=X1; i<=nx; i++) {
+      for (j=Y1; j<=ny; j++) {
+	x = v[k][i][j];
+	x *= 0xc6a4a7935bd1e995ULL;
+	x ^= (x >> 47);
+	x *= 0xc6a4a7935bd1e995ULL;
+
+	h *= 0xc6a4a7935bd1e995ULL;
+	h ^= (h >> 47);
+	h += x;
+
+	h *= 0xc6a4a7935bd1e995ULL;
+	h ^= (h >> 47);
+      }
+    }
+  }
+  return h;	  
+}
+
 void tracer(int itts)
 {
 
@@ -163,6 +188,12 @@ double hlst[NYMEM];
 # ifdef WRTTS
   double wrts;
 # endif
+
+#define TRAC_TIMING
+#ifdef TRAC_TIMING
+  struct timespec startclock, endclock;
+  clock_gettime(CLOCK_MONOTONIC, &startclock); 
+#endif
 
   dt = timekeeper.dt;
 
@@ -292,11 +323,23 @@ double hlst[NYMEM];
     print_tr(pstage);
     */
 
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 0 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
   /* beginning of itt loop */
     for (itt = 0; itt < NUM_ADV_ITER; itt++) {
 
       /* big loop over k	 */
 //ompfail 
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 1 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
 #pragma omp parallel 
 {
 #pragma omp for private(i,j,k,m,minslope,slope,uhh,vhh,fluxtr,hup,hlos,ts2,hlst,hlst1,Ihnew)
@@ -528,6 +571,13 @@ double hlst[NYMEM];
 	}
       }
 
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 2 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ printf("HASH %016llX %016llX\n", fhash(hnew), fhash(tr[0]));
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ startclock = endclock;
+#endif
 
 /* ============================================================ */
 /*			now advect vertically			*/
@@ -654,6 +704,12 @@ double hlst[NYMEM];
 	}   /* j */
       }     /* i */
 
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 3 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
 #pragma omp for  private(i,j)
       for (i=X1; i<=nx; i++)
 	  for (j=Y1; j<=ny; j++) {
@@ -733,6 +789,12 @@ double hlst[NYMEM];
 
 		  wd[k][i][j] -= wdh[k][i][j];	
 	      }
+
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 4 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
  
 #else  /* STANDARD_ADVECTION */
       /* big loop over k	 */
@@ -834,6 +896,11 @@ double hlst[NYMEM];
       }
     }
 
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 5 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
 } // omp
 
 #ifdef STANDARD_ADVECTION
@@ -910,8 +977,13 @@ double hlst[NYMEM];
     diffuse_tracer();        
      }
 #endif
-
      
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 6 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
   pstage=4;
   print_tr(pstage);
 
@@ -919,6 +991,12 @@ double hlst[NYMEM];
     tracer_hordiff();
   }
  
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 7 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
   pstage=5;
   print_tr(pstage);
 
@@ -931,6 +1009,7 @@ double hlst[NYMEM];
 #if !defined AGE2 && !defined AGE3
   free3d(hnew, NZ);
 #endif
+  exit(1);
 }
 
 #ifdef DIFFUSE_TRACER
