@@ -358,9 +358,9 @@ double hlst[NYMEM];
 /*   Calculate the i-direction profiles (slopes) of each tracer that  */
 /* is being advected.                                                 */
 //#pragma omp for  private(i,m,minslope)
-	  for (j=Y1;j<=ny;j++) {
+	  for (m=0;m<run_parameters.tracer_counter;m++) {
 	    for (i=X0;i<=nx+1;i++) {
-	      for (m=0;m<run_parameters.tracer_counter;m++) {
+	      for (j=Y1;j<=ny;j++) {
 		minslope = 4.0*((fabs(tr[m][k][i+1][j]-tr[m][k][i][j]) < 
 				 fabs(tr[m][k][i][j]-tr[m][k][i-1][j])) ? 
 				(tr[m][k][i+1][j]-tr[m][k][i][j]) :
@@ -380,8 +380,8 @@ double hlst[NYMEM];
 /* in the cell plus whatever part of its half of the mass flux that   */
 /* the flux through the other side does not require.                  */
 //#pragma omp for  private(i,m,hup,hlos,ts2)
-	  for (j=Y1;j<=ny;j++) {
-	    for (i=X0;i<=nx;i++) {
+	  for (i=X0;i<=nx;i++) {
+	    for (j=Y1;j<=ny;j++) {
 	      if (uhr[k][i][j] == 0.0) {
 		uhh[i][j] = 0.0;
 		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr_x[i][j][m] = 0.0;
@@ -426,15 +426,18 @@ double hlst[NYMEM];
 		}
 	      }
 	    }
+	  }
             //#pragma omp barrier
 /*   Calculate new tracer concentration in each cell after accounting */
 /* for the i-direction fluxes.                                        */
-
+	  for (j=Y1;j<=ny;j++) {
 	    uhr[k][X0][j] -= uhh[X0][j];
+	  }
            // #pragma omp barrier
 
 //#pragma omp for  private(i,m,hlst1,Ihnew)
-	    for (i=X1;i<=nx;i++) {
+	  for (i=X1;i<=nx;i++) {
+	    for (j=Y1;j<=ny;j++) {
 
 	      if ((uhh[i][j] != 0.0) || (uhh[i-1][j] != 0.0)) 
 		{
@@ -453,7 +456,7 @@ double hlst[NYMEM];
 		}
 	    }
           //  #pragma omp barrier
-	  } /* j loop */
+	  }
 
 /* ============================================================ */
 /*			now advect meridionally			*/
