@@ -586,41 +586,7 @@ double hlst[NYMEM];
 /*      interface between layer k and layer k-1. net flux at this       */
 /*      interface is wd[[k][i][j]= ea[k][i][j] and eb[k-1][i][j]        */
 #pragma omp for  private(i,j,k,hup,hlos)
-   for(k=0; k<=2; k++) {
-      for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
-/* k=0,2 */
-
-          if (wd[k][i][j] == 0.0) {
-            wdh[k][i][j] = 0.0;
-          }
-          else if (wd[k][i][j] > 0.0) {
-	    // ASSERT(k>0); //XXX add check loop
-            hup = hnew[k-1][i][j] - MLMIN;
-            hlos = D_MAX(0.0, -wd[k-1][i][j]);
-            if (((hup - wd[k][i][j] - hlos) < 0.0) &&
-                ((0.5*hup - wd[k][i][j]) < 0.0)) {
-              wdh[k][i][j] = D_MAX(0.5*hup,hup-hlos);
-            }
-            else wdh[k][i][j] = wd[k][i][j];
-          }
-          else {
-            hup = hnew[k][i][j] - ((k<2) ? MLMIN : EPSILON);
-            hlos = D_MAX(0.0,wd[k+1][i][j]);
-            if (((hup + wd[k][i][j] - hlos) < 0.0) &&
-                ((0.5*hup + wd[k][i][j]) < 0.0)) {
-              wdh[k][i][j] = D_MIN(-0.5*hup,-hup+hlos);
-            }
-            else wdh[k][i][j] = wd[k][i][j];
-          }
-	 }
-      }
-   }
-
-/* k=3 --> NZ-1 */
-
-#pragma omp for  private(i,j,k,hup,hlos)
-	  for (k=3; k<=NZ-1; k++) {   	
+   for (k=0; k<=NZ-1; k++) {   	
       for (j=Y1; j<=ny; j++) {
 	 for (i=X1; i<=nx; i++) {
 
@@ -628,7 +594,8 @@ double hlst[NYMEM];
 	      wdh[k][i][j] = 0.0;
 	    }
 	    else if (wd[k][i][j] > 0.0) {
-	      hup = hnew[k-1][i][j] - EPSILON;
+	      // ASSERT(k>0); //XXX add check loop
+	      hup = hnew[k-1][i][j] - ((k<3) ? MLMIN : EPSILON);
 	      hlos = D_MAX(0.0, -wd[k-1][i][j]);
 	      if (((hup - wd[k][i][j] - hlos) < 0.0) &&
 		  ((0.5*hup - wd[k][i][j]) < 0.0)) {
@@ -637,7 +604,7 @@ double hlst[NYMEM];
 	      else wdh[k][i][j] = wd[k][i][j];
 	    }
 	    else {
-	      hup = hnew[k][i][j] - EPSILON;
+	      hup = hnew[k][i][j] - ((k<2) ? MLMIN : EPSILON);
 	      if (k != NZ-1) {
 		hlos = D_MAX(0.0,wd[k+1][i][j]);
 	      } else {
