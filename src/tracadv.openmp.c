@@ -586,17 +586,17 @@ double hlst[NYMEM];
 /*      interface between layer k and layer k-1. net flux at this       */
 /*      interface is wd[[k][i][j]= ea[k][i][j] and eb[k-1][i][j]        */
 #pragma omp for  private(i,j,k,hup,hlos)
-   for(k=0; k<=1; k++) {
+   for(k=0; k<=2; k++) {
       for (j=Y1; j<=ny; j++) {
 	 for (i=X1; i<=nx; i++) {
-/* k=0,1 */
+/* k=0,2 */
 
           if (wd[k][i][j] == 0.0) {
             wdh[k][i][j] = 0.0;
           }
           else if (wd[k][i][j] > 0.0) {
-	    // ASSERT(k>0);
-            hup = hnew[0][i][j] - MLMIN;
+	    // ASSERT(k>0); //XXX add check loop
+            hup = hnew[k-1][i][j] - MLMIN;
             hlos = D_MAX(0.0, -wd[k-1][i][j]);
             if (((hup - wd[k][i][j] - hlos) < 0.0) &&
                 ((0.5*hup - wd[k][i][j]) < 0.0)) {
@@ -605,7 +605,7 @@ double hlst[NYMEM];
             else wdh[k][i][j] = wd[k][i][j];
           }
           else {
-            hup = hnew[k][i][j] - MLMIN;
+            hup = hnew[k][i][j] - ((k<2) ? MLMIN : EPSILON);
             hlos = D_MAX(0.0,wd[k+1][i][j]);
             if (((hup + wd[k][i][j] - hlos) < 0.0) &&
                 ((0.5*hup + wd[k][i][j]) < 0.0)) {
@@ -616,35 +616,6 @@ double hlst[NYMEM];
 	 }
       }
    }
-
-#pragma omp for  private(i,j,hup,hlos)
-      for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
-/* k=2 */
-
-          if (wd[2][i][j] == 0.0) {
-            wdh[2][i][j] = 0.0;
-          }
-          else if (wd[2][i][j] > 0.0) {
-            hup = hnew[1][i][j] - MLMIN;
-            hlos = D_MAX(0.0, -wd[1][i][j]);
-            if (((hup - wd[2][i][j] - hlos) < 0.0) &&
-                ((0.5*hup - wd[2][i][j]) < 0.0)) {
-              wdh[2][i][j] = D_MAX(0.5*hup,hup-hlos);
-            }
-            else wdh[2][i][j] = wd[2][i][j];
-          }
-          else {
-            hup = hnew[2][i][j] - EPSILON;
-            hlos = D_MAX(0.0,wd[3][i][j]);
-            if (((hup + wd[2][i][j] - hlos) < 0.0) &&
-                ((0.5*hup + wd[2][i][j]) < 0.0)) {
-              wdh[2][i][j] = D_MIN(-0.5*hup,-hup+hlos);
-            }
-            else wdh[2][i][j] = wd[2][i][j];
-          }
-        }
-         }
 
 /* k=3 --> NZ-1 */
 
