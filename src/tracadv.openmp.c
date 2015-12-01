@@ -582,61 +582,40 @@ double hlst[NYMEM];
 /* ============================================================ */
 /*			now advect vertically			*/
 /* ============================================================ */
-#pragma omp for private(i,j,hup,hlos)
-      for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
 /*      work from top to bottom - by interfaces - interface k is the    */
 /*      interface between layer k and layer k-1. net flux at this       */
 /*      interface is wd[[k][i][j]= ea[k][i][j] and eb[k-1][i][j]        */
-        
-/* k=0 */
-        
-	  if (wd[0][i][j] == 0.0) {
-	    wdh[0][i][j] = 0.0;
-	  }
-	  else if (wd[0][i][j] < 0.0) {
-	    hup = hnew[0][i][j] - MLMIN;
-	    hlos = D_MAX(0.0, wd[1][i][j]);
-	    if (((hup + wd[0][i][j] - hlos) < 0.0) &&
-		((0.5*hup + wd[0][i][j]) < 0.0)) {
-	      wdh[0][i][j] = D_MIN(-0.5*hup,-hup+hlos);
-	    }
-	    else wdh[0][i][j] = wd[0][i][j];
-	  }
-	  else {
-	    wdh[0][i][j] = wd[0][i][j];
-	  }        
-    }
-    }
-
-#pragma omp for  private(i,j,hup,hlos)
+#pragma omp for  private(i,j,k,hup,hlos)
+   for(k=0; k<=1; k++) {
       for (j=Y1; j<=ny; j++) {
 	 for (i=X1; i<=nx; i++) {
-/* k=1 */
+/* k=0,1 */
 
-          if (wd[1][i][j] == 0.0) {
-            wdh[1][i][j] = 0.0;
+          if (wd[k][i][j] == 0.0) {
+            wdh[k][i][j] = 0.0;
           }
-          else if (wd[1][i][j] > 0.0) {
+          else if (wd[k][i][j] > 0.0) {
+	    // ASSERT(k>0);
             hup = hnew[0][i][j] - MLMIN;
-            hlos = D_MAX(0.0, -wd[0][i][j]);
-            if (((hup - wd[1][i][j] - hlos) < 0.0) &&
-                ((0.5*hup - wd[1][i][j]) < 0.0)) {
-              wdh[1][i][j] = D_MAX(0.5*hup,hup-hlos);
+            hlos = D_MAX(0.0, -wd[k-1][i][j]);
+            if (((hup - wd[k][i][j] - hlos) < 0.0) &&
+                ((0.5*hup - wd[k][i][j]) < 0.0)) {
+              wdh[k][i][j] = D_MAX(0.5*hup,hup-hlos);
             }
-            else wdh[1][i][j] = wd[1][i][j];
+            else wdh[k][i][j] = wd[k][i][j];
           }
           else {
-            hup = hnew[1][i][j] - MLMIN;
-            hlos = D_MAX(0.0,wd[2][i][j]);
-            if (((hup + wd[1][i][j] - hlos) < 0.0) &&
-                ((0.5*hup + wd[1][i][j]) < 0.0)) {
-              wdh[1][i][j] = D_MIN(-0.5*hup,-hup+hlos);
+            hup = hnew[k][i][j] - MLMIN;
+            hlos = D_MAX(0.0,wd[k+1][i][j]);
+            if (((hup + wd[k][i][j] - hlos) < 0.0) &&
+                ((0.5*hup + wd[k][i][j]) < 0.0)) {
+              wdh[k][i][j] = D_MIN(-0.5*hup,-hup+hlos);
             }
-            else wdh[1][i][j] = wd[1][i][j];
+            else wdh[k][i][j] = wd[k][i][j];
           }
+	 }
       }
-       }
+   }
 
 #pragma omp for  private(i,j,hup,hlos)
       for (j=Y1; j<=ny; j++) {
