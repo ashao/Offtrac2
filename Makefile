@@ -42,7 +42,10 @@ DEPDIR = .d
 #
 # This is a slightly conservative choice, and could be changed
 # up or down depending on user tolerance
-CORECOUNT := $(shell lscpu -p | egrep -v ^\# | cut -d, -f2 | sort -u | wc -l )
+CORECOUNT := $(shell lscpu -p 2>/dev/null| egrep -v ^\# | cut -d, -f2 | sort -u | wc -l )
+ifeq ($(CORECOUNT),0)
+CORECOUNT := 4
+endif 
 MAKEFLAGS += -j$(CORECOUNT)
 
 # Make the output directory and dependency directory
