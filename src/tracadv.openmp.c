@@ -147,7 +147,7 @@ void tracer(int itts)
   double ***uhr; /* The remaining zonal and meridional */
   double ***vhr; /* thickness fluxes, in m3.*/
 
-  double uhh[NXMEM];        /* uhh and vhh are the reduced fluxes     */
+  double uhh[NXMEM][NYMEM];  /* uhh and vhh are the reduced fluxes     */
   double vhh[NYMEM];        /* during the current iteration, in m3.d  */
 
   double hup, hlos;         /* hup is the upwind volume, hlos is the  */
@@ -383,7 +383,7 @@ double hlst[NYMEM];
 	  for (j=Y1;j<=ny;j++) {
 	    for (i=X0;i<=nx;i++) {
 	      if (uhr[k][i][j] == 0.0) {
-		uhh[i] = 0.0;
+		uhh[i][j] = 0.0;
 		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr_x[i][j][m] = 0.0;
 	      }
 	      else if (uhr[k][i][j] < 0.0) {
@@ -397,12 +397,12 @@ double hlst[NYMEM];
 		hlos = D_MAX(0.0,uhr[k][i+1][j]);
 		if (((hup + uhr[k][i][j] - hlos) < 0.0) && 
 		    ((0.5*hup + uhr[k][i][j]) < 0.0)) {
-		  uhh[i] = D_MIN(-0.5*hup,-hup+hlos);
+		  uhh[i][j] = D_MIN(-0.5*hup,-hup+hlos);
 		}
-		else uhh[i] = uhr[k][i][j];
-		ts2 = 0.5*(1.0 + uhh[i]/hvol[k][i+1][j]);
+		else uhh[i][j] = uhr[k][i][j];
+		ts2 = 0.5*(1.0 + uhh[i][j]/hvol[k][i+1][j]);
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr_x[i][j][m] = uhh[i]*(tr[m][k][i+1][j] - slope_x[i+1][j][m]*ts2);
+		  fluxtr_x[i][j][m] = uhh[i][j]*(tr[m][k][i+1][j] - slope_x[i+1][j][m]*ts2);
 		}
 	      }
 	      else {
@@ -416,13 +416,13 @@ double hlst[NYMEM];
 		hlos = D_MAX(0.0,-uhr[k][i-1][j]);
 		if (((hup - uhr[k][i][j] - hlos) < 0.0) && 
 		    ((0.5*hup - uhr[k][i][j]) < 0.0)) {
-		  uhh[i] = D_MAX(0.5*hup,hup-hlos);
+		  uhh[i][j] = D_MAX(0.5*hup,hup-hlos);
 		}
-		else uhh[i] = uhr[k][i][j];
-		ts2 = 0.5*(1.0 - uhh[i]/hvol[k][i][j]);
+		else uhh[i][j] = uhr[k][i][j];
+		ts2 = 0.5*(1.0 - uhh[i][j]/hvol[k][i][j]);
 
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr_x[i][j][m] = uhh[i]*(tr[m][k][i][j] + slope_x[i][j][m]*ts2);
+		  fluxtr_x[i][j][m] = uhh[i][j]*(tr[m][k][i][j] + slope_x[i][j][m]*ts2);
 		}
 	      }
 	    }
@@ -430,18 +430,18 @@ double hlst[NYMEM];
 /*   Calculate new tracer concentration in each cell after accounting */
 /* for the i-direction fluxes.                                        */
 
-	    uhr[k][X0][j] -= uhh[X0];
+	    uhr[k][X0][j] -= uhh[X0][j];
            // #pragma omp barrier
 
 //#pragma omp for  private(i,m,hlst1,Ihnew)
 	    for (i=X1;i<=nx;i++) {
 
-	      if ((uhh[i] != 0.0) || (uhh[i-1] != 0.0)) 
+	      if ((uhh[i][j] != 0.0) || (uhh[i-1][j] != 0.0)) 
 		{
-		  uhr[k][i][j] -= uhh[i];
+		  uhr[k][i][j] -= uhh[i][j];
 		  hlst1 = hvol[k][i][j];
 
-		  hvol[k][i][j] -= (uhh[i] - uhh[i-1]);
+		  hvol[k][i][j] -= (uhh[i][j] - uhh[i-1][j]);
 		  Ihnew = 1.0 / hvol[k][i][j];
 		  
 		  for (m=0;m<run_parameters.tracer_counter;m++) {
