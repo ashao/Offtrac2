@@ -77,7 +77,7 @@ ifeq ($(CC_IS_GCC46PLUS),1)
 CFLAGS += -Ofast -flto
 else
 # gcc < 4.6 flags
-CFLAGS += -O2 -ffast-math
+CFLAGS += -O2
 endif
 ifneq ($(CC_IS_GCCX64),1)
 # 32-bit gcc flags
