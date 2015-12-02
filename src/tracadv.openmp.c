@@ -605,7 +605,7 @@ double hlst[NYMEM];
 	    }
 	    else {
 	      hup = hnew[k][i][j] - ((k<2) ? MLMIN : EPSILON);
-	      // ASSERT(wd[NZ]==0); //XXX add check loop
+	      // ASSERT(k<NZ); //XXX add check loop
 	      hlos = D_MAX(0.0,wd[k+1][i][j]);
 	      if (((hup + wd[k][i][j] - hlos) < 0.0) &&
 		  ((0.5*hup + wd[k][i][j]) < 0.0)) {
@@ -614,9 +614,9 @@ double hlst[NYMEM];
 	      else wdh[k][i][j] = wd[k][i][j];
 	    }
 	    
-	  } /* k */
-	}   /* j */
-      }     /* i */
+	  } /* j */
+	}   /* i */
+      }     /* k */
 
 #ifdef TRAC_TIMING
  clock_gettime(CLOCK_MONOTONIC, &endclock);
@@ -664,16 +664,16 @@ double hlst[NYMEM];
 		  for (m=0;m<run_parameters.tracer_counter;m++)
 		      tr[m][k][i][j] = bet[j] * (hnew[k][i][j]*tr[m][k][i][j] +
 						 ear[k][i][j]*(tr[m][k-1][i][j]) );
-	      }	      
-	  }
+	    }
+	}
 
-	  for (m=0;m<run_parameters.tracer_counter;m++)
-	      for (k=NZ-2;k>=0;k--) {
+	for (m=0;m<run_parameters.tracer_counter;m++)
+	    for (k=NZ-2;k>=0;k--) {
 		for (j=Y1; j<=ny; j++) {
 		      tr[m][k][i][j] += gam[k+1][j]*tr[m][k+1][i][j];
-		  }
-       }
-      } /*j*/
+		}
+	    }
+      }
 
 /* update hvol with diapycnal fluxes */
 #pragma omp for  private(i,j,k)
