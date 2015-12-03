@@ -98,30 +98,6 @@ void hvol_kintegral(int k, double ***hvol);
 void tracer_integral(int trnum, double ***hvol);
 void tracer_kintegral(int trnum, int k, double ***hvol);
 
-unsigned long long fhash(double ***a) {
-  unsigned long long ***v = (unsigned long long ***)a;
-  unsigned i, j, k;
-  unsigned long long x, h = 0xF0E1D2C3B4A59687ULL;
-  for (k=0; k<=NZ-1; k++) {
-    for (i=X1; i<=nx; i++) {
-      for (j=Y1; j<=ny; j++) {
-	x = v[k][i][j];
-	x *= 0xc6a4a7935bd1e995ULL;
-	x ^= (x >> 47);
-	x *= 0xc6a4a7935bd1e995ULL;
-
-	h *= 0xc6a4a7935bd1e995ULL;
-	h ^= (h >> 47);
-	h += x;
-
-	h *= 0xc6a4a7935bd1e995ULL;
-	h ^= (h >> 47);
-      }
-    }
-  }
-  return h;	  
-}
-
 void tracer(int itts)
 {
 
