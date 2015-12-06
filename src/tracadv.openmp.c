@@ -21,6 +21,7 @@
 #include "alloc.h"
 #include "timekeeper.h"
 #include "initialize.h"
+#include "tracer_utilities.h"
 
 extern struct timekeeper_t timekeeper;
 extern struct parameters run_parameters;
@@ -261,6 +262,8 @@ double hlst[NYMEM];
     }
   }
 
+  if (run_parameters.conservation_check)
+    calc_h_inventory(hnew);
 
 /* calculate the diapycnal velocities at the interfaces		*/
 /*   if we read in the ea, eb and eaml variables                */
@@ -778,6 +781,8 @@ double hlst[NYMEM];
 	}
     }
 
+  if (run_parameters.conservation_check)
+    calc_h_inventory(hnew);
 
     //HF
     //	zonal re-entrance

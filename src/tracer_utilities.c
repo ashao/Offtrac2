@@ -74,7 +74,7 @@ void z_depth(double ***h, double ***depth) {
 
 }
 
-double calc_inventory( double ***tr_array, double ***h_array ) {
+double calc_tr_inventory( double ***tr_array, double ***h_array ) {
 
 	extern double areagr[NXMEM][NYMEM];
 
@@ -90,6 +90,25 @@ double calc_inventory( double ***tr_array, double ***h_array ) {
 
 	return inventory;
 }
+
+void calc_h_inventory( double ***h_array ) {
+
+	extern double areagr[NXMEM][NYMEM];
+
+	double inventory;
+	int i, j, k;
+
+	inventory = 0.0;
+
+	for(k=0;k<NZ;k++)
+	  for(i=2;i<NXMEM-2;i++)
+	    for(j=2;j<NYMEM-2;j++) {
+	      inventory += oceanmask[i][j]*areagr[i][j]*h_array[k][i][j];
+	    }
+
+	printf("Ocean inventory: %e\n", inventory);
+}
+
 
 double linear_interpolation(const double xin[], const double yin[], double xi, int numin) {
 

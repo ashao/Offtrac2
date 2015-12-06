@@ -71,7 +71,7 @@ void initialize_test( ) {
 			for (k=NML;k<NZ;k++)	tr[mTEST][k][i][j] = 0.0;
 		}
 
-	inventory=calc_inventory(tr[mTEST], hend);
+	inventory=calc_tr_inventory(tr[mTEST], hend);
 	printf("Test tracer inventory: %e\n", inventory);
 }
 
@@ -89,7 +89,7 @@ void step_test( double dt ){
 					tr[mTEST][k][i][j] = 1.;
 	}
 			
-	inventory=calc_inventory(tr[mTEST], hend);
+	inventory=calc_tr_inventory(tr[mTEST], hend);
 	printf("Test tracer inventory: %e\n", inventory);
 
 }
