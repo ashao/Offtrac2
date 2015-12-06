@@ -146,6 +146,8 @@ void tracer(int itts)
 double hlst1, Ihnew;
 double hlst[NYMEM];
 
+double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
+
 //  double MLMIN = EPSILON;   /* min depth for ML			      */
 
 	double MLMIN = 4.25; // Changing to 0.8 as done in GOLD
@@ -771,8 +773,13 @@ double hlst[NYMEM];
 //BX 		h[k][i][j] = hend[k][i][j];
 # endif
 
-		if (run_parameters.conservation_check)
+		if (run_parameters.conservation_check) {
 			htest[k][i][j] = hnew[k][i][j]-hend[k][i][j];
+			htest_max = (fabs(htest[k][i][j]) > fabs(htest_max)) ?
+			  htest[k][i][j] : htest_max;
+			htest_tot += fabs(htest[k][i][j]);
+			htest_rmse += htest[k][i][j] * htest[k][i][j];
+		}
 //		printf("htest(%d,%d,%d)=%g,hend=%g\n",
 //		       k,i,j,htes
 //		htest[k][i][j] = h[k][i][j];
@@ -781,8 +788,10 @@ double hlst[NYMEM];
 	}
     }
 
-  if (run_parameters.conservation_check)
+  if (run_parameters.conservation_check) {
     calc_h_inventory(hnew);
+    printf("htest: max %e tot %e rmse %e\n", htest_max, htest_tot, htest_rmse/(NZ*(nx-X1+1)*(ny-Y1+1)));
+ }
 
     //HF
     //	zonal re-entrance
