@@ -82,6 +82,8 @@ extern int ny;                       /* The number of y-points in the */
                                      /* the current processor.        */
 #endif
 
+extern int oceanmask[NXMEM][NYMEM];
+
 // for debugging
 
 double hvolint;
@@ -147,6 +149,7 @@ double hlst1, Ihnew;
 double hlst[NYMEM];
 
 double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
+unsigned htest_n = 0; 
 
 //  double MLMIN = EPSILON;   /* min depth for ML			      */
 
@@ -775,10 +778,13 @@ double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
 
 		if (run_parameters.conservation_check) {
 			htest[k][i][j] = hnew[k][i][j]-hend[k][i][j];
-			htest_max = (fabs(htest[k][i][j]) > fabs(htest_max)) ?
-			  htest[k][i][j] : htest_max;
-			htest_tot += fabs(htest[k][i][j]);
-			htest_rmse += htest[k][i][j] * htest[k][i][j];
+			if (oceanmask[i][j]) {
+			  htest_max = (fabs(htest[k][i][j]) > htest_max) ?
+			    fabs(htest[k][i][j]) : htest_max;
+			  htest_tot += fabs(htest[k][i][j]);
+			  htest_rmse += htest[k][i][j] * htest[k][i][j];
+			  htest_n++;
+			}
 		}
 //		printf("htest(%d,%d,%d)=%g,hend=%g\n",
 //		       k,i,j,htes
@@ -790,7 +796,7 @@ double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
 
   if (run_parameters.conservation_check) {
     calc_h_inventory(hnew);
-    printf("htest: max %e tot %e rmse %e\n", htest_max, htest_tot, sqrt(htest_rmse/(NZ*(nx-X1+1)*(ny-Y1+1))));
+    printf("htest: max %e tot %e rmse %e\n", htest_max, htest_tot, sqrt(htest_rmse/htest_n));
  }
 
     //HF
