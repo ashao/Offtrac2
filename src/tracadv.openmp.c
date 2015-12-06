@@ -264,9 +264,6 @@ double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
     }
   }
 
-  if (run_parameters.conservation_check)
-    calc_h_inventory(hnew);
-
 /* calculate the diapycnal velocities at the interfaces		*/
 /*   if we read in the ea, eb and eaml variables                */
 /*   Otherwise we read in wd directly                           */
@@ -287,6 +284,9 @@ double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
 #endif
 
 } // omp
+
+  if (run_parameters.conservation_check)
+    calc_h_inventory(hnew);
 
 #define STANDARD_ADVECTION
 //#undef STANDARD_ADVECTION
@@ -790,7 +790,7 @@ double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
 
   if (run_parameters.conservation_check) {
     calc_h_inventory(hnew);
-    printf("htest: max %e tot %e rmse %e\n", htest_max, htest_tot, htest_rmse/(NZ*(nx-X1+1)*(ny-Y1+1)));
+    printf("htest: max %e tot %e rmse %e\n", htest_max, htest_tot, sqrt(htest_rmse/(NZ*(nx-X1+1)*(ny-Y1+1))));
  }
 
     //HF
