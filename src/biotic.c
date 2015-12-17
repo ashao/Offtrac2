@@ -172,7 +172,10 @@ void biotic_sms(int ibiodt, double dt)
 	double fp[NZ], zremin[NZ];
 	double fca[NZ], zreminca[NZ];
 	double jdop_ij[NZ], jpo4_ij[NZ], jca[NZ];
-	double jdic_ij[NZ], jalk_ij[NZ], jprod_ij[NZ];
+	double jprod_ij[NZ];
+# ifdef DIC
+	double jdic_ij[NZ], jalk_ij[NZ];
+# endif
 	double jremin_ij[NZ], jremdop_ij[NZ];
 	double flux_caco3;
 	double imbal, flux_rem;
@@ -795,6 +798,7 @@ void biotic_sms(int ibiodt, double dt)
 				/*-----------------------------------------------------------------------
 				 *     DIC
 				 *-----------------------------------------------------------------------*/
+#ifdef DIC
 				for (k=0; k<NZ; k++)
 					jdic_ij[k] = c_2_p * jpo4_ij[k] + jca[k];
 
@@ -803,7 +807,7 @@ void biotic_sms(int ibiodt, double dt)
 				 *-----------------------------------------------------------------------*/
 				for (k=0; k<NZ; k++)
 					jalk_ij[k] = -n_2_p * jpo4_ij[k] + 2.0 * jca[k];
-
+#endif
 
 				/*-----------------------------------------------------------------------
 				 *       check for mass conservation in sinking/remin fluxes

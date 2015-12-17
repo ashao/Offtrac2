@@ -34,13 +34,13 @@
 
 /* Specify properties of the passive tracers                          */
 
-#define NUM_ADV_ITER 30         /* number of iterations for advection */
+#define NUM_ADV_ITER 40         /* number of iterations for advection */
 
 #define MERGED_ML                /* merge the first and second two     */
                                /* layers for all BGC variables       */
 
 
-#define NOVARS 28              /*  Number of variables used in        */
+#define NOVARS 30              /*  Number of variables used in        */
                                /*    vardesc structure for output.    */
                                /*    Moved here from offtrac.c        */
                                /*  25OCT07 BX ashao                   */

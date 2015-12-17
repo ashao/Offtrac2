@@ -59,6 +59,7 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"test")) var_idx = 27;
 
 	if (!strcmp(var_name,"adjttd")) var_idx = 28;
+	if (!strcmp(var_name,"adjttd_restart")) var_idx = 29;
 
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);

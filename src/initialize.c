@@ -330,6 +330,8 @@ void set_run_parameters( void )
 			flags[map_variable_to_index("adjttd")]=1;
 			rflags[map_variable_to_index("adjttd_restart")]=1;
 		}
+		if (!strcmp(attribute,"adjoint_initfile"))
+			strcpy(run_parameters.adjoint_initfile,value);
 
 		if (!strcmp(attribute,"ttd"))
 			flags[map_variable_to_index(attribute)] = atoi(value);

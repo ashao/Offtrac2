@@ -34,13 +34,14 @@ void initializemasks() {
     }
   }
 
-  for(i=0;i<NXMEM;i++)
 	for(j=0;j<NYMEM;j++) {
+  	for(i=0;i<NXMEM;i++){
 	if (D[i][j]<MINIMUM_DEPTH) {
 		oceanmask[i][j] = 0; }
 	else {
 		oceanmask[i][j] = 1; }
 	}
+  }
   /*
   for (j=27;j<=33;j++) {
     printf("D = %g,%g,%g,%g,%g,%g \n", 

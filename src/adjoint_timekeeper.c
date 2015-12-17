@@ -73,7 +73,7 @@ void update_adjoint_timekeeper( void ) {
 
 	if ( (timekeeper.current_interval == 0) )	{
 		timekeeper.current_year--;
-		timekeeper.current_interval = timekeeper.num_intervals_year;
+		timekeeper.current_interval = timekeeper.num_intervals_year-1;
 	}
 
 	if (run_parameters.use_hindcast) {
@@ -82,7 +82,10 @@ void update_adjoint_timekeeper( void ) {
 
 	// The climatology index should always increment so that it is always on the correct time interval
 	timekeeper.climatology_index--;
-	timekeeper.climatology_index = timekeeper.climatology_index % run_parameters.ntime_climatology;
+	if (timekeeper.climatology_index<0)
+		timekeeper.climatology_index += run_parameters.ntime_climatology;
+	else
+		timekeeper.climatology_index = timekeeper.climatology_index % run_parameters.ntime_climatology;
 
 
 	if (timekeeper.num_intervals_year==73) { timekeeper.dt = 5.0 * seconds_in_day; }
