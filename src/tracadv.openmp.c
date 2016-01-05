@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 // begin yanxu
 #include <omp.h>
 // end yanxu    
@@ -20,6 +21,7 @@
 #include "alloc.h"
 #include "timekeeper.h"
 #include "initialize.h"
+#include "tracer_utilities.h"
 
 extern struct timekeeper_t timekeeper;
 extern struct parameters run_parameters;
@@ -80,6 +82,8 @@ extern int ny;                       /* The number of y-points in the */
                                      /* the current processor.        */
 #endif
 
+extern int oceanmask[NXMEM][NYMEM];
+
 // for debugging
 
 double hvolint;
@@ -97,6 +101,29 @@ void hvol_kintegral(int k, double ***hvol);
 void tracer_integral(int trnum, double ***hvol);
 void tracer_kintegral(int trnum, int k, double ***hvol);
 
+unsigned long long fhash(double ***a) {
+  unsigned i, j, k;
+  unsigned long long x, h = 0xF0E1D2C3B4A59687ULL;
+  for (k=0; k<=NZ-1; k++) {
+    for (i=X1; i<=nx; i++) {
+      for (j=Y1; j<=ny; j++) {
+	x = (unsigned long long)(a[k][i][j]);
+	x *= 0xc6a4a7935bd1e995ULL;
+	x ^= (x >> 47);
+	x *= 0xc6a4a7935bd1e995ULL;
+
+	h *= 0xc6a4a7935bd1e995ULL;
+	h ^= (h >> 47);
+	h += x;
+
+	h *= 0xc6a4a7935bd1e995ULL;
+	h ^= (h >> 47);
+      }
+    }
+  }
+  return h;	  
+}
+
 void tracer(int itts)
 {
 
@@ -110,16 +137,15 @@ void tracer(int itts)
 
   double ***hvol; /* The cell volume of an h-element   */
 
-  double slope[NXMEM+NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
+  double slope[NXMEM][NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
                         /* point in units of concentration (nondim.). */
-  double fluxtr[NXMEM+NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
+  double fluxtr[NXMEM][NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
                         /* boundary, in m3 * conc. (nondim.).         */
-
 
   double ***uhr; /* The remaining zonal and meridional */
   double ***vhr; /* thickness fluxes, in m3.*/
 
-  double uhh[NXMEM];        /* uhh and vhh are the reduced fluxes     */
+  double uhh[NXMEM][NYMEM];  /* uhh and vhh are the reduced fluxes     */
   double vhh[NYMEM];        /* during the current iteration, in m3.d  */
 
   double hup, hlos;         /* hup is the upwind volume, hlos is the  */
@@ -133,9 +159,8 @@ void tracer(int itts)
   double ***ebr;
   double ***wdh;
   
-  double bet[NXMEM];        /* bet and gam are variables used by the  */
-  double gam[NZ][NXMEM];    /* tridiagonal solver.                    */
-  double hnew0[NXMEM];      /* The original topmost layer thickness,  */
+  double bet[NYMEM];        /* bet and gam are variables used by the  */
+  double gam[NZ][NYMEM];    /* tridiagonal solver.                    */
 #if defined AGE2 || defined AGE3
   //  extern double hnew[NZ][NXMEM][NYMEM];
   extern double ***hnew;
@@ -145,6 +170,9 @@ void tracer(int itts)
 
 double hlst1, Ihnew;
 double hlst[NYMEM];
+
+double htest_max = 0.0, htest_tot = 0.0, htest_rmse = 0.0;
+unsigned htest_n = 0; 
 
 //  double MLMIN = EPSILON;   /* min depth for ML			      */
 
@@ -163,6 +191,12 @@ double hlst[NYMEM];
 # ifdef WRTTS
   double wrts;
 # endif
+
+#undef TRAC_TIMING
+#ifdef TRAC_TIMING
+  struct timespec startclock, endclock;
+  clock_gettime(CLOCK_MONOTONIC, &startclock); 
+#endif
 
   dt = timekeeper.dt;
 
@@ -187,7 +221,7 @@ double hlst[NYMEM];
     if(ebr == NULL) {
 	fprintf(stderr,"not enough memory for ebr!\n");
     }
-  wdh = alloc3d(NZ,NXMEM,NYMEM);
+  wdh = alloc3d(NZ+1,NXMEM,NYMEM);
     if(wdh == NULL) {
 	fprintf(stderr,"not enough memory for wdh!\n");
     }
@@ -262,7 +296,6 @@ double hlst[NYMEM];
     }
   }
 
-
 /* calculate the diapycnal velocities at the interfaces		*/
 /*   if we read in the ea, eb and eaml variables                */
 /*   Otherwise we read in wd directly                           */
@@ -284,6 +317,11 @@ double hlst[NYMEM];
 
 } // omp
 
+#ifdef FWADD // Comment out code addaded by fwojcik
+  if (run_parameters.conservation_check)
+    calc_h_inventory(hnew);
+#endif
+
 #define STANDARD_ADVECTION
 //#undef STANDARD_ADVECTION
 #ifdef STANDARD_ADVECTION
@@ -292,11 +330,18 @@ double hlst[NYMEM];
     print_tr(pstage);
     */
 
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 0 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
   /* beginning of itt loop */
     for (itt = 0; itt < NUM_ADV_ITER; itt++) {
 
       /* big loop over k	 */
 //ompfail 
+
 #pragma omp parallel 
 {
 #pragma omp for private(i,j,k,m,minslope,slope,uhh,vhh,fluxtr,hup,hlos,ts2,hlst,hlst1,Ihnew)
@@ -309,24 +354,25 @@ double hlst[NYMEM];
 /* ============================================================ */
 /*			first advect zonally			*/
 /* ============================================================ */
-	  for (j=Y1;j<=ny;j++) {
 
 /*   Calculate the i-direction profiles (slopes) of each tracer that  */
 /* is being advected.                                                 */
 //#pragma omp for  private(i,m,minslope)
+	  for (m=0;m<run_parameters.tracer_counter;m++) {
 	    for (i=X0;i<=nx+1;i++) {
-	      for (m=0;m<run_parameters.tracer_counter;m++) {
+	      for (j=Y1;j<=ny;j++) {
 		minslope = 4.0*((fabs(tr[m][k][i+1][j]-tr[m][k][i][j]) < 
 				 fabs(tr[m][k][i][j]-tr[m][k][i-1][j])) ? 
 				(tr[m][k][i+1][j]-tr[m][k][i][j]) :
 				(tr[m][k][i][j]-tr[m][k][i-1][j]));
-		slope[i][m] = umask[i][j]*umask[i-1][j] *
+		slope[i][j][m] = umask[i][j]*umask[i-1][j] *
 		  (((tr[m][k][i+1][j]-tr[m][k][i][j]) * 
 		    (tr[m][k][i][j]-tr[m][k][i-1][j]) < 0.0) ? 0.0 :
 		   ((fabs(tr[m][k][i+1][j]-tr[m][k][i-1][j])<fabs(minslope)) ?
 		    0.5*(tr[m][k][i+1][j]-tr[m][k][i-1][j]) : 0.5*minslope));
 	      }
 	    }
+	  }
             //#pragma omp barrier
 
 /*   Calculate the i-direction fluxes of each tracer, using as much   */
@@ -334,10 +380,11 @@ double hlst[NYMEM];
 /* in the cell plus whatever part of its half of the mass flux that   */
 /* the flux through the other side does not require.                  */
 //#pragma omp for  private(i,m,hup,hlos,ts2)
-	    for (i=X0;i<=nx;i++) {
+	  for (i=X0;i<=nx;i++) {
+	    for (j=Y1;j<=ny;j++) {
 	      if (uhr[k][i][j] == 0.0) {
-		uhh[i] = 0.0;
-		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[i][m] = 0.0;
+		uhh[i][j] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[i][j][m] = 0.0;
 	      }
 	      else if (uhr[k][i][j] < 0.0) {
 
@@ -350,12 +397,12 @@ double hlst[NYMEM];
 		hlos = D_MAX(0.0,uhr[k][i+1][j]);
 		if (((hup + uhr[k][i][j] - hlos) < 0.0) && 
 		    ((0.5*hup + uhr[k][i][j]) < 0.0)) {
-		  uhh[i] = D_MIN(-0.5*hup,-hup+hlos);
+		  uhh[i][j] = D_MIN(-0.5*hup,-hup+hlos);
 		}
-		else uhh[i] = uhr[k][i][j];
-		ts2 = 0.5*(1.0 + uhh[i]/hvol[k][i+1][j]);
+		else uhh[i][j] = uhr[k][i][j];
+		ts2 = 0.5*(1.0 + uhh[i][j]/hvol[k][i+1][j]);
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[i][m] = uhh[i]*(tr[m][k][i+1][j] - slope[i+1][m]*ts2);
+		  fluxtr[i][j][m] = uhh[i][j]*(tr[m][k][i+1][j] - slope[i+1][j][m]*ts2);
 		}
 	      }
 	      else {
@@ -369,44 +416,49 @@ double hlst[NYMEM];
 		hlos = D_MAX(0.0,-uhr[k][i-1][j]);
 		if (((hup - uhr[k][i][j] - hlos) < 0.0) && 
 		    ((0.5*hup - uhr[k][i][j]) < 0.0)) {
-		  uhh[i] = D_MAX(0.5*hup,hup-hlos);
+		  uhh[i][j] = D_MAX(0.5*hup,hup-hlos);
 		}
-		else uhh[i] = uhr[k][i][j];
-		ts2 = 0.5*(1.0 - uhh[i]/hvol[k][i][j]);
+		else uhh[i][j] = uhr[k][i][j];
+		ts2 = 0.5*(1.0 - uhh[i][j]/hvol[k][i][j]);
 
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[i][m] = uhh[i]*(tr[m][k][i][j] + slope[i][m]*ts2);
+		  fluxtr[i][j][m] = uhh[i][j]*(tr[m][k][i][j] + slope[i][j][m]*ts2);
 		}
 	      }
 	    }
+	  }
             //#pragma omp barrier
 /*   Calculate new tracer concentration in each cell after accounting */
 /* for the i-direction fluxes.                                        */
+	  for (j=Y1;j<=ny;j++) {
+	    uhr[k][X0][j] -= uhh[X0][j];
+	  }
 
-	    uhr[k][X0][j] -= uhh[X0];
            // #pragma omp barrier
 
 //#pragma omp for  private(i,m,hlst1,Ihnew)
-	    for (i=X1;i<=nx;i++) {
+	  for (i=X1;i<=nx;i++) {
+	    for (j=Y1;j<=ny;j++) {
 
-	      if ((uhh[i] != 0.0) || (uhh[i-1] != 0.0)) 
+	      if ((uhh[i][j] != 0.0) || (uhh[i-1][j] != 0.0)) 
 		{
-		  uhr[k][i][j] -= uhh[i];
+		  uhr[k][i][j] -= uhh[i][j];
 		  hlst1 = hvol[k][i][j];
 
-		  hvol[k][i][j] -= (uhh[i] - uhh[i-1]);
+		  hvol[k][i][j] -= (uhh[i][j] - uhh[i-1][j]);
 		  Ihnew = 1.0 / hvol[k][i][j];
 		  
 		  for (m=0;m<run_parameters.tracer_counter;m++) {
 		    tr[m][k][i][j] *= hlst1;
 		    tr[m][k][i][j] = (tr[m][k][i][j] - 
-				      (fluxtr[i][m]-fluxtr[i-1][m])) * Ihnew;
+				      (fluxtr[i][j][m]-fluxtr[i-1][j][m])) * Ihnew;
 		  }
 
 		}
 	    }
           //  #pragma omp barrier
-	  } /* j loop */
+	  }
+
 
 /* ============================================================ */
 /*			now advect meridionally			*/
@@ -421,7 +473,7 @@ double hlst[NYMEM];
 				 fabs(tr[m][k][i][j]-tr[m][k][i][j-1])) ?
 				(tr[m][k][i][j+1]-tr[m][k][i][j]) : 
 				(tr[m][k][i][j]-tr[m][k][i][j-1]));
-		slope[j][m] = vmask[i][j] * vmask[i][j-1] *
+		slope[0][j][m] = vmask[i][j] * vmask[i][j-1] *
 		  (((tr[m][k][i][j+1]-tr[m][k][i][j]) *
 		    (tr[m][k][i][j]-tr[m][k][i][j-1]) < 0.0) ? 0.0 :
 		   ((fabs(tr[m][k][i][j+1]-tr[m][k][i][j-1])<fabs(minslope)) ?
@@ -438,7 +490,7 @@ double hlst[NYMEM];
 	    for (j=Y0;j<=ny;j++) {
 	      if (vhr[k][i][j] == 0.0) { 
 		vhh[j] = 0.0;
-		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[j][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[0][j][m] = 0.0;
 	      }
 	      else if (vhr[k][i][j] < 0.0) {
 
@@ -459,7 +511,7 @@ double hlst[NYMEM];
 		ts2 = 0.5*(1.0 + vhh[j]/(hvol[k][i][j+1]));
 		
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j+1] - slope[j+1][m]*ts2);
+		  fluxtr[0][j][m] = vhh[j]*(tr[m][k][i][j+1] - slope[0][j+1][m]*ts2);
 		}
 	      }
 	      else {
@@ -481,7 +533,7 @@ double hlst[NYMEM];
 		ts2 = 0.5*(1.0 - vhh[j] / (hvol[k][i][j]));
 		
 		for (m=0;m<run_parameters.tracer_counter;m++) {
-		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j] + slope[j][m]*ts2);
+		  fluxtr[0][j][m] = vhh[j]*(tr[m][k][i][j] + slope[0][j][m]*ts2);
 		}
 	      }
 	    }
@@ -503,7 +555,7 @@ double hlst[NYMEM];
 		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  tr[m][k][i][j] *= hlst[j];
 		  tr[m][k][i][j] = (tr[m][k][i][j] - 
-				    fluxtr[j][m] + fluxtr[j-1][m]) * Ihnew;
+				    fluxtr[0][j][m] + fluxtr[0][j-1][m]) * Ihnew;
 		}
 	      }
 	    }
@@ -528,107 +580,23 @@ double hlst[NYMEM];
 	}
       }
 
-
 /* ============================================================ */
 /*			now advect vertically			*/
 /* ============================================================ */
-#pragma omp for private(i,j,hup,hlos)
-      for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
 /*      work from top to bottom - by interfaces - interface k is the    */
 /*      interface between layer k and layer k-1. net flux at this       */
 /*      interface is wd[[k][i][j]= ea[k][i][j] and eb[k-1][i][j]        */
-        
-/* k=0 */
-        
-	  if (wd[0][i][j] == 0.0) {
-	    wdh[0][i][j] = 0.0;
-	  }
-	  else if (wd[0][i][j] < 0.0) {
-	    hup = hnew[0][i][j] - MLMIN;
-	    hlos = D_MAX(0.0, wd[1][i][j]);
-	    if (((hup + wd[0][i][j] - hlos) < 0.0) &&
-		((0.5*hup + wd[0][i][j]) < 0.0)) {
-	      wdh[0][i][j] = D_MIN(-0.5*hup,-hup+hlos);
-	    }
-	    else wdh[0][i][j] = wd[0][i][j];
-	  }
-	  else {
-	    wdh[0][i][j] = wd[0][i][j];
-	  }        
-    }
-    }
-
-#pragma omp for  private(i,j,hup,hlos)
-      for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
-/* k=1 */
-
-          if (wd[1][i][j] == 0.0) {
-            wdh[1][i][j] = 0.0;
-          }
-          else if (wd[1][i][j] > 0.0) {
-            hup = hnew[0][i][j] - MLMIN;
-            hlos = D_MAX(0.0, -wd[0][i][j]);
-            if (((hup - wd[1][i][j] - hlos) < 0.0) &&
-                ((0.5*hup - wd[1][i][j]) < 0.0)) {
-              wdh[1][i][j] = D_MAX(0.5*hup,hup-hlos);
-            }
-            else wdh[1][i][j] = wd[1][i][j];
-          }
-          else {
-            hup = hnew[1][i][j] - MLMIN;
-            hlos = D_MAX(0.0,wd[2][i][j]);
-            if (((hup + wd[1][i][j] - hlos) < 0.0) &&
-                ((0.5*hup + wd[1][i][j]) < 0.0)) {
-              wdh[1][i][j] = D_MIN(-0.5*hup,-hup+hlos);
-            }
-            else wdh[1][i][j] = wd[1][i][j];
-          }
-      }
-       }
-
-#pragma omp for  private(i,j,hup,hlos)
-      for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
-/* k=2 */
-
-          if (wd[2][i][j] == 0.0) {
-            wdh[2][i][j] = 0.0;
-          }
-          else if (wd[2][i][j] > 0.0) {
-            hup = hnew[1][i][j] - MLMIN;
-            hlos = D_MAX(0.0, -wd[1][i][j]);
-            if (((hup - wd[2][i][j] - hlos) < 0.0) &&
-                ((0.5*hup - wd[2][i][j]) < 0.0)) {
-              wdh[2][i][j] = D_MAX(0.5*hup,hup-hlos);
-            }
-            else wdh[2][i][j] = wd[2][i][j];
-          }
-          else {
-            hup = hnew[2][i][j] - EPSILON;
-            hlos = D_MAX(0.0,wd[3][i][j]);
-            if (((hup + wd[2][i][j] - hlos) < 0.0) &&
-                ((0.5*hup + wd[2][i][j]) < 0.0)) {
-              wdh[2][i][j] = D_MIN(-0.5*hup,-hup+hlos);
-            }
-            else wdh[2][i][j] = wd[2][i][j];
-          }
-        }
-         }
-
-/* k=3 --> NZ-1 */
-
 #pragma omp for  private(i,j,k,hup,hlos)
-	  for (k=3; k<=NZ-1; k++) {   	
+   for (k=0; k<=NZ-1; k++) {   	
+     for (i=X1; i<=nx; i++) {
       for (j=Y1; j<=ny; j++) {
-	 for (i=X1; i<=nx; i++) {
 
 	    if (wd[k][i][j] == 0.0) {
 	      wdh[k][i][j] = 0.0;
 	    }
 	    else if (wd[k][i][j] > 0.0) {
-	      hup = hnew[k-1][i][j] - EPSILON;
+	      // ASSERT(k>0); //XXX add check loop
+	      hup = hnew[k-1][i][j] - ((k<3) ? MLMIN : EPSILON);
 	      hlos = D_MAX(0.0, -wd[k-1][i][j]);
 	      if (((hup - wd[k][i][j] - hlos) < 0.0) &&
 		  ((0.5*hup - wd[k][i][j]) < 0.0)) {
@@ -637,12 +605,9 @@ double hlst[NYMEM];
 	      else wdh[k][i][j] = wd[k][i][j];
 	    }
 	    else {
-	      hup = hnew[k][i][j] - EPSILON;
-	      if (k != NZ-1) {
-		hlos = D_MAX(0.0,wd[k+1][i][j]);
-	      } else {
-		hlos = 0.0;
-	      }
+	      hup = hnew[k][i][j] - ((k<2) ? MLMIN : EPSILON);
+	      // ASSERT(k<NZ); //XXX add check loop
+	      hlos = D_MAX(0.0,wd[k+1][i][j]);
 	      if (((hup + wd[k][i][j] - hlos) < 0.0) &&
 		  ((0.5*hup + wd[k][i][j]) < 0.0)) {
 		wdh[k][i][j] = D_MIN(-0.5*hup,-hup+hlos);
@@ -650,9 +615,17 @@ double hlst[NYMEM];
 	      else wdh[k][i][j] = wd[k][i][j];
 	    }
 	    
-	  } /* k */
-	}   /* j */
-      }     /* i */
+	  } /* j */
+	}   /* i */
+      }     /* k */
+
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 3 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ printf("HASH %016llX %016llX %016llX\n", fhash(hnew), fhash(tr[0]), fhash(wdh));
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ startclock = endclock;
+#endif
 
 #pragma omp for  private(i,j)
       for (i=X1; i<=nx; i++)
@@ -672,56 +645,43 @@ double hlst[NYMEM];
 	  }
       }     
  
-#pragma omp for  private(i,j,k,m,hnew0,bet,gam)
-      for (j=Y1; j<=ny; j++) {
-
-	  for (i=X1; i<=nx; i++) {
-	      hnew0[i] = hnew[0][i][j];
-	      bet[i]=1.0/(hnew[0][i][j] + ebr[0][i][j] + wdh[0][i][j]);
+#pragma omp for  private(i,j,k,m,bet,gam)
+      for (i=X1; i<=nx; i++) {
+	for (j=Y1; j<=ny; j++) {
+	      bet[j]=1.0/(hnew[0][i][j] + ebr[0][i][j] + wdh[0][i][j]);
 
 	      for (m=0;m<run_parameters.tracer_counter;m++)
-		  tr[m][0][i][j] = bet[i]*(hnew0[i]*tr[m][0][i][j]);
-	  }
+		tr[m][0][i][j] = bet[j]*(hnew[0][i][j]*tr[m][0][i][j]);
+	}
 
-	  for (k=1;k<=NZ-1;k++) {
-	      for (i=X1;i<=nx;i++) {
-		  gam[k][i] = ebr[k-1][i][j] * bet[i];
+	for (k=1;k<=NZ-1;k++) {
+	    for (j=Y1; j<=ny; j++) {
+		  gam[k][j] = ebr[k-1][i][j] * bet[j];
 
-		  bet[i]=1.0/(hnew[k][i][j] + ebr[k][i][j] +
-			      (1.0-gam[k][i])*ear[k][i][j]);
+		  bet[j]=1.0/(hnew[k][i][j] + ebr[k][i][j] +
+			      (1.0-gam[k][j])*ear[k][i][j]);
 		  
 
 		  for (m=0;m<run_parameters.tracer_counter;m++)
-		      tr[m][k][i][j] = bet[i] * (hnew[k][i][j]*tr[m][k][i][j] +
+		      tr[m][k][i][j] = bet[j] * (hnew[k][i][j]*tr[m][k][i][j] +
 						 ear[k][i][j]*(tr[m][k-1][i][j]) );
-	      }	      
-	  }
+	    }
+	}
 
-	  for (m=0;m<run_parameters.tracer_counter;m++)
-	      for (k=NZ-2;k>=0;k--) {
-		  for (i=X1;i<=nx;i++) {
-		      tr[m][k][i][j] += gam[k+1][i]*tr[m][k+1][i][j];
-		  }
-       }
-      } /*j*/
-
-/* update hvol with diapycnal fluxes */
-#pragma omp for  private(i,j,k)
-      for (k=0;k<NZ-1;k++) {
-	  for (i=X1; i<=nx; i++)
-	      for (j=Y1; j<=ny; j++)
-		  hnew[k][i][j] += (wdh[k][i][j] - wdh[k+1][i][j]);
+	for (m=0;m<run_parameters.tracer_counter;m++)
+	    for (k=NZ-2;k>=0;k--) {
+		for (j=Y1; j<=ny; j++) {
+		      tr[m][k][i][j] += gam[k+1][j]*tr[m][k+1][i][j];
+		}
+	    }
       }
 
-#pragma omp for  private(i,j)
-      for (i=X1; i<=nx; i++)
-	  for (j=Y1; j<=ny; j++)
-	      hnew[NZ-1][i][j] += wdh[NZ-1][i][j];
-
+/* update hvol with diapycnal fluxes */
 #pragma omp for  private(i,j,k)
       for (k=0;k<=NZ-1;k++)
 	  for (i=X1; i<=nx; i++)
 	      for (j=Y1; j<=ny; j++) {
+		  hnew[k][i][j] += (wdh[k][i][j] - wdh[k+1][i][j]);
 		  if (hnew[k][i][j] < EPSILON) hnew[k][i][j] = EPSILON;
 		  hvol[k][i][j] = DXDYh(i,j)*hnew[k][i][j];
 
@@ -733,7 +693,7 @@ double hlst[NYMEM];
 
 		  wd[k][i][j] -= wdh[k][i][j];	
 	      }
- 
+
 #else  /* STANDARD_ADVECTION */
       /* big loop over k	 */
 //      printf("phos(%d,%d,%d)=%g,uhtm=%g\n",0,190,26,tr[mPHOSPHATE][0][190][26],
@@ -834,6 +794,11 @@ double hlst[NYMEM];
       }
     }
 
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 5 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
 } // omp
 
 #ifdef STANDARD_ADVECTION
@@ -864,8 +829,16 @@ double hlst[NYMEM];
 //BX 		h[k][i][j] = hend[k][i][j];
 # endif
 
-		if (run_parameters.conservation_check)
+		if (run_parameters.conservation_check) {
 			htest[k][i][j] = hnew[k][i][j]-hend[k][i][j];
+			if (oceanmask[i][j]) {
+			  htest_max = (fabs(htest[k][i][j]) > htest_max) ?
+			    fabs(htest[k][i][j]) : htest_max;
+			  htest_tot += fabs(htest[k][i][j]);
+			  htest_rmse += htest[k][i][j] * htest[k][i][j];
+			  htest_n++;
+			}
+		}
 //		printf("htest(%d,%d,%d)=%g,hend=%g\n",
 //		       k,i,j,htes
 //		htest[k][i][j] = h[k][i][j];
@@ -873,7 +846,12 @@ double hlst[NYMEM];
 	    }
 	}
     }
-
+#ifdef FWADD
+  if (run_parameters.conservation_check) {
+    calc_h_inventory(hnew);
+    printf("htest: max %e tot %e rmse %e\n", htest_max, htest_tot, sqrt(htest_rmse/htest_n));
+ }
+#endif
 
     //HF
     //	zonal re-entrance
@@ -910,8 +888,13 @@ double hlst[NYMEM];
     diffuse_tracer();        
      }
 #endif
-
      
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 6 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
   pstage=4;
   print_tr(pstage);
 
@@ -919,6 +902,12 @@ double hlst[NYMEM];
     tracer_hordiff();
   }
  
+#ifdef TRAC_TIMING
+ clock_gettime(CLOCK_MONOTONIC, &endclock);
+ printf("Step 7 elapsed time: %fs\n", (double) (endclock.tv_sec-startclock.tv_sec) + (double) (endclock.tv_nsec-startclock.tv_nsec)/1.e9) ;
+ startclock = endclock;
+#endif
+
   pstage=5;
   print_tr(pstage);
 
@@ -927,9 +916,12 @@ double hlst[NYMEM];
   free3d(vhr, NZ);
   free3d(ear, NZ);
   free3d(ebr, NZ);
-  free3d(wdh, NZ);
+  free3d(wdh, NZ+1);
 #if !defined AGE2 && !defined AGE3
   free3d(hnew, NZ);
+#endif
+#ifdef FWADD
+  exit(1);
 #endif
 }
 

@@ -1,10 +1,7 @@
-#
-#  $Id: Makefile,v 7c235f8731c0 2013/09/17 15:56:24 fdelahoyde $
-#
-               CFLAGS:=	-O
+               CFLAGS:=	-O3
             CINCLUDES:=	-I.
               Library:=	libgswteos-10.so
-              Program:=	gsw_check_functions
+              Program:=	gsw_check
       $(Program)_SRCS:=	gsw_check_functions.c \
 			gsw_oceanographic_toolbox.c \
 			gsw_saar.c

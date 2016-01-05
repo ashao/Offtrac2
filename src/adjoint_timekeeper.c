@@ -35,7 +35,7 @@ void initialize_adjoint_timekeeper( void ) {
 	// printf("Timekeeper.total_intervals: %d\n",timekeeper.total_intervals);
 
 	timekeeper.write_intervals = ceil(timekeeper.total_intervals/run_parameters.wrint);
-	if (run_parameters.sinterval == 72) {
+	if (run_parameters.sinterval == (timekeeper.num_intervals_year-1)) {
 		run_parameters.syear = run_parameters.syear+1;
 	}
 	// Check to see if we should begin by reading a hindcast year
@@ -71,7 +71,7 @@ void update_adjoint_timekeeper( void ) {
 
 	timekeeper.current_time = timekeeper.current_year + (double) (timekeeper.current_interval-1)/timekeeper.num_intervals_year;
 
-	if ( (timekeeper.current_interval == 0) )	{
+	if ( (timekeeper.current_interval < 0) )	{
 		timekeeper.current_year--;
 		timekeeper.current_interval = timekeeper.num_intervals_year-1;
 	}

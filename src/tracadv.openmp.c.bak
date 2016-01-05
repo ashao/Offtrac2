@@ -18,11 +18,11 @@
 #include "metrics.h"
 #include "offtrac.h"
 #include "alloc.h"
-#ifdef HTEST
-#include "ideal_age.h"
-#endif
 #include "timekeeper.h"
+#include "initialize.h"
 
+extern struct timekeeper_t timekeeper;
+extern struct parameters run_parameters;
 
 static double dmax1, dmax2, dmin1, dmin2;
 #define D_MAX(a,b) (dmax1=(a),dmax2=(b),((dmax1) > (dmax2)) ?\
@@ -30,25 +30,37 @@ static double dmax1, dmax2, dmin1, dmin2;
 #define D_MIN(a,b) (dmin1=(a),dmin2=(b),((dmin1) < (dmin2)) ?\
                    (dmin1) : (dmin2))
 
-extern double ***h, ***hstart, ***hend;	/* Layer thickness, begin of advec step in m.  */
+double dt;
 
+extern double ***h, ***hstart, ***hend, ***htest;
+
+//extern double h[NZ][NXMEM][NYMEM];	/* Layer thickness, begin of advec step in m.  */
+
+//extern double hstart[NZ][NXMEM][NYMEM];	/* Layer thickness, begin of advec step in m.  */
+
+//extern double hend[NZ][NXMEM][NYMEM];	/* Layer thickness, end of advec step in m.  */
 #ifdef HTEST
 // extern double htest[NZ][NXMEM][NYMEM];	/* Layer thickness, used for debugging  */
 #endif
 
 extern double ****tr; /* Tracer concentration g m-3.*/
-extern double           D[NXMEM][NYMEM]; /* Basin depth, in m.         */
+extern double D[NXMEM][NYMEM]; /* Basin depth, in m.         */
 
 extern double ***uhtm; /* uhtm and the vhtm are the sum */
 extern double ***vhtm; /* of uh and vh between tracer   */
                     /* updates, both in m3 s-1.      */
-extern double ***wd; /* the diapycnal velocity that is */
-                                      /* calculated at the interfaces   */
 
 extern double umask[NXMEM][NYMEM];   /* _mask are 1 over ocean and 0  */
 extern double vmask[NXMEM][NYMEM];   /* over land on the u & v grids. */
 
-int itts = 0;
+extern double ***ea;
+extern double ***eb;
+extern double eaml[NXMEM][NYMEM];
+//extern double wd[NZ+1][NXMEM][NYMEM]; /* the diapycnal velocity that is */
+                                      /* calculated at the interfaces   */
+extern double ***wd;
+extern char directory2[95];          /* The directory to use to save  */
+                                     /* output files.                 */
 
 #if defined(PARALLEL_X) || defined(PARALLEL_Y)
 extern int pe_here;                  /* The current processor's label.*/
@@ -69,17 +81,14 @@ extern int ny;                       /* The number of y-points in the */
 #endif
 
 // for debugging
-#ifdef AGE
-  extern int mAGE;
-#endif
+
 double hvolint;
-extern double trintegral[NTR];
+extern struct parameters run_parameters;
+
 
 #ifdef DIFFUSE_TRACER
 static void diffuse_tracer();
 #endif
-
-extern struct timekeeper_t timekeeper;
 
 static void tracer_hordiff();
 void print_tr(int pstage);
@@ -88,7 +97,7 @@ void hvol_kintegral(int k, double ***hvol);
 void tracer_integral(int trnum, double ***hvol);
 void tracer_kintegral(int trnum, int k, double ***hvol);
 
-void tracer( )
+void tracer(int itts)
 {
 
 /*    This subroutine time steps the tracer concentration.            */
@@ -101,9 +110,9 @@ void tracer( )
 
   double ***hvol; /* The cell volume of an h-element   */
 
-  double slope[NXMEM+NYMEM][NTR]; /* The concentration slope per grid */
+  double slope[NXMEM+NYMEM][run_parameters.tracer_counter]; /* The concentration slope per grid */
                         /* point in units of concentration (nondim.). */
-  double fluxtr[NXMEM+NYMEM][NTR];/* The flux of tracer across a      */
+  double fluxtr[NXMEM+NYMEM][run_parameters.tracer_counter];/* The flux of tracer across a      */
                         /* boundary, in m3 * conc. (nondim.).         */
 
 
@@ -142,9 +151,7 @@ double hlst[NYMEM];
 	double MLMIN = 4.25; // Changing to 0.8 as done in GOLD
 //	double MLMIN = EPSILON;
 //	double BLMIN = 0.20; // ashao: in global configuration of HIM it's 0.1
-	double BLMIN = 0.10;
-	double dt;
-	dt = timekeeper.dt;
+//	double BLMIN = 0.10;
 
 #ifdef ENTRAIN
   double nts = dt/DT; /* number of timesteps (#day*86400/3600seconds) */
@@ -157,6 +164,9 @@ double hlst[NYMEM];
   double wrts;
 # endif
 
+  dt = timekeeper.dt;
+
+//  printf("Beginning tracer transport dt=%f\n",dt);
   hvol = alloc3d(NZ,NXMEM,NYMEM);
     if(hvol == NULL) {
 	fprintf(stderr,"not enough memory for hvol!\n");
@@ -299,14 +309,13 @@ double hlst[NYMEM];
 /* ============================================================ */
 /*			first advect zonally			*/
 /* ============================================================ */
-#ifndef ADV1D
 	  for (j=Y1;j<=ny;j++) {
 
 /*   Calculate the i-direction profiles (slopes) of each tracer that  */
 /* is being advected.                                                 */
 //#pragma omp for  private(i,m,minslope)
 	    for (i=X0;i<=nx+1;i++) {
-	      for (m=0;m<NTR;m++) {
+	      for (m=0;m<run_parameters.tracer_counter;m++) {
 		minslope = 4.0*((fabs(tr[m][k][i+1][j]-tr[m][k][i][j]) < 
 				 fabs(tr[m][k][i][j]-tr[m][k][i-1][j])) ? 
 				(tr[m][k][i+1][j]-tr[m][k][i][j]) :
@@ -328,7 +337,7 @@ double hlst[NYMEM];
 	    for (i=X0;i<=nx;i++) {
 	      if (uhr[k][i][j] == 0.0) {
 		uhh[i] = 0.0;
-		for (m=0;m<NTR;m++) fluxtr[i][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[i][m] = 0.0;
 	      }
 	      else if (uhr[k][i][j] < 0.0) {
 
@@ -345,7 +354,7 @@ double hlst[NYMEM];
 		}
 		else uhh[i] = uhr[k][i][j];
 		ts2 = 0.5*(1.0 + uhh[i]/hvol[k][i+1][j]);
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[i][m] = uhh[i]*(tr[m][k][i+1][j] - slope[i+1][m]*ts2);
 		}
 	      }
@@ -365,7 +374,7 @@ double hlst[NYMEM];
 		else uhh[i] = uhr[k][i][j];
 		ts2 = 0.5*(1.0 - uhh[i]/hvol[k][i][j]);
 
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[i][m] = uhh[i]*(tr[m][k][i][j] + slope[i][m]*ts2);
 		}
 	      }
@@ -388,7 +397,7 @@ double hlst[NYMEM];
 		  hvol[k][i][j] -= (uhh[i] - uhh[i-1]);
 		  Ihnew = 1.0 / hvol[k][i][j];
 		  
-		  for (m=0;m<NTR;m++) {
+		  for (m=0;m<run_parameters.tracer_counter;m++) {
 		    tr[m][k][i][j] *= hlst1;
 		    tr[m][k][i][j] = (tr[m][k][i][j] - 
 				      (fluxtr[i][m]-fluxtr[i-1][m])) * Ihnew;
@@ -398,18 +407,16 @@ double hlst[NYMEM];
 	    }
           //  #pragma omp barrier
 	  } /* j loop */
-#endif
 
 /* ============================================================ */
 /*			now advect meridionally			*/
 /* ============================================================ */
-#ifndef ADV1D
 	  for (i=X1;i<=nx;i++) {
 /*   Calculate the j-direction profiles (slopes) of each tracer that  */
 /* is being advected.                                                 */
 //#pragma omp for  private(j,m,minslope)
 	    for (j=Y0;j<=ny+1;j++) {
-	      for (m=0;m<NTR;m++) {
+	      for (m=0;m<run_parameters.tracer_counter;m++) {
 		minslope = 4.0*((fabs(tr[m][k][i][j+1]-tr[m][k][i][j]) <
 				 fabs(tr[m][k][i][j]-tr[m][k][i][j-1])) ?
 				(tr[m][k][i][j+1]-tr[m][k][i][j]) : 
@@ -431,7 +438,7 @@ double hlst[NYMEM];
 	    for (j=Y0;j<=ny;j++) {
 	      if (vhr[k][i][j] == 0.0) { 
 		vhh[j] = 0.0;
-		for (m=0;m<NTR;m++) fluxtr[j][m] = 0.0;
+		for (m=0;m<run_parameters.tracer_counter;m++) fluxtr[j][m] = 0.0;
 	      }
 	      else if (vhr[k][i][j] < 0.0) {
 
@@ -451,7 +458,7 @@ double hlst[NYMEM];
 		else vhh[j] = vhr[k][i][j];
 		ts2 = 0.5*(1.0 + vhh[j]/(hvol[k][i][j+1]));
 		
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j+1] - slope[j+1][m]*ts2);
 		}
 	      }
@@ -473,7 +480,7 @@ double hlst[NYMEM];
 		else vhh[j] = vhr[k][i][j];
 		ts2 = 0.5*(1.0 - vhh[j] / (hvol[k][i][j]));
 		
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  fluxtr[j][m] = vhh[j]*(tr[m][k][i][j] + slope[j][m]*ts2);
 		}
 	      }
@@ -493,7 +500,7 @@ double hlst[NYMEM];
 		hvol[k][i][j] -= (vhh[j] - vhh[j-1]);
 		Ihnew = 1.0 / hvol[k][i][j];
 		vhr[k][i][j] -= vhh[j];
-		for (m=0;m<NTR;m++) {
+		for (m=0;m<run_parameters.tracer_counter;m++) {
 		  tr[m][k][i][j] *= hlst[j];
 		  tr[m][k][i][j] = (tr[m][k][i][j] - 
 				    fluxtr[j][m] + fluxtr[j-1][m]) * Ihnew;
@@ -502,7 +509,6 @@ double hlst[NYMEM];
 	    }
        //     #pragma omp barrier
 	  } /* i loop */
-#endif
 
 	}			 /* end of big loop over k		*/
 
@@ -673,7 +679,7 @@ double hlst[NYMEM];
 	      hnew0[i] = hnew[0][i][j];
 	      bet[i]=1.0/(hnew[0][i][j] + ebr[0][i][j] + wdh[0][i][j]);
 
-	      for (m=0;m<NTR;m++)
+	      for (m=0;m<run_parameters.tracer_counter;m++)
 		  tr[m][0][i][j] = bet[i]*(hnew0[i]*tr[m][0][i][j]);
 	  }
 
@@ -685,13 +691,13 @@ double hlst[NYMEM];
 			      (1.0-gam[k][i])*ear[k][i][j]);
 		  
 
-		  for (m=0;m<NTR;m++)
+		  for (m=0;m<run_parameters.tracer_counter;m++)
 		      tr[m][k][i][j] = bet[i] * (hnew[k][i][j]*tr[m][k][i][j] +
 						 ear[k][i][j]*(tr[m][k-1][i][j]) );
 	      }	      
 	  }
 
-	  for (m=0;m<NTR;m++)
+	  for (m=0;m<run_parameters.tracer_counter;m++)
 	      for (k=NZ-2;k>=0;k--) {
 		  for (i=X1;i<=nx;i++) {
 		      tr[m][k][i][j] += gam[k+1][i]*tr[m][k+1][i][j];
@@ -718,13 +724,13 @@ double hlst[NYMEM];
 	      for (j=Y1; j<=ny; j++) {
 		  if (hnew[k][i][j] < EPSILON) hnew[k][i][j] = EPSILON;
 		  hvol[k][i][j] = DXDYh(i,j)*hnew[k][i][j];
-/*
+
 		  if ( wd[k][i][j] > 0.0 && ( wdh[k][i][j] > wd[k][i][j] ))
 		      printf("case 1 wdh[k]\n");
 
 		  else if ( wd[k][i][j] < 0.0 && ( wdh[k][i][j] < wd[k][i][j] ))
 		      printf("case 2 wdh[k]\n");
-*/
+
 		  wd[k][i][j] -= wdh[k][i][j];	
 	      }
  
@@ -795,7 +801,7 @@ double hlst[NYMEM];
         hvol[k][0][j]    = hvol[k][nx-1][j];
         hvol[k][1][j]    = hvol[k][nx][j];
 
-        for (m=0;m<NTR;m++) {
+        for (m=0;m<run_parameters.tracer_counter;m++) {
           tr[m][k][nx+1][j] = tr[m][k][2][j];
           tr[m][k][nx+2][j] = tr[m][k][3][j];
           tr[m][k][0][j]    = tr[m][k][nx-1][j];
@@ -821,7 +827,7 @@ double hlst[NYMEM];
         hvol[k][ii][ny+1] = hvol[k][i][ny];
         hvol[k][ii][ny+2] = hvol[k][i][ny-1];
   
-        for (m=0;m<NTR;m++) {
+        for (m=0;m<run_parameters.tracer_counter;m++) {
           tr[m][k][ii][ny+1] = tr[m][k][i][ny];
           tr[m][k][ii][ny+2] = tr[m][k][i][ny-1];
         }
@@ -857,12 +863,13 @@ double hlst[NYMEM];
 		h[k][i][j] = fract1*hstart[k][i][j] + fract2*hend[k][i][j];
 //BX 		h[k][i][j] = hend[k][i][j];
 # endif
-#ifdef HTEST
-	  	htest[k][i][j] = hnew[k][i][j]-hend[k][i][j]; 
+
+		if (run_parameters.conservation_check)
+			htest[k][i][j] = hnew[k][i][j]-hend[k][i][j];
 //		printf("htest(%d,%d,%d)=%g,hend=%g\n",
 //		       k,i,j,htes
 //		htest[k][i][j] = h[k][i][j];
-#endif
+
 	    }
 	}
     }
@@ -948,7 +955,7 @@ static void diffuse_tracer()
 
   C2dtKD = 2.0*KD*dt; C2dtKDML = 2.0*KDML*dt;
 
-	printf("DIFFUSING TRACER - diapycnal\n");
+	printf("DIFFUSING TRACER - diapycnal dt=%f\n",dt);
 
 //#pragma omp parallel for private(i,j,k,m,a,z,bet,gam)
   for (i=X1;i<=nx;i++) {
@@ -968,7 +975,7 @@ static void diffuse_tracer()
 #endif
       bet[j]=1.0/(h[0][i][j]-a[1][j]);
 
-      for (m=0;m<NTR;m++)
+      for (m=0;m<run_parameters.tracer_counter;m++)
         tr[m][0][i][j] = bet[j] * h[0][i][j] * tr[m][0][i][j];
     }
     }
@@ -988,7 +995,7 @@ static void diffuse_tracer()
         gam[k][j]=a[k][j]*bet[j];
         bet[j]=1.0/(h[k][i][j] - a[k+1][j] - a[k][j]*(1.0+gam[k][j]));
 
-        for (m=0;m<NTR;m++)
+        for (m=0;m<run_parameters.tracer_counter;m++)
           tr[m][k][i][j]=(h[k][i][j]*tr[m][k][i][j] - 
                           a[k][j]*tr[m][k-1][i][j])*bet[j];
       }
@@ -1000,7 +1007,7 @@ static void diffuse_tracer()
       gam[NZ-1][j]=a[NZ-1][j]*bet[j];
       bet[j]=1.0/(h[NZ-1][i][j] - a[NZ-1][j]*(1.0+gam[k][j]));
 
-      for (m=0;m<NTR;m++)
+      for (m=0;m<run_parameters.tracer_counter;m++)
         tr[m][NZ-1][i][j]=(h[NZ-1][i][j]*tr[m][NZ-1][i][j] - 
                            a[NZ-1][j]*tr[m][NZ-2][i][j])*bet[j];
       }
@@ -1009,7 +1016,7 @@ static void diffuse_tracer()
     for (k=(NZ-2);k>=0;k--) {
       for (j=Y1;j<=ny;j++) {
         if (D[i][j] > MINIMUM_DEPTH)
-        for (m=0;m<NTR;m++)
+        for (m=0;m<run_parameters.tracer_counter;m++)
           tr[m][k][i][j] -= gam[k+1][j]*tr[m][k+1][i][j];
       }
     }
@@ -1066,10 +1073,8 @@ static void tracer_hordiff(void)
   static int zero_if_first_call = 0;
   int i, j, k, ii, m, domore_k, itt;
   double C0;  /* A work variable with units of m2. */
-  
-  double dt;
-  dt = timekeeper.dt;
-  printf("DIFFUSING TRACER - isopycnal\n");
+
+  printf("DIFFUSING TRACER - isopycnal dt=%f\n",dt);
 
   if (zero_if_first_call == 0) {
     for (j=Y1;j<=ny;j++) 
@@ -1157,7 +1162,7 @@ for (k=0;k<NZ;k++) {
 	      Coef_y[ii][ny+2] = Coef_y[i][ny-1];
 	  }
 
-      for (m=0;m<NTR;m++) {
+      for (m=0;m<run_parameters.tracer_counter;m++) {
 
 	  for (i=X1;i<=nx;i++) 
 	      for (j=Y1;j<=ny;j++) 
@@ -1243,4 +1248,30 @@ void hvol_kintegral(int k, double ***hvol){
   }
 
 }
+
+//BX tracer_integral is calculated in step.c
+/*
+void tracer_kintegral(int trnum, int k, double ***hvol){
+    
+  int i, j;
+  double sum;
+
+//  trintegral[trnum]=0.e0;
+  sum=0.e0;
+//#pragma omp parallel for  private(i,j) reduction(+:sum) schedule(dynamic)
+  for (i=2;i<=NXMEM-1;i++) {
+      for (j=2;j<=NYMEM-1;j++) {
+	  //BX if (h[k][i][j] > 1e-6) {
+	      //BX	      trintegral[trnum] += tr[trnum][k][i][j] * h[k][i][j] * dxdyh[i][j];
+          //   trintegral[trnum] += tr[trnum][k][i][j] * hvol[k][i][j];
+          sum += tr[trnum][k][i][j] * hvol[k][i][j];
+	     //BX }
+      }
+  }
+
+ trintegral[trnum] = sum;
+
+}
+*/
+//BX-e
 
