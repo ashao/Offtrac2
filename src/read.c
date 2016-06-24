@@ -748,13 +748,13 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 		}
 	}
 	//  temporary bug fix for northern-most row (j=211)
-/*
+
 	for (i=2;i<NXMEM;i++) {
 		for (k=0;k<NZWOA;k++) {
 			oxytmp[k][i][211] = oxytmp[k][i][210];
 		}
 	}
-*/
+
 //	wrap_reentrance_3d(oxytmp,NZWOA);
 
 	for (i=0;i<NXMEM;i++) {
@@ -781,7 +781,7 @@ void read_woa_file(int imon, double ***harray, double ***outarray, char *filenam
 
 			} else {
 				for (k=0;k<NZ;k++ ) {
-					outarray[k][i][j] = misval;
+					outarray[k][i][j] = 0;
 				}
 			}
 		}

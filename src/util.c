@@ -196,10 +196,10 @@ void divide_darray3d(double ***arr, double ***num, double ***den) {
 
 }
 
-void wrap_reentrance_3d( double ***arr, int nz ){
+void wrap_reentrance_3d( double ***arr, int nzed ){
 	int i,j,k, ii;
 
-	for (k = 0; k < nz; k++) {
+	for (k = 0; k < nzed; k++) {
 		for (j = 0; j <= NYMEM - 1; j++) {
 			arr[k][0][j] = arr[k][nx - 1][j];
 			arr[k][1][j] = arr[k][nx][j];
@@ -209,7 +209,7 @@ void wrap_reentrance_3d( double ***arr, int nz ){
 	}	
 	for (i = 2; i <= nx; i++) {
 		ii = 363 - i;
-		for (k = 0; k < NZ; k++) {
+		for (k = 0; k < nzed; k++) {
 			arr[k][ii][ny + 1] = arr[k][i][ny];
 			arr[k][ii][ny + 2] = arr[k][i][ny - 1];
 		}

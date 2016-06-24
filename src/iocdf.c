@@ -326,7 +326,8 @@ void create_file(char filename[], int type, struct vardesc vars[], int novars,
 # endif
 
 # ifdef NETCDF4
-    status = nc_create(filename, NC_NETCDF4|NC_NOCLOBBER, cdfid);
+//    status = nc_create(filename, NC_NETCDF4|NC_NOCLOBBER, cdfid);
+    status = nc_create(filename, NC_NETCDF4, cdfid);
 # else
     status = nc_create(filename, NC_NOCLOBBER, cdfid);
 # endif
