@@ -39,6 +39,7 @@ struct parameters {
 	int do_ar;
 	int do_oxygen;
 	int do_adjttd;
+	int do_age_pair;
   	int adjttd_restart;
 };
 

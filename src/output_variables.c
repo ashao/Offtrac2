@@ -29,7 +29,7 @@ int map_variable_to_index( char *var_name ) {
 	if (!strcmp(var_name,"vhtm"))		var_idx = 6;
 	if (!strcmp(var_name,"wd"))			var_idx = 7;
 
-	// User-defined variables
+	// User-defined variablesd
 	if (!strcmp(var_name,"age"))		var_idx = 8;
 
 	if (!strcmp(var_name,"cfc11"))	var_idx = 9;
@@ -60,6 +60,9 @@ int map_variable_to_index( char *var_name ) {
 
 	if (!strcmp(var_name,"adjttd")) var_idx = 28;
 	if (!strcmp(var_name,"adjttd_restart")) var_idx = 29;
+
+	if (!strcmp(var_name,"age_pair1")) var_idx = 30;
+	if (!strcmp(var_name,"age_pair2")) var_idx = 31;
 
 	if (var_idx < 0)	{
 		printf("ERROR: %s is undefined in output_variables.c\n",var_name);

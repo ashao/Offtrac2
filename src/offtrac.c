@@ -43,6 +43,7 @@
 #include "ar_module.h"
 #include "oxygen.h"
 #include "phosphate.h"
+#include "age_pair.h"
 /*-------------------------------------------------------------------*
  *                                                                   *
  *
@@ -310,6 +311,10 @@ int main( int argc, char *argv[] )
 				set_darray3d_zero(mn_test, NZ, NXMEM, NYMEM);
 				set_darray3d_zero(mn_htest, NZ, NXMEM, NYMEM);
 			}
+			if (run_parameters.do_age_pair) {
+			    set_darray3d_zero(mn_age_pair1, NZ, NXMEM, NYMEM);
+			    set_darray3d_zero(mn_age_pair2, NZ, NXMEM, NYMEM);
+			}
 			//			printf("netcdf record = %d\n", timekeeper.num_records + 1);
 			timekeeper.num_records++;
 
@@ -360,6 +365,10 @@ int main( int argc, char *argv[] )
 		copy_darray3d(mn_oxygen,tr[mOXYGEN],NZ,NXMEM,NYMEM);
 		copy_darray3d(mn_phos,tr[mPHOSPHATE],NZ,NXMEM,NYMEM);
 		copy_darray3d(mn_dop,tr[mDOP],NZ,NXMEM,NYMEM);
+	}
+	if (run_parameters.do_age_pair) {
+	    copy_darray3d(mn_age_pair1,tr[mAGE1],NZ,NXMEM,NYMEM);
+	    copy_darray3d(mn_age_pair2,tr[mAGE2],NZ,NXMEM,NYMEM);
 	}
 
 	/* Copy the variable descriptions to a list of the actual restart variables. */
@@ -498,6 +507,11 @@ void alloc_fields(void)
 	if (run_parameters.do_adjttd) {
 		var[map_variable_to_index("adjttd")] = &mn_adjttd[0][0];
 		var[map_variable_to_index("adjttd_restart")] = &adjttd_init[0][0][0];
+	}
+
+	if (run_parameters.do_age_pair) {
+	    var[map_variable_to_index("age_pair1")] = &mn_age_pair1[0][0][0];
+	    var[map_variable_to_index("age_pair2")] = &mn_age_pair2[0][0][0];
 	}
 
 

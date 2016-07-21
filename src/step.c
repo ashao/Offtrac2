@@ -34,6 +34,7 @@
 #include "oxygen.h"
 #include "phosphate.h"
 
+#include "age_pair.h"
 #include "conservation_check.h"
 
 #include "ttd_bp.h"
@@ -150,6 +151,10 @@ void step_fields( ) {
 		step_adjttd();
 	}
 
+	if (run_parameters.do_age_pair) {
+	    step_age_pair(timekeeper.dt);
+	}
+
 	merge_ml_tr();
 
 	clock_gettime(CLOCK_MONOTONIC, &endclock);
@@ -238,6 +243,11 @@ void step_fields( ) {
 		submit_for_averaging(mn_dop,tr[mDOP]);
 		submit_for_averaging(mn_jpo4,jpo4);
 
+	}
+
+	if (run_parameters.do_age_pair) {
+	    submit_for_averaging(mn_age_pair1,tr[mAGE1]);
+	    submit_for_averaging(mn_age_pair2,tr[mAGE2]);
 	}
 
 	// NOTE: NO Calls for adjoint TTD here because the averaging is treated slightly differently, see step_adjttd
